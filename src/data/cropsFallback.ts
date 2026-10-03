@@ -501,6 +501,7 @@ export const CROPS_DATA: CropInfo[] = [
       ],
       spoilageIndicators: ['Dark slimy leaf liquefaction', 'Ammonia odor', 'Yellowing of cotyledons']
     },
+    recipes: [
       {
         title: 'Nutrient-Surge Green Micro-Elixir',
         prepTime: '8 mins',
