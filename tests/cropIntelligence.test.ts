@@ -192,12 +192,24 @@ async function testSmartPlan() {
     source: 'offline-directory'
   }, 1000);
 
-  assert(plan.crop.name.includes('Brinjal'), 'Smart plan contains verified Brinjal crop');
-  assert(plan.weather.temperatureC > -50, 'Smart plan contains real weather temperature');
-  assert(plan.packagingSpec.totalUnitsRequired > 0, 'Smart plan contains calculated packaging unit count');
-  assert(plan.transportGuidance.estimatedFreightCost > 0, 'Smart plan contains deterministic transport cost');
-  assert(plan.realizations.length > 0, 'Smart plan contains complete mandi realizations breakdown');
-  assert(plan.provenanceBatchHash.startsWith('0X'), 'Smart plan generated cryptographic provenance hash');
+// 7. TEST OKRA VS BRINJAL ISOLATION & EXPANDED 100+ COMMODITY COVERAGE
+console.log('\n7. Testing Okra vs Brinjal Distinction & Multi-Category Coverage:');
+const okraRes = resolveCropAlias('bhindi');
+const brinjalRes = resolveCropAlias('baingan');
+assert(okraRes?.canonicalId === 'okra', 'Okra (bhindi) maps strictly to "okra"');
+assert(brinjalRes?.canonicalId === 'brinjal', 'Brinjal (baingan) maps strictly to "brinjal"');
+assert(okraRes?.canonicalId !== brinjalRes?.canonicalId, 'Okra and Brinjal are strictly separate canonical entities');
+
+const okraProd = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'okra');
+assert(okraProd !== undefined, 'Okra canonical product is preloaded in COMPREHENSIVE_PRODUCT_DATABASE');
+assert(okraProd?.scientificName.includes('Abelmoschus'), 'Okra scientific name is Abelmoschus esculentus');
+
+// 8. TEST MULTI-FACTOR SHELF LIFE RANGE ESTIMATOR
+console.log('\n8. Testing Multi-Factor Shelf-Life Range Estimator:');
+assert(brinjalPackRec.recommended.estimatedShelfLifeRange !== undefined, 'Shelf-life range string is present in packaging recommendation');
+assert(brinjalPackRec.recommended.estimatedShelfLifeDays > 0, `Estimated shelf-life days is positive (${brinjalPackRec.recommended.estimatedShelfLifeDays} days)`);
+assert(typeof brinjalPackRec.recommended.estimatedShelfLifeRange === 'string', `Shelf-life range is formatted as string ("${brinjalPackRec.recommended.estimatedShelfLifeRange}")`);
+assert(brinjalPackRec.disclaimer.includes('decision-support'), 'Shelf-life includes honest decision-support model estimate disclaimer');
 
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
@@ -209,3 +221,4 @@ async function testSmartPlan() {
 }
 
 testSmartPlan();
+

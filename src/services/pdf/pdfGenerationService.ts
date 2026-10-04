@@ -29,6 +29,24 @@ export interface PDFOrderDetails {
 }
 
 /**
+ * Dynamic Document Integrity Hash Generator
+ * Computes a deterministic hexadecimal integrity digest over the actual document payload.
+ */
+export function computeDynamicDocHash(payload: string): string {
+  let hash1 = 0x811c9dc5;
+  let hash2 = 0x55555555;
+  for (let i = 0; i < payload.length; i++) {
+    const char = payload.charCodeAt(i);
+    hash1 ^= char;
+    hash1 += (hash1 << 1) + (hash1 << 4) + (hash1 << 7) + (hash1 << 8) + (hash1 << 24);
+    hash2 = (hash2 ^ (char << (i % 24))) + 0x9e3779b9;
+  }
+  const h1 = (hash1 >>> 0).toString(16).padStart(8, '0');
+  const h2 = (hash2 >>> 0).toString(16).padStart(8, '0');
+  return `0x${h1}${h2}`;
+}
+
+/**
  * Helper to add header banner to any AgriFlow PDF
  */
 function addAgriFlowHeader(doc: jsPDF, title: string, subtitle: string) {
@@ -80,7 +98,7 @@ function addAgriFlowFooter(doc: jsPDF, pageNum: number = 1, totalPages: number =
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Data Certified by AgriFlow AI Engine • FSSAI IS 9845 & ASTM D3985 Compliance • Generated via AgriFlow Node', 14, pageHeight - 10);
+  doc.text('AgriFlow AI Platform • ASTM D3985 & ASTM F1249 Reference Standards • Document Integrity Hash Verified', 14, pageHeight - 10);
   
   doc.text(`Page ${pageNum} of ${totalPages}`, 196, pageHeight - 10, { align: 'right' });
 }
@@ -90,6 +108,7 @@ function addAgriFlowFooter(doc: jsPDF, pageNum: number = 1, totalPages: number =
  */
 export function generateProductPassportPDF(product: ProductIntelligence, batchId: string = 'AGF-8921'): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const dynamicHash = computeDynamicDocHash(`${batchId}-${product.id}-${product.scientificName}`);
   
   addAgriFlowHeader(doc, 'Digital Product Passport', `Batch ID: ${batchId}`);
 
@@ -108,12 +127,12 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Botanical / Scientific: ${product.scientificName}  |  Variety: ${product.variety || 'Standard Farm Grade'}`, 20, y + 16);
+  doc.text(`Botanical / Scientific: ${product.scientificName}  |  Variety: ${product.variety || 'Commercial Grade'}`, 20, y + 16);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Category: ${product.category}  •  Subcategory: ${product.subcategory}  •  Status: FSSAI Certified Batch`, 20, y + 23);
+  doc.text(`Category: ${product.category}  •  Subcategory: ${product.subcategory}  •  Status: Food-Contact Compliant`, 20, y + 23);
 
   // Provenance Stamp badge
   doc.setFillColor(16, 185, 129);
@@ -121,9 +140,9 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
-  doc.text('PROVENANCE VERIFIED', 169, y + 12, { align: 'center' });
+  doc.text('PROVENANCE RECORD', 169, y + 12, { align: 'center' });
   doc.setFontSize(6.5);
-  doc.text('100% FARM TRACEABLE', 169, y + 17, { align: 'center' });
+  doc.text('FARM TRACEABLE', 169, y + 17, { align: 'center' });
 
   y += 36;
 
@@ -135,7 +154,7 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
   y += 5;
 
   const farmData = [
-    ['Farm Location:', 'Nashik Bio-Agricultural Cluster (Plot #42B), Maharashtra, India'],
+    ['Farm Location:', 'Nashik Bio-Agricultural Belt (Plot #42B), Maharashtra, India'],
     ['Soil & Agro-Climate:', `${product.growing.soil.substring(0, 75)}...`],
     ['Growth Duration:', `${product.growing.growthDuration} (${product.growing.growthDays} days cycle)`],
     ['Ideal Temperature:', `${product.growing.temperatureRange[0]}°C to ${product.growing.temperatureRange[1]}°C  (Rainfall: ${product.growing.rainfallRequirement})`],
@@ -166,7 +185,7 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
   const packData = [
     ['Primary Packaging:', product.packaging.primaryPackaging],
     ['Recommended Material:', product.packaging.recommendedMaterials.join(', ')],
-    ['Ventilation Requirement:', product.packaging.ventilationRequired ? `Mandatory (${product.packaging.ventilationSpec})` : 'Airtight Hermetic Seal Required'],
+    ['Ventilation Requirement:', product.packaging.ventilationRequired ? `Mandatory (${product.packaging.ventilationSpec})` : 'Airtight Hermetic Gas-Lockout Required'],
     ['Storage Temperature:', `${product.storage.storageTemperature} (Relative Humidity: ${product.storage.humidity})`],
     ['Shelf-Life Matrix:', `Ambient: ${product.storage.shelfLifeAmbient}  |  Cold Storage: ${product.storage.shelfLifeCold}`],
     ['Transit Vehicle:', `${product.transportation.recommendedVehicle} (Target: ${product.transportation.targetTemp})`]
@@ -193,11 +212,11 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
   y += 6;
 
   const stages = [
-    { name: '1. Seed & Sowing', date: 'Day 0', detail: 'Certified Non-GMO seeds sown in raised nursery' },
+    { name: '1. Seed & Sowing', date: 'Day 0', detail: 'High-viability seeds sown in raised nursery' },
     { name: '2. Field Harvest', date: `Day ${product.growing.growthDays}`, detail: `Harvested in morning hours: ${product.harvesting.recommendedWindow}` },
     { name: '3. Packaging Lock', date: `Day ${product.growing.growthDays + 1}`, detail: `Packaged in ${product.packaging.primaryPackaging} with QR tag` },
     { name: '4. Cold Transit', date: `Day ${product.growing.growthDays + 2}`, detail: `Dispatched via ${product.transportation.recommendedVehicle}` },
-    { name: '5. Consumer Delivery', date: `Day ${product.growing.growthDays + 3}`, detail: 'Delivered fresh with zero temperature violations' }
+    { name: '5. Consumer Delivery', date: `Day ${product.growing.growthDays + 3}`, detail: 'Delivered fresh with continuous temperature tracking' }
   ];
 
   stages.forEach((st, idx) => {
@@ -230,7 +249,7 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
 
   y += 4;
 
-  // Cryptographic Blockchain Hash
+  // Document Integrity Verification Hash
   doc.setFillColor(241, 245, 249);
   doc.setDrawColor(226, 232, 240);
   doc.roundedRect(14, y, 182, 15, 1.5, 1.5, 'FD');
@@ -238,12 +257,12 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('CRYPTOGRAPHIC PASSPORT PROVENANCE HASH:', 18, y + 5);
+  doc.text('DOCUMENT INTEGRITY VERIFICATION HASH:', 18, y + 5);
 
   doc.setFont('courier', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(71, 85, 105);
-  doc.text(`sha256: 9f8a7c2e4b1d6e8f0a3c5e7b9d1f3a5b7c9e1d3f5a7b9c1e3f5a7b9d1f3e5b7a [${batchId}]`, 18, y + 10);
+  doc.text(`${dynamicHash} [Payload: ${batchId}]`, 18, y + 10);
 
   addAgriFlowFooter(doc, 1, 1);
   return doc;
@@ -254,6 +273,7 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
  */
 export function generateOrderInvoicePDF(details: PDFOrderDetails): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const invoiceHash = computeDynamicDocHash(`${details.orderId}-${details.totalAmount}-${details.customerName}`);
   
   addAgriFlowHeader(doc, 'Tax Invoice / Receipt', `INV-${details.orderId.replace(/[^0-9]/g, '') || '9042'}`);
 
@@ -270,337 +290,278 @@ export function generateOrderInvoicePDF(details: PDFOrderDetails): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
-  doc.text(details.customerName || 'Hindushree Muniraju', 14, y);
-  doc.text(details.farmerName || 'Kisan Agro Cooperative (Rajesh Patel)', 110, y);
+  doc.text(details.customerName || 'Registered Customer', 14, y);
+  doc.text(details.farmerName || 'Kisan Agro Cooperative Farms', 110, y);
   y += 4.5;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text(details.customerAddress || 'Indiranagar 100ft Road, Bengaluru, KA 560038', 14, y);
-  doc.text(details.farmerLocation || 'Nashik Farm Cluster, Maharashtra, IN', 110, y);
-  y += 4;
-  doc.text(`Phone: ${details.customerPhone || '+91 98450 12345'}`, 14, y);
-  doc.text(`FSSAI Producer Lic: 11521045000219`, 110, y);
-  y += 8;
+  doc.text(details.customerAddress || 'Agricultural Marketplace Hub, Delivery Zone 1', 14, y);
+  doc.text(details.farmerLocation || 'Nashik Agricultural Belt, Maharashtra', 110, y);
+  y += 4.5;
 
-  // Metadata Strip
-  doc.setFillColor(248, 250, 252);
-  doc.setDrawColor(226, 232, 240);
-  doc.roundedRect(14, y, 182, 10, 1.5, 1.5, 'FD');
+  doc.text(`Contact: ${details.customerPhone || '+91 User Mobile'}`, 14, y);
+  doc.text(`Batch ID: ${details.batchId || 'AGF-8921'}  |  Order Date: ${details.orderDate || 'Today'}`, 110, y);
+  
+  y += 12;
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(71, 85, 105);
-  doc.text(`Invoice Date: ${details.orderDate || new Date().toLocaleDateString('en-IN')}`, 18, y + 6.5);
-  doc.text(`Payment: ${details.paymentMethod || 'AgriFlow Smart Wallet'} [PAID]`, 85, y + 6.5);
-  doc.text(`Shipment Status: ${details.shipmentStatus || 'Delivered'}`, 145, y + 6.5);
-
-  y += 16;
-
-  // Itemized Commercial Table Header
-  doc.setFillColor(15, 23, 42);
+  // Invoice Items Table Header
+  doc.setFillColor(241, 245, 249);
   doc.rect(14, y, 182, 8, 'F');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(255, 255, 255);
-  doc.text('ITEM DESCRIPTION', 18, y + 5.5);
-  doc.text('QTY (KG)', 95, y + 5.5, { align: 'right' });
-  doc.text('RATE (₹/KG)', 130, y + 5.5, { align: 'right' });
-  doc.text('AMOUNT (₹)', 188, y + 5.5, { align: 'right' });
-
-  y += 8;
-
-  // Table Row 1: Commodity
-  doc.setFillColor(255, 255, 255);
-  doc.rect(14, y, 182, 8, 'F');
-  doc.setDrawColor(241, 245, 249);
-  doc.line(14, y + 8, 196, y + 8);
-
+  
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(15, 23, 42);
-  doc.text(`${details.productName} (${details.productCategory})`, 18, y + 5.5);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`${details.quantityKg} kg`, 95, y + 5.5, { align: 'right' });
-  doc.text(`₹${details.unitPrice.toFixed(2)}`, 130, y + 5.5, { align: 'right' });
-  const subtotal = details.quantityKg * details.unitPrice;
-  doc.text(`₹${subtotal.toFixed(2)}`, 188, y + 5.5, { align: 'right' });
+  doc.text('Item Description', 18, y + 5.5);
+  doc.text('Category', 90, y + 5.5);
+  doc.text('Qty (kg)', 125, y + 5.5);
+  doc.text('Rate (₹/kg)', 150, y + 5.5);
+  doc.text('Total (₹)', 180, y + 5.5);
 
   y += 8;
 
-  // Table Row 2: SIH26236 Food-Grade Packaging
-  doc.setFillColor(250, 250, 250);
-  doc.rect(14, y, 182, 8, 'F');
-  doc.line(14, y + 8, 196, y + 8);
-
+  // Primary Item
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(71, 85, 105);
-  doc.text('Food-Grade Certified Packaging (SIH26236 Specification)', 18, y + 5.5);
-  doc.text(`${details.quantityKg} kg`, 95, y + 5.5, { align: 'right' });
-  doc.text('₹1.80', 130, y + 5.5, { align: 'right' });
-  doc.text(`₹${details.packagingCost.toFixed(2)}`, 188, y + 5.5, { align: 'right' });
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text(details.productName, 18, y + 6);
+  doc.text(details.productCategory, 90, y + 6);
+  doc.text(`${details.quantityKg} kg`, 125, y + 6);
+  doc.text(`₹${details.unitPrice.toFixed(2)}`, 150, y + 6);
+  doc.text(`₹${(details.quantityKg * details.unitPrice).toFixed(2)}`, 180, y + 6);
 
-  y += 8;
-
-  // Table Row 3: Reefer Cold-Chain Logistics
-  doc.setFillColor(255, 255, 255);
-  doc.rect(14, y, 182, 8, 'F');
-  doc.line(14, y + 8, 196, y + 8);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(71, 85, 105);
-  doc.text('Refrigerated IoT Cold-Chain Freight & Last-Mile Delivery', 18, y + 5.5);
-  doc.text('1 load', 95, y + 5.5, { align: 'right' });
-  doc.text('Flat', 130, y + 5.5, { align: 'right' });
-  doc.text(`₹${details.transportCost.toFixed(2)}`, 188, y + 5.5, { align: 'right' });
-
+  // Divider
+  doc.setDrawColor(226, 232, 240);
+  doc.line(14, y + 10, 196, y + 10);
   y += 14;
 
-  // Total Summary Box on right
-  const totalBoxX = 110;
-  doc.setFillColor(248, 250, 252);
-  doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(totalBoxX, y, 86, 32, 2, 2, 'FD');
+  // Packaging & Reefer Transit Line Items
+  doc.text('Food-Grade Standard Packaging (SIH26236 Specification)', 18, y + 5.5);
+  doc.text('Packaging Fee', 90, y + 5.5);
+  doc.text('1 Batch', 125, y + 5.5);
+  doc.text(`₹${details.packagingCost.toFixed(2)}`, 150, y + 5.5);
+  doc.text(`₹${details.packagingCost.toFixed(2)}`, 180, y + 5.5);
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text('Commodity Subtotal:', totalBoxX + 6, y + 7);
-  doc.text(`₹${subtotal.toFixed(2)}`, 190, y + 7, { align: 'right' });
+  doc.line(14, y + 10, 196, y + 10);
+  y += 14;
 
-  doc.text('Packaging & Logistics Fee:', totalBoxX + 6, y + 13);
-  doc.text(`₹${(details.packagingCost + details.transportCost).toFixed(2)}`, 190, y + 13, { align: 'right' });
+  doc.text('Cold-Chain IoT Monitored Highway Reefer Transit', 18, y + 5.5);
+  doc.text('Logistics', 90, y + 5.5);
+  doc.text('Doorstep', 125, y + 5.5);
+  doc.text(`₹${details.transportCost.toFixed(2)}`, 150, y + 5.5);
+  doc.text(`₹${details.transportCost.toFixed(2)}`, 180, y + 5.5);
 
-  doc.text('GST / Mandi Cess (0% Agricultural Exemption):', totalBoxX + 6, y + 19);
-  doc.text('₹0.00', 190, y + 19, { align: 'right' });
+  doc.line(14, y + 10, 196, y + 10);
+  y += 18;
 
-  doc.setDrawColor(203, 213, 225);
-  doc.line(totalBoxX + 4, y + 22, totalBoxX + 82, y + 22);
+  // Calculation Breakdown
+  const subtotal = (details.quantityKg * details.unitPrice) + details.packagingCost + details.transportCost;
+  const gst = subtotal * 0.05; // 5% agricultural service gst
+  const grandTotal = subtotal + gst;
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(16, 185, 129); // emerald
-  doc.text('NET PAID TOTAL:', totalBoxX + 6, y + 28);
-  doc.text(`₹${details.totalAmount.toFixed(2)}`, 190, y + 28, { align: 'right' });
-
-  y += 42;
-
-  // Terms & Authorized Signatory
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(100, 116, 139);
-  doc.text('1. Farm produce sold under AgriFlow Direct-to-Consumer Fair Price Guarantee.', 14, y);
-  doc.text('2. 100% Quality guarantee: Any post-transit spoilage reported within 24h is credited instantly to wallet.', 14, y + 4);
-  doc.text('3. This is a computer-generated tax invoice and requires no physical signature.', 14, y + 8);
-
-  // Digital Sign Stamp
-  doc.setFillColor(241, 245, 249);
-  doc.roundedRect(148, y, 44, 18, 1.5, 1.5, 'FD');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor(15, 23, 42);
-  doc.text('DIGITALLY AUTHORIZED', 170, y + 6, { align: 'center' });
-  doc.setFont('courier', 'normal');
-  doc.setFontSize(6.5);
-  doc.setTextColor(100, 116, 139);
-  doc.text('AGRIFLOW-FIN-NODE #08', 170, y + 12, { align: 'center' });
-
-  addAgriFlowFooter(doc, 1, 1);
-  return doc;
-}
-
-/**
- * 3. 📦 Generate Packaging Intelligence Report PDF (SIH26236 Dossier)
- */
-export function generatePackagingReportPDF(
-  product: ProductIntelligence,
-  recommendation: PackagingRecommendationReport,
-  params: { batchKg: number; distanceKm: number; tempC: number; humidityPercent: number }
-): jsPDF {
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  
-  addAgriFlowHeader(doc, 'SIH26236 Packaging Dossier', 'AI Barrier Recommendation');
-
-  let y = 42;
-
-  // Title Box
-  doc.setFillColor(248, 250, 252);
-  doc.setDrawColor(168, 85, 247); // purple
-  doc.roundedRect(14, y, 182, 22, 2, 2, 'FD');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(15, 23, 42);
-  doc.text(`Commodity: ${product.name} (${product.category})`, 20, y + 8);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Evaluation Batch: ${params.batchKg} kg  •  Distance: ${params.distanceKm} km  •  Microclimate: ${params.tempC}°C / ${params.humidityPercent}% RH`, 20, y + 15);
-
-  y += 28;
-
-  // Section 1: Respiration & Gas-Exchange Kinetics
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10.5);
-  doc.setTextColor(15, 23, 42);
-  doc.text('1. Respiration Kinetics & Botanical Gas-Exchange', 14, y);
-  y += 5;
-
-  const respData = [
-    ['Respiration Rate Class:', recommendation.respiration.respirationRateClass],
-    ['O2 Consumption Rate:', `${recommendation.respiration.estimatedO2ConsumptionMgKgHr} mg/kg·h at ${params.tempC}°C`],
-    ['Heat of Respiration:', `${recommendation.respiration.estimatedHeatGenerationKjKgDay} kJ/kg·day (Requires active dissipation)`],
-    ['Ventilation Requirement:', recommendation.respiration.recommendedPerforationDensity],
-    ['Optimal Atmosphere:', recommendation.respiration.optimalAtmosphereGasFlush]
+  const totals = [
+    ['Subtotal (Farm Goods + Packaging + Logistics):', `₹${subtotal.toFixed(2)}`],
+    ['Applicable GST (5% Food & Freight):', `₹${gst.toFixed(2)}`],
+    ['Total Amount Paid:', `₹${grandTotal.toFixed(2)}`]
   ];
 
-  respData.forEach(([label, value]) => {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(71, 85, 105);
-    doc.text(label, 16, y);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(15, 23, 42);
-    doc.text(value, 65, y);
-    y += 5;
+  totals.forEach(([lbl, val], idx) => {
+    const isGrand = idx === totals.length - 1;
+    doc.setFont('helvetica', isGrand ? 'bold' : 'normal');
+    doc.setFontSize(isGrand ? 10 : 8.5);
+    doc.setTextColor(isGrand ? 16 : 71, isGrand ? 185 : 85, isGrand ? 129 : 105);
+    doc.text(lbl, 110, y);
+    doc.text(val, 196, y, { align: 'right' });
+    y += isGrand ? 7 : 5.5;
   });
 
-  y += 5;
+  y += 10;
 
-  // Section 2: 4-Tier Material Science Decision
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10.5);
-  doc.setTextColor(15, 23, 42);
-  doc.text('2. Multi-Criteria Material Selection (SIH26236 Algorithm)', 14, y);
-  y += 5;
-
-  // 1. Recommended Tier Box
-  doc.setFillColor(240, 253, 244); // emerald-50
+  // Payment Status Box
+  doc.setFillColor(240, 253, 244);
   doc.setDrawColor(34, 197, 94);
-  doc.roundedRect(14, y, 182, 34, 2, 2, 'FD');
+  doc.roundedRect(14, y, 182, 20, 2, 2, 'FD');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(21, 128, 61);
-  doc.text(`🥇 RECOMMENDED: ${recommendation.recommended.material.name} (Match Score: ${Math.round(recommendation.recommended.score)}%)`, 18, y + 6);
+  doc.text(`PAYMENT STATUS: COMPLETED VIA ${details.paymentMethod.toUpperCase()}`, 18, y + 7);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(15, 23, 42);
-  doc.text(`Primary Function: ${recommendation.recommended.material.primaryFunction}`, 18, y + 12);
-  doc.text(`Barrier Metrics: OTR = ${recommendation.recommended.material.oxygenTransmissionRate}  |  WVTR = ${recommendation.recommended.material.waterVaporTransmissionRate}`, 18, y + 17);
-  doc.text(`Why Selected: ${recommendation.recommended.scientificRationale.substring(0, 85)}...`, 18, y + 22);
-  doc.text(`FSSAI Compliance: ${recommendation.recommended.material.foodContactSafe ? 'Certified Food Contact Safe (IS 9845)' : 'Industrial Secondary Outer'}  •  Estimated Unit Cost: ₹${recommendation.recommended.costPerKg.toFixed(2)}/kg`, 18, y + 27);
-
-  y += 38;
-
-  // 2. Alternative & Budget Tiers
-  if (recommendation.alternative) {
-    doc.setFillColor(254, 252, 232); // yellow-50
-    doc.setDrawColor(234, 179, 8);
-    doc.roundedRect(14, y, 88, 22, 1.5, 1.5, 'FD');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(161, 98, 7);
-    doc.text(`🥈 ALTERNATIVE: ${recommendation.alternative.material.name}`, 18, y + 6);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(71, 85, 105);
-    doc.text(`Score: ${Math.round(recommendation.alternative.score)}%  •  Cost: ₹${recommendation.alternative.costPerKg.toFixed(2)}/kg`, 18, y + 11);
-    doc.text(`Suitable alternative commercial option.`, 18, y + 16);
-  }
-
-  if (recommendation.budget) {
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(203, 213, 225);
-    doc.roundedRect(108, y, 88, 22, 1.5, 1.5, 'FD');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(71, 85, 105);
-    doc.text(`💰 BUDGET: ${recommendation.budget.material.name}`, 112, y + 6);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(100, 116, 139);
-    doc.text(`Cost: ₹${recommendation.budget.costPerKg.toFixed(2)}/kg (Economical choice)`, 112, y + 11);
-    doc.text(`Suitable for short-haul transit < 100 km.`, 112, y + 16);
-  }
+  doc.setFontSize(8);
+  doc.setTextColor(71, 85, 105);
+  doc.text(`Transaction Reference: TXN-${details.orderId.replace(/[^0-9]/g, '') || '883910'} • Document Integrity Hash: ${invoiceHash}`, 18, y + 14);
 
   y += 28;
 
-  // 3. Not Recommended Warning Box
-  if (recommendation.notRecommended) {
-    doc.setFillColor(254, 242, 242); // red-50
-    doc.setDrawColor(239, 68, 68);
-    doc.roundedRect(14, y, 182, 22, 1.5, 1.5, 'FD');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(185, 28, 28);
-    doc.text(`❌ NOT RECOMMENDED: ${recommendation.notRecommended.material.name}`, 18, y + 6);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(127, 29, 29);
-    doc.text(`Scientific Failure Mode: ${recommendation.notRecommended.scientificRationale}`, 18, y + 12);
-    doc.text(`Risk Warning: Incompatible barrier causes rapid spoilage.`, 18, y + 17);
-  }
-
-  y += 28;
-
-  // Provenance & ASTM Standards Notice
+  // Terms Note
   doc.setFont('helvetica', 'italic');
-  doc.setFontSize(7);
-  doc.setTextColor(100, 116, 139);
-  doc.text('* Tested according to ASTM D3985 (Coulometric O2 Detection) and ASTM F1249 (Modulated Infrared WVTR). Values reflect standardized 23°C, 50% RH laboratory benchmarks.', 14, y);
+  doc.setFontSize(7.5);
+  doc.setTextColor(148, 163, 184);
+  doc.text('Notes & Guarantee:', 14, y);
+  doc.text('1. Produce is packed according to SIH26236 Food-Grade Material Specifications.', 14, y + 5.5);
+  doc.text('2. Quality assurance: Any post-transit spoilage reported within 24h is processed according to fair trade policy.', 14, y + 11);
 
   addAgriFlowFooter(doc, 1, 1);
   return doc;
 }
 
 /**
- * 4. 🚚 Generate Delivery / Transport Report PDF
+ * 3. 📦 Generate Technical Packaging Dossier PDF
  */
-export function generateDeliveryReportPDF(order: FarmerOrder, isSimulatedGps: boolean = true): jsPDF {
+export function generatePackagingDossierPDF(product: ProductIntelligence, recommendation: PackagingRecommendationReport): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const dossierHash = computeDynamicDocHash(`${product.id}-${recommendation.recommended.material.name}-${recommendation.respiration.respirationRateClass}`);
   
-  addAgriFlowHeader(doc, 'Transit & Telemetry Audit', `Shipment: ${order.batchId}`);
+  addAgriFlowHeader(doc, 'SIH26236 Packaging Dossier', `Commodity: ${product.name}`);
 
   let y = 42;
 
-  // Shipment Overview Box
+  // Executive Summary Banner
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, y, 182, 26, 2, 2, 'FD');
+  doc.roundedRect(14, y, 182, 32, 2, 2, 'FD');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
+  doc.setFontSize(12);
   doc.setTextColor(15, 23, 42);
-  doc.text(`Batch: ${order.batchId} (${order.cropName} - ${order.quantityKg} kg)`, 20, y + 7);
+  doc.text(`AI Packaging Recommendation: ${recommendation.recommended.material.name}`, 20, y + 8);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Driver / Fleet: ${order.driverName || 'Gaurav Logistics Fleet'}  •  Vehicle: MH-15-EG-4421 (Insulated Reefer)`, 20, y + 14);
-  doc.text(`Origin: ${order.farmerName || 'Nashik Bio-Farm'}, Maharashtra  ➔  Destination: ${order.deliveryLocation || 'Bengaluru APMC Yard'}`, 20, y + 20);
+  doc.text(`Evaluation Score: ${Math.round(recommendation.recommended.score)}/100  |  Estimated Shelf-Life Range: ${recommendation.recommended.estimatedShelfLifeRange || `${recommendation.recommended.estimatedShelfLifeDays} Days`}`, 20, y + 14);
+  doc.text(`OTR: ${recommendation.recommended.material.barrierProperties.otrRange}  |  WVTR: ${recommendation.recommended.material.barrierProperties.wvtrRange}`, 20, y + 20);
+  doc.text(`Estimated Packaging Cost: ₹${recommendation.recommended.costPerKg.toFixed(2)}/kg  |  Eco Score: ${recommendation.recommended.ecoScore}/100`, 20, y + 26);
 
-  y += 32;
+  y += 38;
 
-  // Section 1: GPS Route & Telemetry Audit
+  // Section 1: Botanical Respiration & Gas Exchange Kinetics
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('1. Route Execution & Telemetry Log', 14, y);
+  doc.text('1. Botanical Respiration & Gas Permeability Analysis', 14, y);
+  y += 5;
+
+  const respData = [
+    ['Respiration Classification:', recommendation.respiration.respirationRateClass],
+    ['O2 Consumption Rate (20°C):', `${recommendation.respiration.estimatedO2ConsumptionMgKgHr} mg O2 / kg·h (Heat Gen: ${recommendation.respiration.estimatedHeatGenerationKjKgDay} kJ/kg·day)`],
+    ['Gas Exchange Requirement:', recommendation.respiration.requiresVentilation ? `Ventilation Mandatory (${recommendation.respiration.recommendedPerforationDensity})` : 'Hermetic Non-Permeable Seal Required'],
+    ['Anaerobic Decay Risk:', recommendation.respiration.anaerobicRiskUnderSealedFilm],
+    ['Recommended Gas Flush / MAP:', recommendation.respiration.optimalAtmosphereGasFlush]
+  ];
+
+  respData.forEach(([lbl, val]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105);
+    doc.text(lbl, 16, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(15, 23, 42);
+    doc.text(val, 65, y);
+    y += 5.5;
+  });
+
+  y += 6;
+
+  // Section 2: ASTM Barrier Radar Table
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text('2. ASTM Material Property Matrix & Candidate Ranking', 14, y);
+  y += 5;
+
+  doc.setFillColor(241, 245, 249);
+  doc.rect(14, y, 182, 7, 'F');
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text('Material Candidate', 18, y + 5);
+  doc.text('OTR (cc/m²·day)', 75, y + 5);
+  doc.text('WVTR (g/m²·day)', 110, y + 5);
+  doc.text('Score', 145, y + 5);
+  doc.text('Evaluation Tier', 170, y + 5);
+
+  y += 7;
+
+  recommendation.allEvaluations.slice(0, 4).forEach((ev) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(30, 41, 59);
+    doc.text(ev.material.name.substring(0, 30), 18, y + 5);
+    doc.text(ev.material.barrierProperties.otrRange, 75, y + 5);
+    doc.text(ev.material.barrierProperties.wvtrRange, 110, y + 5);
+    doc.text(`${Math.round(ev.score)}%`, 145, y + 5);
+    doc.text(ev.tier, 170, y + 5);
+    
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, y + 7, 196, y + 7);
+    y += 8;
+  });
+
+  y += 6;
+
+  // Section 3: Engineered Multi-Layer Packaging Architecture
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text('3. Multi-Layer Engineered Packaging Structure', 14, y);
+  y += 6;
+
+  product.packaging.layers.forEach((layer) => {
+    doc.setFillColor(16, 185, 129);
+    doc.circle(18, y + 1.5, 2, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`Layer ${layer.layer}: ${layer.name} (${layer.material})`, 24, y + 2.5);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(71, 85, 105);
+    doc.text(layer.function, 24, y + 7);
+
+    y += 10;
+  });
+
+  y += 2;
+
+  // Decision Support Disclaimer Box
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(14, y, 182, 14, 1.5, 1.5, 'FD');
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Decision Support Note: Estimates derived from ASTM test method references and physiological crop models. Actual shelf life may vary.', 18, y + 5);
+  doc.text(`Dossier Integrity Hash: ${dossierHash}`, 18, y + 10);
+
+  addAgriFlowFooter(doc, 1, 1);
+  return doc;
+}
+
+/**
+ * 4. 🚚 Generate Cold-Chain Transit & Telemetry Audit PDF
+ */
+export function generateTransitAuditPDF(order: FarmerOrder, isSimulatedGps: boolean = true): jsPDF {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const telemetryHash = computeDynamicDocHash(`${order.id}-${order.distanceKm}-${order.status}`);
+  
+  addAgriFlowHeader(doc, 'Cold-Chain Transit Audit', `Shipment: ${order.id}`);
+
+  let y = 42;
+
+  // Section 1: Telemetry & Vehicle Header
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text('1. Route Telemetry & IoT Sensor Parameters', 14, y);
   y += 5;
 
   const telemetryData = [
-    ['GPS Tracking Mode:', isSimulatedGps ? 'SIMULATED GPS — DEMO MODE (Validated Route Corridor)' : 'VERIFIED HARDWARE GPS (Browser Geolocation)'],
+    ['GPS Tracking Mode:', isSimulatedGps ? 'SIMULATED GPS — DEMO MODE (Validated Route Corridor)' : 'REAL DEVICE GPS (Browser Geolocation API)'],
     ['Total Route Distance:', `${order.distanceKm} km (Estimated transit duration: ${Math.round(order.distanceKm / 45)} hours)`],
     ['Reefer Setpoint Temp:', `${order.packagingSpec?.targetTemp || '13.0°C'}  (Recorded Avg: 13.1°C)`],
     ['Relative Humidity:', '88% RH (Inside ventilated CFB box microclimate)'],
@@ -625,7 +586,7 @@ export function generateDeliveryReportPDF(order: FarmerOrder, isSimulatedGps: bo
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('2. Cold-Chain Compliance & Risk Analysis', 14, y);
+  doc.text('2. Cold-Chain Monitoring & Temperature Range Analysis', 14, y);
   y += 5;
 
   doc.setFillColor(240, 253, 244);
@@ -635,13 +596,13 @@ export function generateDeliveryReportPDF(order: FarmerOrder, isSimulatedGps: bo
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(21, 128, 61);
-  doc.text('🟢 COLD-CHAIN LOCK: 100% TEMPERATURE INTEGRITY MAINTAINED', 18, y + 7);
+  doc.text('❄️ COLD-CHAIN STATUS: SAFE TEMPERATURE RANGE MAINTAINED', 18, y + 7);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(15, 23, 42);
   doc.text(`• Minimum Recorded Temp: 12.8°C  |  Maximum Recorded Temp: 13.4°C  |  Variance: ±0.3°C (Target: 13°C)`, 18, y + 13);
-  doc.text(`• Zero thermal abuse events or prolonged stops detected across the national highway corridor.`, 18, y + 18);
+  doc.text(`• Zero critical thermal abuse events logged across highway corridor.`, 18, y + 18);
   doc.text(`• Product freshness preservation score: 99.2% on final arrival.`, 18, y + 23);
 
   y += 34;
@@ -654,11 +615,11 @@ export function generateDeliveryReportPDF(order: FarmerOrder, isSimulatedGps: bo
   y += 6;
 
   const waypoints = [
-    { pt: 'Waypoint 1: Farm Gate Dispatch (Nashik)', time: '06:00 AM', status: 'Pre-cooled produce loaded into reefer' },
-    { pt: 'Waypoint 2: Pune-Solapur Highway Toll', time: '10:30 AM', status: 'Telemetry heartbeat verified (13.1°C)' },
-    { pt: 'Waypoint 3: Hubballi Logistics Hub', time: '04:15 PM', status: 'Driver rest & automated sensor sanity check' },
-    { pt: 'Waypoint 4: Tumakuru Entry Checkpost', time: '08:45 PM', status: 'Within 50km of destination' },
-    { pt: 'Waypoint 5: Bengaluru Mandi Delivery Hub', time: '10:30 PM', status: 'Handover complete & QR code acknowledged' }
+    { pt: 'Waypoint 1: Farm Gate Dispatch (Origin)', time: '06:00 AM', status: 'Pre-cooled produce loaded into reefer' },
+    { pt: 'Waypoint 2: Highway Express Toll Corridor', time: '10:30 AM', status: 'Telemetry heartbeat verified (13.1°C)' },
+    { pt: 'Waypoint 3: Regional Logistics Intermediate Hub', time: '04:15 PM', status: 'Driver rest & automated sensor sanity check' },
+    { pt: 'Waypoint 4: Metro City Entry Checkpost', time: '08:45 PM', status: 'Within 50km of destination' },
+    { pt: 'Waypoint 5: Distribution Center Delivery Hub', time: '10:30 PM', status: 'Handover complete & QR code acknowledged' }
   ];
 
   waypoints.forEach((wp) => {
@@ -683,6 +644,12 @@ export function generateDeliveryReportPDF(order: FarmerOrder, isSimulatedGps: bo
     y += 7.5;
   });
 
+  y += 4;
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Telemetry Audit Hash: ${telemetryHash}`, 14, y + 6);
+
   addAgriFlowFooter(doc, 1, 1);
   return doc;
 }
@@ -696,6 +663,7 @@ export function generateCompleteMasterReportPDF(
   recommendation: PackagingRecommendationReport
 ): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const masterHash = computeDynamicDocHash(`${product.id}-${order.id}-${recommendation.recommended.material.name}`);
   
   // Page 1: Executive Summary & Product Passport
   addAgriFlowHeader(doc, 'Master Dossier: Page 1', 'Product Passport & Origin');
@@ -728,14 +696,14 @@ export function generateCompleteMasterReportPDF(
   doc.setFontSize(8);
   doc.setTextColor(71, 85, 105);
   doc.text(`• Scientific: ${product.scientificName}`, 20, y + 15);
-  doc.text(`• Variety: ${product.variety || 'Certified Grade'}`, 20, y + 21);
+  doc.text(`• Variety: ${product.variety || 'Commercial Grade'}`, 20, y + 21);
   doc.text(`• Category: ${product.category} (${product.subcategory})`, 20, y + 27);
   doc.text(`• Growing Cycle: ${product.growing.growthDuration}`, 20, y + 33);
 
-  doc.text(`• Batch Quantity: ${order.quantityKg} kg`, 110, y + 15);
+  doc.text(`• Batch Quantity: ${order.weightKg || 500} kg`, 110, y + 15);
   doc.text(`• Base Rate: ₹${product.market.basePricePerKg.toFixed(2)}/kg`, 110, y + 21);
-  doc.text(`• Estimated Total Realization: ₹${(order.quantityKg * product.market.basePricePerKg).toFixed(2)}`, 110, y + 27);
-  doc.text(`• Destination: ${order.deliveryLocation}`, 110, y + 33);
+  doc.text(`• Estimated Total Realization: ₹${((order.weightKg || 500) * product.market.basePricePerKg).toFixed(2)}`, 110, y + 27);
+  doc.text(`• Destination: ${order.destination || 'Retail Distribution Hub'}`, 110, y + 33);
 
   y += 46;
 
@@ -758,9 +726,9 @@ export function generateCompleteMasterReportPDF(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(15, 23, 42);
-  doc.text(`• OTR: ${recommendation.recommended.material.oxygenTransmissionRate}  |  WVTR: ${recommendation.recommended.material.waterVaporTransmissionRate}`, 18, y + 13);
+  doc.text(`• OTR: ${recommendation.recommended.material.barrierProperties.otrRange}  |  WVTR: ${recommendation.recommended.material.barrierProperties.wvtrRange}`, 18, y + 13);
   doc.text(`• Respiration: ${recommendation.respiration.respirationRateClass} (${recommendation.respiration.estimatedO2ConsumptionMgKgHr} mg O2/kg·h)`, 18, y + 18);
-  doc.text(`• Food Contact: FSSAI IS 9845 Certified Safe  |  Estimated Cost: ₹${recommendation.recommended.costPerKg.toFixed(2)}/kg`, 18, y + 23);
+  doc.text(`• Food Contact: FSSAI IS 9845 Standard Safe  |  Estimated Cost: ₹${recommendation.recommended.costPerKg.toFixed(2)}/kg`, 18, y + 23);
 
   y += 36;
 
@@ -781,13 +749,13 @@ export function generateCompleteMasterReportPDF(
 
   y += 28;
 
-  // Cryptographic Verification Stamp
+  // Document Integrity Stamp
   doc.setFillColor(241, 245, 249);
   doc.roundedRect(14, y, 182, 14, 1.5, 1.5, 'FD');
   doc.setFont('courier', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(71, 85, 105);
-  doc.text(`AgriFlow AI Master Verification Hash: sha256:4a8c9e1f2b3d... [Verified by AgriFlow Cryptographic Node]`, 18, y + 8);
+  doc.text(`AgriFlow AI Master Verification Hash: ${masterHash} [Computed from Batch Payload]`, 18, y + 8);
 
   addAgriFlowFooter(doc, 1, 1);
   return doc;

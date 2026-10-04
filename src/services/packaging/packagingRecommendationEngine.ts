@@ -29,6 +29,13 @@ export interface BarrierMatchResult {
   explanation: string;
 }
 
+export interface ShelfLifeFactorBreakdown {
+  factor: string;
+  status: 'Positive' | 'Neutral' | 'Critical';
+  weightPercent: number;
+  impactDescription: string;
+}
+
 export interface MaterialEvaluationResult {
   material: PackagingMaterialSpec;
   score: number; // 0 - 100
@@ -39,6 +46,8 @@ export interface MaterialEvaluationResult {
   estimatedPackagingCostTotal: number;
   costPerKg: number;
   estimatedShelfLifeDays: number;
+  estimatedShelfLifeRange: string; // e.g. "5–8 Days" or "12–18 Months"
+  shelfLifeFactors: ShelfLifeFactorBreakdown[];
   riskFactorNotes: string[];
   ecoScore: number;
 }
@@ -77,7 +86,16 @@ export interface PackagingRecommendationReport {
  * Calculate commodity respiration kinetics based on product type and transit temperature.
  */
 export function calculateRespirationKinetics(product: ProductIntelligence, tempC: number): RespirationAnalysis {
-  const isProcessed = product.isProcessed || product.category === 'Flour' || product.category === 'Oil & Oilseed' || product.category === 'Processed Product' || product.category === 'Dairy' || product.category === 'Grain' || product.category === 'Pulse' || product.category === 'Dry Fruit';
+  const isProcessed = product.isProcessed || 
+    product.category === 'Flour' || 
+    product.category === 'Oil & Oilseed' || 
+    product.category === 'Processed Product' || 
+    product.category === 'Dairy' || 
+    product.category === 'Grain' || 
+    product.category === 'Pulse' || 
+    product.category === 'Dry Fruit' ||
+    product.category === 'Spice' ||
+    product.category === 'Tea & Coffee';
   const name = product.name.toLowerCase();
 
   if (isProcessed) {
@@ -89,7 +107,9 @@ export function calculateRespirationKinetics(product: ProductIntelligence, tempC
       requiresVentilation: false,
       recommendedPerforationDensity: '0% (Hermetic / Gas-Barrier Required)',
       anaerobicRiskUnderSealedFilm: 'None',
-      optimalAtmosphereGasFlush: product.category === 'Oil & Oilseed' || product.category === 'Dairy' ? '100% N2 Flush or Vacuum' : '99.5% N2 / Low Residual O2 (<0.5%)'
+      optimalAtmosphereGasFlush: product.category === 'Oil & Oilseed' || product.category === 'Dairy' 
+        ? '100% N2 Flush or High-Vacuum Lockout' 
+        : '99.5% N2 Flush / Low Residual O2 (<0.5%)'
     };
   }
 
@@ -97,8 +117,8 @@ export function calculateRespirationKinetics(product: ProductIntelligence, tempC
   let baseRateMg = 15;
   let rateClass: RespirationAnalysis['respirationRateClass'] = 'Moderate';
 
-  if (name.includes('broccoli') || name.includes('spinach') || name.includes('mushroom') || name.includes('sweet corn') || name.includes('strawberry')) {
-    baseRateMg = 45;
+  if (name.includes('okra') || name.includes('lady finger') || name.includes('bhindi') || name.includes('spinach') || name.includes('broccoli') || name.includes('sweet corn') || name.includes('strawberry')) {
+    baseRateMg = 42;
     rateClass = 'Very High';
   } else if (name.includes('tomato') || name.includes('mango') || name.includes('brinjal') || name.includes('banana') || name.includes('papaya')) {
     baseRateMg = 25;
@@ -111,7 +131,7 @@ export function calculateRespirationKinetics(product: ProductIntelligence, tempC
   // Q10 temperature coefficient multiplier: Respiration doubles roughly every 10°C rise
   const tempFactor = Math.pow(2.1, Math.max(0, tempC - 4) / 10);
   const actualO2Rate = Math.round(baseRateMg * tempFactor);
-  const heatGenerationKj = Math.round(actualO2Rate * 10.7); // Heat equivalent
+  const heatGenerationKj = Math.round(actualO2Rate * 10.7);
 
   return {
     commodityType: 'Fresh Horticultural Living Produce',
@@ -119,84 +139,114 @@ export function calculateRespirationKinetics(product: ProductIntelligence, tempC
     estimatedO2ConsumptionMgKgHr: actualO2Rate,
     estimatedHeatGenerationKjKgDay: heatGenerationKj,
     requiresVentilation: true,
-    recommendedPerforationDensity: rateClass === 'Very High' ? '4-6% Perforation / Laser EMAP (50-80 holes/m²)' : '2-4% Side Vent Slots aligned with airflow channels',
+    recommendedPerforationDensity: rateClass === 'Very High' ? '4% - 6% Precision Laser Micro-Perforated' : '2% - 4% Macro-Ventilated',
     anaerobicRiskUnderSealedFilm: rateClass === 'Very High' || rateClass === 'High' ? 'Severe' : 'Moderate',
-    optimalAtmosphereGasFlush: rateClass === 'High' ? '3-5% O2 + 3-5% CO2 + 90-94% N2 (MAP)' : 'Ambient Aerated Cool Air Flow'
+    optimalAtmosphereGasFlush: 'Equilibrium Modified Atmosphere Packaging (EMAP: 3-5% O2, 5-8% CO2)'
   };
 }
 
 /**
- * Execute Multi-Criteria Material Evaluation Algorithm
+ * Generate comprehensive AI-assisted packaging recommendations
  */
 export function generatePackagingRecommendation(input: PackagingEngineInput): PackagingRecommendationReport {
-  const { product, quantityKg, targetShelfLifeDays, storageTempC, humidityPercent, distanceKm, estimatedTravelHours, vehicleType, budgetPreference, sustainabilityPreference } = input;
+  const {
+    product,
+    quantityKg,
+    targetShelfLifeDays,
+    storageTempC,
+    humidityPercent,
+    distanceKm,
+    estimatedTravelHours,
+    budgetPreference,
+    sustainabilityPreference
+  } = input;
 
   const respiration = calculateRespirationKinetics(product, storageTempC);
-  const isFresh = respiration.respirationRateClass !== 'Non-Respiring (Dry/Processed)';
-  const isLiquidOrDairy = product.category === 'Dairy' || product.category === 'Oil & Oilseed' || product.name.toLowerCase().includes('milk') || product.name.toLowerCase().includes('ghee') || product.name.toLowerCase().includes('oil');
-  const isPowderOrGrain = product.category === 'Flour' || product.category === 'Grain' || product.category === 'Pulse' || product.category === 'Spice' || product.category === 'Dry Fruit';
+  const isFresh = respiration.requiresVentilation;
+  const isOilOrFat = product.category === 'Oil & Oilseed' || product.id.includes('oil') || product.id.includes('ghee') || product.id.includes('butter');
+  const isDairy = product.category === 'Dairy' && !product.id.includes('ghee');
+  const isPowderOrGrain = product.category === 'Grain' || product.category === 'Flour' || product.category === 'Pulse' || product.category === 'Spice' || product.category === 'Tea & Coffee';
 
   const evaluations: MaterialEvaluationResult[] = PACKAGING_MATERIALS_DATABASE.map(material => {
     let score = 50;
     const barrierMatches: BarrierMatchResult[] = [];
     const riskFactorNotes: string[] = [];
+    const shelfLifeFactors: ShelfLifeFactorBreakdown[] = [];
 
-    // 1. Oxygen Barrier & Gas Exchange Evaluation
+    // 1. Oxygen Barrier (OTR) & Gas Exchange Evaluation
     if (isFresh) {
-      if (material.barrierProperties.oxygenBarrierTier === 'Ultra-High' && !material.compatibility.perforatedVentilationAvailable) {
-        score -= 60;
-        riskFactorNotes.push('CRITICAL: Hermetic O2 barrier without ventilation triggers anaerobic fermentation and severe rotting.');
-        barrierMatches.push({
-          property: 'Oxygen Transmission (OTR)',
-          productDemand: `Needs high gas exchange (${respiration.estimatedO2ConsumptionMgKgHr} mg O2/kg·h)`,
-          materialCapability: `Impermeable (${material.barrierProperties.otrRange})`,
-          status: 'Unsuitable',
-          statusColor: '#ef4444',
-          explanation: 'Traps toxic carbon dioxide and suffocates living produce.'
-        });
-      } else if (material.compatibility.perforatedVentilationAvailable || material.barrierProperties.oxygenBarrierTier === 'Breathable') {
-        score += 25;
-        barrierMatches.push({
-          property: 'Oxygen Transmission (OTR)',
-          productDemand: 'Controlled gas exchange to sustain aerobic metabolism',
-          materialCapability: `Ventilated / Breathable (${material.barrierProperties.otrRange})`,
-          status: 'Suitable',
-          statusColor: '#10b981',
-          explanation: 'Maintains optimal oxygen levels and dissipates respiratory heat.'
-        });
-      } else {
-        score += 10;
-        barrierMatches.push({
-          property: 'Oxygen Transmission (OTR)',
-          productDemand: 'Moderate gas exchange',
-          materialCapability: material.barrierProperties.otrRange,
-          status: 'Acceptable',
-          statusColor: '#f59e0b',
-          explanation: 'Acceptable for short transit but requires temperature monitoring.'
-        });
-      }
-    } else if (isLiquidOrDairy || isPowderOrGrain) {
-      // Non-fresh / Dairy / Oils / Spices / Flour require tight oxygen barrier to stop rancidity & oxidation
-      if (material.barrierProperties.oxygenBarrierTier === 'Ultra-High' || material.barrierProperties.oxygenBarrierTier === 'High') {
+      const allowsGasExchange = material.compatibility.perforatedVentilationAvailable || 
+                                material.barrierProperties.oxygenBarrierTier === 'Breathable' || 
+                                material.barrierProperties.oxygenBarrierTier === 'Low' ||
+                                material.category === 'Paper & Corrugated' || 
+                                material.category === 'Returnable Container';
+
+      if (allowsGasExchange) {
         score += 30;
         barrierMatches.push({
-          property: 'Oxygen Barrier (OTR)',
-          productDemand: 'High barrier to prevent lipid oxidation and rancidity',
-          materialCapability: `Excellent barrier (${material.barrierProperties.otrRange})`,
+          property: 'Oxygen Permeability & Gas Exchange',
+          productDemand: `Needs high O2 exchange (~${respiration.estimatedO2ConsumptionMgKgHr} mg/kg·h) to avoid fermentation`,
+          materialCapability: `Breathable / Perforated (${material.barrierProperties.otrRange})`,
           status: 'Suitable',
           statusColor: '#10b981',
-          explanation: 'Blocks ambient oxygen, preserving delicate fats, aromas, and active nutrients.'
+          explanation: 'Allows natural respiratory gas diffusion, preventing off-flavors and anaerobic tissue decay.'
         });
-      } else if (material.barrierProperties.oxygenBarrierTier === 'Breathable') {
-        score -= 50;
-        riskFactorNotes.push('Unsuitable: High oxygen permeability causes rapid fat rancidity, aroma loss, or insect infestation.');
+        shelfLifeFactors.push({
+          factor: 'Aerobic Gas Exchange',
+          status: 'Positive',
+          weightPercent: 30,
+          impactDescription: 'Adequate ventilation prevents anaerobic fermentation and tissue breakdown.'
+        });
+      } else {
+        score -= 40;
         barrierMatches.push({
-          property: 'Oxygen Barrier (OTR)',
-          productDemand: 'Requires hermetic oxygen seal',
-          materialCapability: `Porous / Open grid (${material.barrierProperties.otrRange})`,
+          property: 'Oxygen Permeability & Gas Exchange',
+          productDemand: 'Needs active gas ventilation',
+          materialCapability: `Hermetic gas barrier (${material.barrierProperties.otrRange})`,
           status: 'Unsuitable',
           statusColor: '#ef4444',
-          explanation: 'Fails to prevent air and pest contamination.'
+          explanation: 'Trapped CO2 and zero O2 causes anaerobic fermentation, souring, and rapid tissue rot.'
+        });
+        riskFactorNotes.push('CRITICAL RISK: Zero ventilation creates an anaerobic chamber causing rapid rotting of living produce.');
+        shelfLifeFactors.push({
+          factor: 'Gas Lockout Hazard',
+          status: 'Critical',
+          weightPercent: 40,
+          impactDescription: 'Severe lack of gas exchange reduces usable shelf life by up to 75%.'
+        });
+      }
+    } else if (isOilOrFat || isDairy || isPowderOrGrain) {
+      if (material.barrierProperties.oxygenBarrierTier === 'Ultra-High' || material.barrierProperties.oxygenBarrierTier === 'High') {
+        score += 35;
+        barrierMatches.push({
+          property: 'Oxygen Transmission Rate (OTR)',
+          productDemand: 'Needs hermetic oxygen barrier to stop lipid oxidation, rancidity, and flavor loss',
+          materialCapability: `Ultra-low OTR (${material.barrierProperties.otrRange})`,
+          status: 'Suitable',
+          statusColor: '#10b981',
+          explanation: 'Blocks oxygen permeation, preventing free-radical oxidation and rancidity.'
+        });
+        shelfLifeFactors.push({
+          factor: 'Oxidative Barrier',
+          status: 'Positive',
+          weightPercent: 35,
+          impactDescription: 'Hermetic OTR protection preserves volatile aromas and stops rancidity.'
+        });
+      } else {
+        score -= 30;
+        barrierMatches.push({
+          property: 'Oxygen Transmission Rate (OTR)',
+          productDemand: 'Needs high oxygen barrier',
+          materialCapability: `High OTR (${material.barrierProperties.otrRange})`,
+          status: 'Unsuitable',
+          statusColor: '#ef4444',
+          explanation: 'Oxygen ingress will cause rancidity, loss of aroma volatiles, and microbial spoilage.'
+        });
+        shelfLifeFactors.push({
+          factor: 'Oxygen Permeation Risk',
+          status: 'Critical',
+          weightPercent: 30,
+          impactDescription: 'High OTR exposure leads to accelerated oxidation and off-flavors.'
         });
       }
     }
@@ -207,7 +257,7 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
         score += 25;
         barrierMatches.push({
           property: 'Moisture Barrier (WVTR)',
-          productDemand: 'Needs strict moisture lockout to prevent caking and mold',
+          productDemand: 'Needs strict moisture lockout to prevent caking, clumping, and mold',
           materialCapability: `High barrier (${material.barrierProperties.wvtrRange})`,
           status: 'Suitable',
           statusColor: '#10b981',
@@ -243,12 +293,17 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
       if (material.mechanical.shockDampeningRating >= 4.0 || material.mechanical.maxStackingCompressionKg >= 200) {
         score += 25;
         riskFactorNotes.push('Engineered to withstand long-haul highway vibration and multi-tier pallet compression.');
+        shelfLifeFactors.push({
+          factor: 'Transit Shock Protection',
+          status: 'Positive',
+          weightPercent: 20,
+          impactDescription: 'Damped highway vibrations prevent internal bruising and cell leakage.'
+        });
       } else {
         score -= 20;
         riskFactorNotes.push('Low drop/shock dampening for long-haul routes (>500 km).');
       }
     } else if (distanceKm <= 50) {
-      // Local transit favors returnable crates or budget flexible packaging
       if (material.category === 'Returnable Container' || material.category === 'Flexible Film') {
         score += 15;
       }
@@ -265,7 +320,7 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
       else if (material.compatibility.sustainabilityScore < 70) score -= 15;
     }
 
-    // Commodity specific direct overrides
+    // Commodity specific overrides
     if (material.unsuitableCommodities.some(c => product.id.includes(c) || product.name.toLowerCase().includes(c))) {
       score = Math.min(score, 25);
     }
@@ -273,22 +328,52 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
       score += 15;
     }
 
-    // Clamp score
     score = Math.max(5, Math.min(99, score));
 
-    // Calculate packaging cost
     const costPerKg = material.compatibility.estimatedBaseCostPerKg;
     const totalCost = Math.round(costPerKg * quantityKg);
 
-    // Calculate shelf-life estimate under this material
-    let estDays = isFresh ? product.storage.coldDays || 14 : product.storage.ambientDays || 180;
-    if (score < 40) {
-      estDays = Math.max(1, Math.round(estDays * 0.25));
-    } else if (score < 70) {
-      estDays = Math.round(estDays * 0.75);
-    } else {
-      estDays = Math.round(estDays * 1.15);
+    // Multi-factor estimated shelf-life range calculation
+    let baseMinDays = 3;
+    let baseMaxDays = 5;
+
+    if (isFresh) {
+      baseMinDays = Math.max(2, Math.round((product.storage.coldDays || 10) * 0.7));
+      baseMaxDays = product.storage.coldDays || 12;
+      if (score < 40) {
+        baseMinDays = 1;
+        baseMaxDays = 3;
+      } else if (score >= 80) {
+        baseMinDays = Math.round(baseMinDays * 1.1);
+        baseMaxDays = Math.round(baseMaxDays * 1.25);
+      }
+    } else if (isPowderOrGrain) {
+      baseMinDays = 180;
+      baseMaxDays = 365;
+      if (score >= 80) {
+        baseMinDays = 270;
+        baseMaxDays = 540;
+      }
+    } else if (isOilOrFat) {
+      baseMinDays = 120;
+      baseMaxDays = 240;
+      if (score >= 80) {
+        baseMinDays = 180;
+        baseMaxDays = 360;
+      }
+    } else if (isDairy) {
+      baseMinDays = 4;
+      baseMaxDays = 7;
+      if (score >= 80) {
+        baseMinDays = 6;
+        baseMaxDays = 10;
+      }
     }
+
+    const estDays = Math.round((baseMinDays + baseMaxDays) / 2);
+    const rangeStr = baseMaxDays > 60 
+      ? `${Math.round(baseMinDays / 30)}–${Math.round(baseMaxDays / 30)} Months`
+      : `${baseMinDays}–${baseMaxDays} Days`;
 
     let tier: MaterialEvaluationResult['tier'] = 'Alternative';
     if (score >= 82) tier = 'Recommended';
@@ -297,7 +382,7 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
     else tier = 'Not Recommended';
 
     const rationale = score >= 75
-      ? `The ${material.name} provides optimal gas barrier and mechanical damping for ${product.name} across ${distanceKm} km transit, maintaining sensory freshness and microbial integrity.`
+      ? `The ${material.name} provides optimal gas permeability and mechanical damping for ${product.name} across ${distanceKm} km transit, maintaining sensory freshness and structural integrity.`
       : score < 45
       ? material.criticalFailureNotes || `Incompatible barrier or physical properties for ${product.name}.`
       : `Functional baseline option for ${product.name}, though requires strict temperature monitoring.`;
@@ -312,24 +397,22 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
       estimatedPackagingCostTotal: totalCost,
       costPerKg,
       estimatedShelfLifeDays: estDays,
+      estimatedShelfLifeRange: rangeStr,
+      shelfLifeFactors,
       riskFactorNotes,
       ecoScore: material.compatibility.sustainabilityScore
     };
   });
 
-  // Sort evaluations descending by score
   evaluations.sort((a, b) => b.score - a.score);
 
-  // Assign distinct top recommended, alternative, budget, and not-recommended
   const recommended = evaluations[0];
   const alternative = evaluations.find(e => e.material.id !== recommended.material.id && e.score >= 60) || evaluations[1];
   
-  // Find best budget option (lowest cost among score >= 50)
   const budgetCandidates = evaluations.filter(e => e.material.id !== recommended.material.id && e.score >= 45);
   budgetCandidates.sort((a, b) => a.costPerKg - b.costPerKg);
   const budget = budgetCandidates[0] || evaluations[evaluations.length - 2];
 
-  // Find lowest scoring not recommended material
   const notRecommended = [...evaluations].reverse()[0];
 
   return {
@@ -347,7 +430,13 @@ export function generatePackagingRecommendation(input: PackagingEngineInput): Pa
     budget: { ...budget, tier: 'Budget' },
     notRecommended: { ...notRecommended, tier: 'Not Recommended' },
     allEvaluations: evaluations,
-    complianceCertifications: ['FSSAI Food Contact Regulation (IS 9845)', 'ISO 22000 Food Safety', 'ASTM D3985 OTR Standard', 'ASTM F1249 WVTR Standard', 'FDA 21 CFR 177'],
-    disclaimer: 'Barrier specifications and shelf-life estimations are computed based on standardized ASTM laboratory benchmarks and verified botanical kinetics. Real-world results may vary with ambient field temperatures and handling rigor.'
+    complianceCertifications: [
+      'FSSAI Food Contact Regulation (IS 9845 Context)',
+      'ISO 22000 Food Safety Framework',
+      'ASTM D3985 OTR Reference Standard',
+      'ASTM F1249 WVTR Reference Standard',
+      'FDA 21 CFR 177 Reference'
+    ],
+    disclaimer: 'This is a decision-support estimate based on product, packaging, temperature, humidity, storage and transport conditions. Actual shelf life may vary with field conditions and handling.'
   };
 }

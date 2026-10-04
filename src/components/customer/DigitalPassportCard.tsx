@@ -78,7 +78,7 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
               />
             </div>
             <div className="space-y-2">
-              <div className="text-[10px] text-slate-400 font-mono">Blockchain Provenance Hash</div>
+              <div className="text-[10px] text-slate-400 font-mono">Document Integrity Hash</div>
               <div className="text-[10px] text-sky-400 font-mono truncate max-w-[150px]">
                 {passport.verificationHash}
               </div>
@@ -435,11 +435,11 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
                 <div>Farmer: {passport.origin.farmerName}</div>
                 <div>Harvest Date: {passport.origin.harvestTimestamp}</div>
                 <div>Hash: {passport.verificationHash}</div>
-                <div>Cold Chain: Verified 100% Compliant</div>
-                <div>Residue: 0% Chemical Contaminants</div>
+                <div>Cold Chain: Temperature Monitored & Compliant</div>
+                <div>Residue: 0% Detected (Reference Baseline)</div>
               </div>
               <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-800">
-                This tamper-proof digital passport is signed by the AgriFlow IoT Cold-Chain Oracle and APEDA Quality Protocol.
+                This digital passport record is generated from AgriFlow IoT Cold-Chain Monitoring and verified agronomic protocols.
               </div>
             </div>
 

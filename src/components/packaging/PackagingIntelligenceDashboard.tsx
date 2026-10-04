@@ -464,6 +464,24 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Estimated Shelf-Life Range & Decision Support Disclaimer */}
+                    <div className="p-4 rounded-2xl bg-slate-950/70 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white">Estimated Shelf-Life Range:</span>
+                          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono text-xs font-black border border-purple-500/30">
+                            {recommendationReport.recommended.estimatedShelfLifeRange || `${recommendationReport.recommended.estimatedShelfLifeDays} Days`}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">
+                            📊 Model Estimate
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                          This is a decision-support estimate based on product physiology, barrier properties, storage temperature, and transport stress. Actual shelf life may vary with handling and ambient fluctuations.
+                        </p>
+                      </div>
+                    </div>
+
                     {/* Why Selected Reasons */}
                     <div className="p-4 rounded-2xl bg-slate-950/60 border border-emerald-500/20 space-y-2">
                       <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -577,7 +595,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                   <div>
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
                       <Layers className="w-5 h-5 text-purple-400" />
-                      OTR & WVTR Material Property Matrix (ASTM Validated)
+                      OTR & WVTR Material Property Matrix — Reference Test Method Context (ASTM D3985 / ASTM F1249)
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
                       Oxygen Transmission Rate (ASTM D3985) and Water Vapor Transmission Rate (ASTM F1249) benchmarked against {currentProduct.name} physiological requirements.

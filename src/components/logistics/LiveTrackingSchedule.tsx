@@ -409,7 +409,7 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
               <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
               <span>Cold-Chain Audit Pass: Zero thermal breaches logged across national highway.</span>
             </div>
-            <span className="text-emerald-400 font-bold font-mono">100% COMPLIANT</span>
+            <span className="text-emerald-400 font-bold font-mono">SAFE RANGE MONITORED</span>
           </div>
         </div>
 

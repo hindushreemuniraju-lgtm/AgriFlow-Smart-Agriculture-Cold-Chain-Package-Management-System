@@ -518,6 +518,179 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
     }
   },
 
+  // 2C. OKRA (LADY'S FINGER / BHINDI / ABELMOSCHUS ESCULENTUS)
+  {
+    id: 'okra',
+    name: "Okra (Lady's Finger / Bhindi)",
+    category: 'Vegetable',
+    subcategory: 'Malvaceae Pod Vegetable',
+    scientificName: 'Abelmoschus esculentus',
+    variety: 'Parbhani Kranti / Pusa Sawani / Mahyco 10 Hybrid',
+    description: 'High-respiration tender green ridged pod vegetable rich in soluble mucilage fiber, polyphenols, vitamin C, and folates.',
+    icon: '🥒',
+    color: '#16a34a',
+    aliases: ['okra', 'lady finger', 'ladies finger', "lady's finger", 'bhindi', 'bhendi', 'bendekayi', 'bendakaya', 'vendakkai', 'dharosh', 'abelmoschus esculentus', 'gumbo'],
+    images: {
+      productImage: 'okra',
+      productImageAlt: "Tender Green Okra Lady's Finger (Abelmoschus esculentus)"
+    },
+    growing: {
+      climate: 'Warm and humid tropical climate (22°C - 35°C); highly sensitive to frost and waterlogging.',
+      soil: 'Deep, well-drained sandy loam to clay loam rich in organic matter.',
+      idealSoilPh: '6.0 - 6.8',
+      temperatureRange: [20, 35],
+      rainfallRequirement: '750 - 1000 mm during monsoon cycle',
+      sowingMethod: 'Direct seed sowing on ridges and furrows or raised beds',
+      sowingSeason: 'Kharif (June-July) and Spring/Summer (Feb-March)',
+      seedRequirement: '8 - 10 kg / ha (Kharif) or 12 - 15 kg / ha (Summer)',
+      spacing: '45 cm between rows x 30 cm between plants',
+      growthDuration: '90 - 110 days (first picking at 45-50 days)',
+      growthDays: 95,
+      currentMaturityStage: 85,
+      irrigation: 'Furrow irrigation every 4-5 days in summer and 8-10 days in winter; avoid surface waterlogging.',
+      fertilizerGuidance: [
+        { stage: 'Basal Soil Prep', recommendation: 'FYM 20 t/ha + 50 kg N + 50 kg P2O5 + 50 kg K2O', impact: 'Strong root anchorage and early branching', urgency: 'Immediate' },
+        { stage: '30 Days Post-Germination', recommendation: 'Top-dress 25 kg Nitrogen', impact: 'Promotes continuous internodal flowering and tender pod set', urgency: 'Scheduled' },
+        { stage: 'Peak Pod Harvest Cycle', recommendation: '19:19:19 water-soluble foliar spray (0.5%)', impact: 'Prevents fiber hardening and preserves deep green color', urgency: 'Monitoring' }
+      ],
+      commonPests: ['Fruit and Shoot Borer (Earias vittella)', 'Yellow Vein Mosaic Vector Whitefly (Bemisia tabaci)', 'Jassids', 'Mites'],
+      diseaseRisks: ['Yellow Vein Mosaic Virus (YVMV)', 'Enation Leaf Curl Virus', 'Powdery Mildew'],
+      criticalCareTips: [
+        'Select YVMV-resistant certified hybrid seeds like Parbhani Kranti.',
+        'Harvest every alternate day to prevent pods from becoming fibrous and unmarketable.',
+        'Use yellow sticky traps (15/acre) to control whitefly vector populations.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 4,
+      recommendedWindow: 'Harvest 5-6 days after flowering when pods are 8-10 cm long and pod tips snap crisply',
+      maturityIndicators: [
+        'Pods are tender, bright green, and 7-10 cm long.',
+        'Pod apex tip snaps crisply when bent with finger pressure without stringy fibers.',
+        'Seeds inside are soft, translucent, and not fully matured.'
+      ],
+      harvestingMethod: 'Careful manual cutting with sharp pruning shears or gloves; avoid skin injury from pod hairs.',
+      bestHarvestTime: 'Early morning dry hours (06:00 AM - 09:00 AM)',
+      firmnessTarget: '3.5 - 4.5 kg/cm²',
+      postHarvestHandling: [
+        'Grade into Grade A (7-10 cm, uniform green) and Grade B (>10 cm).',
+        'Move immediately to shaded pre-cooling shelter to pull down field heat.',
+        'Avoid washing before dry transport to prevent blackening and bacterial rot.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '2 to 3 Days (at 25°C - 30°C)',
+      shelfLifeCold: '7 to 10 Days (at 8°C - 10°C)',
+      ambientDays: 2,
+      coldDays: 8,
+      storageTemperature: '8°C - 10°C (Extremely sensitive to chilling injury below 7°C)',
+      humidity: '90% - 95% RH',
+      coldStorageRequired: true,
+      storageMethod: 'Perforated plastic crates or breathable bags with high relative humidity',
+      preservationSteps: [
+        'Maintain strictly between 8°C and 10°C; do NOT freeze or store below 7°C to prevent chilling injury, calyx darkening, and water-soaked pitting.',
+        'Ensure continuous air movement to disperse high metabolic heat and $CO_2$.'
+      ],
+      spoilageIndicators: ['Pod tips turning black/brown', 'Skin pitting and water-soaked lesions', 'Tough fibrous texture with lost snapping ability'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Micro-Perforated Polypropylene / LDPE Breathable Liners (30-40 micron) or Ventilated CFB Cartons (5kg)',
+      secondaryPackaging: 'Ventilated Corrugated Master Cartons with 5% side air vent holes',
+      recommendedMaterials: ['Micro-Perforated LDPE (35 micron)', '5-Ply Kraft Corrugated Box with 5% air vents', 'Woven Leno Mesh Bags for local markets'],
+      ventilationRequired: true,
+      ventilationSpec: 'Minimum 5-6% side vent slots to prevent condensation and anaerobic fermentation',
+      moistureProtection: 'High RH retention without liquid water accumulation',
+      ethyleneSensitivity: 'High',
+      ethyleneControl: 'Strictly isolate from apples, bananas, and ripening fruits',
+      cushioningSpecs: 'Bottom corrugated liner to absorb vehicle vibrations and prevent tip bruising',
+      shockRating: 4.1,
+      estimatedPackagingCostPerKg: 1.60,
+      packagingCapacity: '5kg / 10kg boxes',
+      ecoCertification: '100% Recyclable Corrugated Board',
+      layers: [
+        { layer: 1, name: 'Micro-Perforated Atmosphere Liner', material: 'Perforated LDPE (35µm)', function: 'Maintains 90% RH while allowing O2 and CO2 gas equilibrium to prevent anaerobic decay', icon: '🍃', glowColor: '#10b981' },
+        { layer: 2, name: 'Ventilated Master Shipper', material: '5-Ply Moisture-Resistant Kraft Box', function: 'Protects tender pod tips from transit crushing and highway stack loads', icon: '📦', glowColor: '#38bdf8' },
+        { layer: 3, name: 'Dynamic Provenance Tag', material: 'Digital QR Traceability Seal', function: 'Harvest timestamp, farm location, and cold-chain temperature history', icon: '🏷️', glowColor: '#a855f7' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Field Heat Pre-Cooling', description: 'Cool pods down to 10°C using forced humid air within 3 hours of picking.' },
+        { step: 2, title: 'Parallel Pod Alignment', description: 'Lay pods parallel in 5kg cartons to prevent tip breakage and skin abrasion.' },
+        { step: 3, title: 'Vent Slot Check', description: 'Ensure master carton side vents remain unobstructed during pallet stacking.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Temperature-Controlled Reefer Truck (8°C - 10°C)',
+      temperatureControlled: true,
+      targetTemp: '9.0°C',
+      maximumRecommendedDistance: '800 km',
+      handlingRequirements: ['Handle gently to prevent blackening of pod ridges', 'Keep reefer set between 8°C and 10°C at all times'],
+      vibrationSensitivity: 'High',
+      baseRatePerKm: 19.5
+    },
+    market: {
+      marketCategory: 'Daily High-Demand Green Vegetable',
+      priceUnit: '₹/kg',
+      basePricePerKg: 38.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 42.00,
+        Mumbai: 45.00,
+        Delhi: 40.00,
+        Nashik: 34.00,
+        Hyderabad: 36.00,
+        Chennai: 44.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 33,
+        protein_g: 1.9,
+        carbs_g: 7.5,
+        fat_g: 0.2,
+        vitaminC_mg: 23.0,
+        vitaminA_IU: 716,
+        dietaryFiber_g: 3.2,
+        potassium_mg: 299,
+        iron_mg: 0.6,
+        antioxidantIndex: 78,
+        glycemicIndex: 20,
+        highlights: ['Rich in Soluble Mucilage Fiber', 'Low Glycemic Load (GI 20)', 'High Folate & Polyphenol Content']
+      },
+      consumptionMethods: ['Stir-Fried Bhindi Masala', 'Crispy Kurkuri Bhindi', 'South Indian Vendakkai Sambar', 'Steamed Pods with Yogurt'],
+      preparationMethods: ['Wash and dry completely before cutting to reduce slime/mucilage release during cooking.'],
+      nutrientPreservationTips: [
+        'Cook on medium-high heat with a dash of dry mango powder (amchur) or lemon juice to reduce stickiness and protect heat-sensitive vitamin C.'
+      ],
+      recommendedPreparation: 'Bhindi Do Pyaza or Crispy Roasted Okra',
+      servingGuidance: 'Ideal for balanced diabetic-friendly and cardiac dietary regimens.',
+      bioavailabilityTip: 'Pair with iron-rich legumes or tomatoes to maximize absorption of vegetable micronutrients.',
+      recipes: [
+        {
+          title: 'Authentic Punjabi Bhindi Masala',
+          prepTime: '20 mins',
+          healthBenefit: 'Low calorie, high digestive fiber and natural blood-glucose regulation',
+          ingredients: ['500g Fresh Tender Okra', '2 Medium Onions sliced', '2 Tomatoes chopped', '1 tsp Cumin seeds', '1/2 tsp Turmeric', '1 tsp Coriander powder', '1/2 tsp Amchur (Dry Mango Powder)', '2 tbsp Mustard Oil'],
+          steps: [
+            'Wash okra thoroughly and pat 100% dry with a clean kitchen towel.',
+            'Trim stem caps and slice into 1-inch rounds.',
+            'Heat mustard oil in a heavy-bottom pan; sauté sliced okra on medium heat for 7-8 minutes until crisp and non-sticky.',
+            'Add sliced onions, tomatoes, and dry spices; cook covered on low flame for 6 minutes until tender and fragrant.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Trapped free condensation triggers rapid surface mold and black pod decay.',
+      highTempRisk: 'Temperatures above 30°C cause rapid fiber lignification, moisture weight loss, and yellowing.',
+      frostRisk: 'Chilling injury below 7°C produces severe water-soaked skin lesions, blackening, and tissue breakdown.',
+      excessRainRisk: 'Harvesting wet pods accelerates post-harvest bacterial soft rot within 24 hours.',
+      transitShockRisk: 'Friction between unaligned pods causes dark abrasion marks along the longitudinal ridges.',
+      mitigationStrategy: 'Cool within 3 hours to 9°C, pack parallel in micro-perforated liners, and transport in steady temperature reefer.'
+    }
+  },
+
   // 3. POTATO
   {
     id: 'potato',

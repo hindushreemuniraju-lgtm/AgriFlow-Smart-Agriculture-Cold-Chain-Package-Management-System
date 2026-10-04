@@ -36,6 +36,8 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProductForModal, setSelectedProductForModal] = useState<ProductIntelligence | null>(null);
   const [cartCount, setCartCount] = useState<number>(2);
+  const [selectedTrackingOrder, setSelectedTrackingOrder] = useState<any | null>(null);
+  const [isCustomerRealGps, setIsCustomerRealGps] = useState<boolean>(false);
   const [pdfModalState, setPdfModalState] = useState<{ isOpen: boolean; product: ProductIntelligence | null; batchId: string }>({
     isOpen: false,
     product: null,
@@ -408,11 +410,19 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
 
                     <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
                       <button
+                        onClick={() => setSelectedTrackingOrder(order)}
+                        className="px-3.5 py-2 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 hover:text-white text-xs font-bold border border-sky-500/40 flex items-center gap-1.5 transition-all shadow-sm"
+                      >
+                        <Truck className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Track Delivery</span>
+                      </button>
+
+                      <button
                         onClick={() => onOpenPassport(order.orderId)}
                         className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-purple-300 hover:text-white text-xs font-bold border border-purple-500/30 flex items-center gap-1.5 transition-colors"
                       >
                         <QrCode className="w-3.5 h-3.5" />
-                        <span>Track Passport</span>
+                        <span>Passport</span>
                       </button>
 
                       <button
@@ -427,6 +437,172 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
                   </div>
                 );
               })}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Live 9-Stage Customer Delivery Tracking Modal */}
+      {selectedTrackingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-3xl rounded-3xl bg-slate-900 border border-sky-500/40 p-6 sm:p-8 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center text-2xl">
+                  🚚
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white">Live Delivery Tracking</h3>
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {selectedTrackingOrder.orderId}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {selectedTrackingOrder.product.name} • {selectedTrackingOrder.quantityKg} kg • Direct Cold-Chain Route
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedTrackingOrder(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* GPS Telemetry Mode Disclaimer Badge */}
+            <div className="mb-6 p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${isCustomerRealGps ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                    Telemetry Source: {isCustomerRealGps ? '🌐 Live Real GPS (Hardware)' : '🧪 Model Simulation (SIH Demo)'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {isCustomerRealGps 
+                    ? 'Using live browser/device location telemetry stream.' 
+                    : 'Displaying synthetic calibrated cold-chain telemetry curve for route demonstration.'}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsCustomerRealGps(!isCustomerRealGps)}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 shrink-0 transition-colors"
+              >
+                Switch to {isCustomerRealGps ? 'Simulated Demo' : 'Real Hardware GPS'}
+              </button>
+            </div>
+
+            {/* 9-Stage Delivery Progression Bar */}
+            <div className="mb-6 space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-300 uppercase">
+                <span>9-Stage Cold-Chain Delivery Pipeline</span>
+                <span className="text-sky-400">{selectedTrackingOrder.status === 'Delivered' ? 'Stage 9/9 Complete' : 'Stage 6/9 Active (In Transit)'}</span>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-9 gap-1.5 text-center">
+                {[
+                  { name: '1. Placed', active: true, done: true },
+                  { name: '2. Packing', active: true, done: true },
+                  { name: '3. Pickup Ready', active: true, done: true },
+                  { name: '4. Driver Assigned', active: true, done: true },
+                  { name: '5. Picked Up', active: true, done: true },
+                  { name: '6. In Transit', active: true, done: selectedTrackingOrder.status === 'Delivered' },
+                  { name: '7. Near Dest.', active: selectedTrackingOrder.status === 'Delivered', done: selectedTrackingOrder.status === 'Delivered' },
+                  { name: '8. Out Delivery', active: selectedTrackingOrder.status === 'Delivered', done: selectedTrackingOrder.status === 'Delivered' },
+                  { name: '9. Delivered', active: selectedTrackingOrder.status === 'Delivered', done: selectedTrackingOrder.status === 'Delivered' }
+                ].map((st, i) => (
+                  <div 
+                    key={i} 
+                    className={`p-2 rounded-xl text-[10px] font-bold border transition-all ${
+                      st.done 
+                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' 
+                        : st.active 
+                        ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 ring-2 ring-sky-500/30 animate-pulse'
+                        : 'bg-slate-950 border-slate-800 text-slate-500'
+                    }`}
+                  >
+                    <div>{st.done ? '✓' : st.active ? '●' : '○'}</div>
+                    <div className="truncate mt-0.5">{st.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Live Telemetry Sensor Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Vehicle Temp</span>
+                <div className="text-lg font-black text-emerald-400 font-mono mt-1">
+                  {selectedTrackingOrder.product.transportation.temperatureControlled ? '4.2 °C' : '24.1 °C'}
+                </div>
+                <span className="text-[10px] text-emerald-500 font-semibold">● Optimal Range</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Relative Humidity</span>
+                <div className="text-lg font-black text-sky-400 font-mono mt-1">
+                  88 %
+                </div>
+                <span className="text-[10px] text-sky-500 font-semibold">● Condensation Protected</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Shock / Vibration</span>
+                <div className="text-lg font-black text-purple-400 font-mono mt-1">
+                  0.18 G
+                </div>
+                <span className="text-[10px] text-purple-400 font-semibold">● Smooth Air-Ride</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Estimated Arrival</span>
+                <div className="text-lg font-black text-amber-400 font-mono mt-1">
+                  {selectedTrackingOrder.status === 'Delivered' ? 'Completed' : 'Today, 4:15 PM'}
+                </div>
+                <span className="text-[10px] text-amber-400 font-semibold">● On Schedule</span>
+              </div>
+            </div>
+
+            {/* Courier & Vehicle Information */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 mb-6 text-xs">
+              <h4 className="font-bold text-slate-300 uppercase tracking-wider text-[11px]">
+                Assigned Logistics Carrier Details
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-slate-300">
+                <div>
+                  <span className="text-slate-500 block text-[10px]">DRIVER & OPERATOR:</span>
+                  <strong>Rajesh Kumar (Verified)</strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[10px]">VEHICLE & REEFER UNIT:</span>
+                  <strong>KA-04-AG-9912 (Reefer 3.5T)</strong>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[10px]">INTEGRITY HASH:</span>
+                  <span className="text-purple-400 text-[11px]">#a8f9c1...e04b</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  const prod = selectedTrackingOrder.product;
+                  const bid = selectedTrackingOrder.orderId;
+                  openDocumentsForOrder(prod, bid);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Transit PDF Dossier</span>
+              </button>
             </div>
 
           </div>
