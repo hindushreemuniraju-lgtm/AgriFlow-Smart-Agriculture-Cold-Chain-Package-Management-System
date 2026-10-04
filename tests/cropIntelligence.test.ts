@@ -246,6 +246,80 @@ assert(watermelonProduct?.storage.storageTemperature.includes('10°C'), 'Waterme
 assert(butterProduct !== undefined, 'Butter is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
 assert(butterProduct?.packaging.layers.length >= 2, 'Butter has multi-layer greaseproof & light barrier packaging');
 
+// 11. TEST REAL CLIENT-SIDE PIXEL COMPUTER VISION CLASSIFIER (No API / Offline)
+console.log('\n11. Testing Autonomous Pixel Computer-Vision & Morphology Classifier:');
+const { classifyFromColorMetrics } = await import('../src/services/crop/pixelVisionClassifier');
+
+// Test Radish (White taproot + green foliage) without filename hint
+const radishMetrics = {
+  whiteRatio: 0.35,
+  greenRatio: 0.12,
+  darkGreenRatio: 0.02,
+  redRatio: 0.02,
+  purpleRatio: 0.01,
+  orangeRatio: 0.02,
+  yellowPaleRatio: 0.03,
+  goldenYellowRatio: 0.01,
+  brownEarthRatio: 0.02,
+  aspectRatio: 1.6, // Elongated cylindrical root
+  totalPixels: 250000,
+  isUniformOrBlank: false
+};
+const radishCV = classifyFromColorMetrics(radishMetrics, 'IMG_20241004_123456.jpg');
+assert(radishCV.canonicalId === 'radish', `White taproot metrics strictly classify as "radish" (Got: ${radishCV.canonicalId})`);
+assert(radishCV.scientificName === 'Raphanus sativus', 'Radish botanical classification is correct');
+
+// Test Watermelon without filename hint
+const watermelonMetrics = {
+  whiteRatio: 0.04,
+  greenRatio: 0.10,
+  darkGreenRatio: 0.35,
+  redRatio: 0.22,
+  purpleRatio: 0.01,
+  orangeRatio: 0.02,
+  yellowPaleRatio: 0.02,
+  goldenYellowRatio: 0.01,
+  brownEarthRatio: 0.03,
+  aspectRatio: 0.95,
+  totalPixels: 250000,
+  isUniformOrBlank: false
+};
+const watermelonCV = classifyFromColorMetrics(watermelonMetrics, 'photo.png');
+assert(watermelonCV.canonicalId === 'watermelon', `Dark green striped + red core metrics strictly classify as "watermelon" (Got: ${watermelonCV.canonicalId})`);
+
+// Test Brinjal without filename hint
+const brinjalMetrics = {
+  whiteRatio: 0.03,
+  greenRatio: 0.05,
+  darkGreenRatio: 0.02,
+  redRatio: 0.04,
+  purpleRatio: 0.32,
+  orangeRatio: 0.01,
+  yellowPaleRatio: 0.02,
+  goldenYellowRatio: 0.01,
+  brownEarthRatio: 0.02,
+  aspectRatio: 1.2,
+  totalPixels: 250000,
+  isUniformOrBlank: false
+};
+const brinjalCV = classifyFromColorMetrics(brinjalMetrics, 'camera_image.jpg');
+assert(brinjalCV.canonicalId === 'brinjal', `Purple anthocyanin metrics strictly classify as "brinjal" (Got: ${brinjalCV.canonicalId})`);
+
+// 12. TEST USER-LEARNED IMAGE CORRECTION MEMORY
+console.log('\n12. Testing Image Correction Memory & Persistent Learning:');
+const { computeImageSignature, recordImageCorrection, getLearnedImageCorrection } = await import('../src/services/crop/imageCorrectionMemoryService');
+
+const mockDataUrl = 'data:image/jpeg;base64,' + Buffer.from('mock_radish_image_data_bytes_1234567890abcdef').toString('base64');
+const testSig = computeImageSignature(mockDataUrl, 45000);
+
+// Record a correction
+recordImageCorrection(testSig, 'radish', 'Radish (White Mooli)', 'Raphanus sativus', 'Vegetable');
+const learned = getLearnedImageCorrection(testSig);
+
+assert(learned !== null, 'Learned correction record exists in memory');
+assert(learned?.canonicalId === 'radish', `Learned product canonicalId is "radish" (Got: ${learned?.canonicalId})`);
+assert(learned?.timesConfirmed === 1, 'Learned record confirmation count is incremented');
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');
@@ -256,5 +330,6 @@ assert(butterProduct?.packaging.layers.length >= 2, 'Butter has multi-layer grea
 }
 
 testSmartPlan();
+
 
 

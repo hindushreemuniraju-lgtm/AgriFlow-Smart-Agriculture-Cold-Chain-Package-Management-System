@@ -3,6 +3,7 @@ import { Search, Camera, Sparkles, X, Check, AlertCircle, RefreshCw, Layers, Che
 import { searchUniversalCrop, searchCropByImage } from '../../services/crop/cropSearchService';
 import { IdentificationResult } from '../../services/crop/cropIdentificationService';
 import { EnrichedProductIntelligence } from '../../services/crop/cropKnowledgeService';
+import { recordImageCorrection } from '../../services/crop/imageCorrectionMemoryService';
 import confetti from 'canvas-confetti';
 
 interface CropIdentificationBarProps {
@@ -56,6 +57,16 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
 
   const confirmProductSelection = (canonicalId: string) => {
     searchUniversalCrop(canonicalId).then((res) => {
+      // Record user confirmation / correction into persistent memory
+      if (imageModalResult?.result.imageSignature) {
+        recordImageCorrection(
+          imageModalResult.result.imageSignature,
+          res.product.id,
+          res.product.name,
+          res.product.scientificName,
+          res.product.category
+        );
+      }
       onSelectCrop(res.product);
       setImageModalResult(null);
       setManualSelectionOpen(false);
@@ -207,13 +218,17 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
                     <span className="text-[10px] font-mono uppercase tracking-wider text-purple-300 font-bold">
                       AI Product Identification
                     </span>
-                    {imageModalResult.result.isRealAi ? (
+                    {imageModalResult.result.source.includes('Learned') ? (
+                      <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-bold border border-cyan-500/30">
+                        🧠 User-Learned Memory
+                      </span>
+                    ) : imageModalResult.result.isRealAi ? (
                       <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
                         🧠 Gemini Vision AI
                       </span>
                     ) : (
                       <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">
-                        📊 Botanical Model
+                        📊 Autonomous CV
                       </span>
                     )}
                   </div>
