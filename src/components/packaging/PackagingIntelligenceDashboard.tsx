@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
 import { generatePackagingRecommendation, PackagingEngineInput } from '../../services/packaging/packagingRecommendationEngine';
 import { evaluateJourneySuitability } from '../../services/transport/deliverySuitabilityService';
@@ -74,7 +74,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
         clearInterval(interval);
         setIsAnalyzing(false);
       }
-    }, 350);
+    }, 300);
   };
 
   const handleProductChange = (newId: string) => {
@@ -423,7 +423,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                               Primary Recommendation
                             </span>
                             <span className="text-xs font-mono font-bold text-emerald-400">
-                              Score: {Math.round(recommendationReport.recommended.overallScore)}%
+                              Score: {Math.round(recommendationReport.recommended.score)}%
                             </span>
                           </div>
                           <h3 className="text-lg font-black text-white mt-0.5">
@@ -435,32 +435,32 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       <div className="text-right">
                         <span className="text-[10px] uppercase font-bold text-slate-400 block">Est. Material Cost</span>
                         <span className="text-base font-black text-emerald-400 font-mono">
-                          ₹{recommendationReport.recommended.material.costPerKgProduce.toFixed(2)} / kg produce
+                          ₹{recommendationReport.recommended.costPerKg.toFixed(2)} / kg
                         </span>
                       </div>
                     </div>
 
                     <p className="text-xs text-slate-300 leading-relaxed">
-                      {recommendationReport.recommended.material.primaryFunction}
+                      {recommendationReport.recommended.scientificRationale}
                     </p>
 
                     {/* Scientific Barrier Properties Strip */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-[11px] font-mono">
                       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                         <span className="text-slate-400 text-[10px] block">ASTM D3985 OTR:</span>
-                        <span className="text-purple-300 font-bold">{recommendationReport.recommended.material.oxygenTransmissionRate}</span>
+                        <span className="text-purple-300 font-bold">{recommendationReport.recommended.material.barrierProperties.otrRange}</span>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                         <span className="text-slate-400 text-[10px] block">ASTM F1249 WVTR:</span>
-                        <span className="text-sky-300 font-bold">{recommendationReport.recommended.material.waterVaporTransmissionRate}</span>
+                        <span className="text-sky-300 font-bold">{recommendationReport.recommended.material.barrierProperties.wvtrRange}</span>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                         <span className="text-slate-400 text-[10px] block">Puncture Strength:</span>
-                        <span className="text-emerald-300 font-bold">{recommendationReport.recommended.material.punctureResistance}</span>
+                        <span className="text-emerald-300 font-bold">{recommendationReport.recommended.material.mechanical.punctureResistanceJoules} Joules</span>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
-                        <span className="text-slate-400 text-[10px] block">FSSAI IS 9845:</span>
-                        <span className="text-emerald-400 font-bold">{recommendationReport.recommended.material.foodContactSafe ? 'Certified' : 'Secondary'}</span>
+                        <span className="text-slate-400 text-[10px] block">Food Contact Standard:</span>
+                        <span className="text-emerald-400 font-bold">{recommendationReport.recommended.material.compatibility.foodContactCertifications[0] || 'FSSAI IS 9845'}</span>
                       </div>
                     </div>
 
@@ -471,10 +471,10 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                         <span>Why This Material Was Selected:</span>
                       </h4>
                       <ul className="text-xs text-slate-300 space-y-1">
-                        {recommendationReport.recommended.whySelected.map((reason, i) => (
+                        {recommendationReport.recommended.barrierMatches.map((b, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="text-emerald-400 font-bold">✓</span>
-                            <span>{reason}</span>
+                            <span><strong>{b.property}:</strong> {b.explanation}</span>
                           </li>
                         ))}
                       </ul>
@@ -492,40 +492,40 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                             <span>🥈 Alternative Option</span>
                           </span>
                           <span className="text-xs font-mono text-yellow-400 font-bold">
-                            Score: {Math.round(recommendationReport.alternative.overallScore)}%
+                            Score: {Math.round(recommendationReport.alternative.score)}%
                           </span>
                         </div>
                         <h4 className="text-sm font-bold text-white">
                           {recommendationReport.alternative.material.name}
                         </h4>
-                        <p className="text-xs text-slate-400">
-                          {recommendationReport.alternative.whySelected[0] || 'Viable commercial substitute.'}
+                        <p className="text-xs text-slate-400 line-clamp-3">
+                          {recommendationReport.alternative.scientificRationale}
                         </p>
                         <div className="text-xs font-mono text-slate-300 pt-2 border-t border-slate-800">
-                          Unit Cost: ₹{recommendationReport.alternative.material.costPerKgProduce.toFixed(2)}/kg
+                          Unit Cost: ₹{recommendationReport.alternative.costPerKg.toFixed(2)}/kg
                         </div>
                       </div>
                     )}
 
                     {/* Budget Option */}
-                    {recommendationReport.budgetOption && (
+                    {recommendationReport.budget && (
                       <div className="rounded-2xl bg-slate-900 border border-purple-500/30 p-5 space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-purple-300 flex items-center gap-1">
                             <span>💰 Budget Compliant Option</span>
                           </span>
                           <span className="text-xs font-mono text-purple-400 font-bold">
-                            Score: {Math.round(recommendationReport.budgetOption.overallScore)}%
+                            Score: {Math.round(recommendationReport.budget.score)}%
                           </span>
                         </div>
                         <h4 className="text-sm font-bold text-white">
-                          {recommendationReport.budgetOption.material.name}
+                          {recommendationReport.budget.material.name}
                         </h4>
-                        <p className="text-xs text-slate-400">
-                          {recommendationReport.budgetOption.whySelected[0] || 'Cost-effective compliant packaging.'}
+                        <p className="text-xs text-slate-400 line-clamp-3">
+                          {recommendationReport.budget.scientificRationale}
                         </p>
                         <div className="text-xs font-mono text-slate-300 pt-2 border-t border-slate-800">
-                          Unit Cost: ₹{recommendationReport.budgetOption.material.costPerKgProduce.toFixed(2)}/kg
+                          Unit Cost: ₹{recommendationReport.budget.costPerKg.toFixed(2)}/kg
                         </div>
                       </div>
                     )}
@@ -533,19 +533,17 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                   </div>
 
                   {/* ❌ NOT RECOMMENDED MATERIALS (WITH FAILURE MODES) */}
-                  {recommendationReport.notRecommended.length > 0 && (
+                  {recommendationReport.notRecommended && (
                     <div className="rounded-2xl bg-rose-950/30 border border-rose-500/40 p-5 space-y-3">
                       <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
                         <XCircle className="w-4 h-4 text-rose-400" />
-                        <span>Not Recommended Materials (Scientific Failure Modes)</span>
+                        <span>Not Recommended Material (Scientific Failure Mode)</span>
                       </h4>
-                      <div className="space-y-2.5">
-                        {recommendationReport.notRecommended.map((item, idx) => (
-                          <div key={idx} className="p-3 rounded-xl bg-slate-950/80 border border-rose-500/20 text-xs">
-                            <div className="font-bold text-white">{item.material.name}</div>
-                            <div className="text-rose-300 mt-0.5"><b>Failure Mode:</b> {item.failureReason}</div>
-                          </div>
-                        ))}
+                      <div className="p-3.5 rounded-xl bg-slate-950/80 border border-rose-500/20 text-xs space-y-1">
+                        <div className="font-bold text-white">{recommendationReport.notRecommended.material.name}</div>
+                        <div className="text-rose-300 leading-relaxed">
+                          <b>Failure Rationale:</b> {recommendationReport.notRecommended.scientificRationale}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -594,25 +592,27 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                           <th className="py-2.5 px-3">OTR (cc/m²·day)</th>
                           <th className="py-2.5 px-3">WVTR (g/m²·day)</th>
                           <th className="py-2.5 px-3">Gas Exchange</th>
-                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3">Tier</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/80 font-mono">
-                        {recommendationReport.barrierComparisonTable.map((row, idx) => (
+                        {recommendationReport.allEvaluations.map((evalItem, idx) => (
                           <tr key={idx} className="hover:bg-slate-800/40">
-                            <td className="py-3 px-3 font-bold text-white">{row.materialName}</td>
-                            <td className="py-3 px-3 text-purple-300">{row.otr}</td>
-                            <td className="py-3 px-3 text-sky-300">{row.wvtr}</td>
-                            <td className="py-3 px-3 text-slate-300">{row.breathabilityLevel}</td>
+                            <td className="py-3 px-3 font-bold text-white">{evalItem.material.name}</td>
+                            <td className="py-3 px-3 text-purple-300">{evalItem.material.barrierProperties.otrRange}</td>
+                            <td className="py-3 px-3 text-sky-300">{evalItem.material.barrierProperties.wvtrRange}</td>
+                            <td className="py-3 px-3 text-slate-300">{evalItem.material.barrierProperties.oxygenBarrierTier}</td>
                             <td className="py-3 px-3">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                row.suitabilityTag === 'RECOMMENDED'
+                                evalItem.tier === 'Recommended'
                                   ? 'bg-emerald-500/20 text-emerald-300'
-                                  : row.suitabilityTag === 'ALTERNATIVE'
+                                  : evalItem.tier === 'Alternative'
                                   ? 'bg-yellow-500/20 text-yellow-300'
+                                  : evalItem.tier === 'Budget'
+                                  ? 'bg-purple-500/20 text-purple-300'
                                   : 'bg-rose-500/20 text-rose-300'
                               }`}>
-                                {row.suitabilityTag}
+                                {evalItem.tier}
                               </span>
                             </td>
                           </tr>
