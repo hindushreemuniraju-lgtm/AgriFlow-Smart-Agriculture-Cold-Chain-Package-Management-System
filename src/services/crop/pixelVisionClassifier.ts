@@ -24,12 +24,14 @@ export interface ColorMetrics {
   whiteRatio: number;      // High R, G, B with low saturation (Radish, Cauliflower, Garlic)
   greenRatio: number;      // Dominant green (Okra, Cucumber, Spinach)
   darkGreenRatio: number;  // Dark green rind (Watermelon rind, Okra)
-  redRatio: number;        // Dominant red (Tomato, Apple, Watermelon core)
+  redRatio: number;        // Vibrant Red (Tomato, Apple, Watermelon core)
   purpleRatio: number;     // High red + blue, low green (Brinjal)
   orangeRatio: number;     // High red, moderate green, low blue (Carrot, Papaya)
   yellowPaleRatio: number; // High R, High G, low-med B (Butter)
-  goldenYellowRatio: number; // Golden amber (Ghee, Honey)
+  goldenYellowRatio: number; // Golden amber (Ghee, Mustard)
   brownEarthRatio: number; // Low-med R, lower G, B (Potato, Onion tunic)
+  darkBrownCoffeeRatio: number; // Dark roasted bean brown / espresso (Coffee Beans)
+  darkTeaRatio: number;    // Very low luma, black/dark CTC tea granules (Tea)
   aspectRatio: number;     // height / width
   totalPixels: number;
   isUniformOrBlank: boolean;
@@ -57,6 +59,8 @@ export function extractCanvasColorMetrics(
   let yellowPaleCount = 0;
   let goldenYellowCount = 0;
   let brownEarthCount = 0;
+  let darkBrownCoffeeCount = 0;
+  let darkTeaCount = 0;
 
   // Sample every 4th pixel for high speed
   const step = 4;
@@ -83,38 +87,46 @@ export function extractCanvasColorMetrics(
     const delta = maxC - minC;
     const saturation = maxC === 0 ? 0 : delta / maxC;
 
-    // 1. White / Ivory / Pale Taproot (Radish, Cauliflower, Garlic, Milk)
-    if (r > 165 && g > 165 && b > 165 && saturation < 0.22) {
+    // 1. Dark Roasted Coffee Beans (Low luma, rich roasted brown/sepia hue, r > g > b)
+    if (r > 25 && r < 140 && g < r * 0.88 && b < g * 0.95 && luma < 115 && luma > 20) {
+      darkBrownCoffeeCount++;
+    }
+    // 2. Black CTC Tea Granules (Very low luma < 55)
+    else if (luma < 55 && Math.abs(r - g) < 25 && Math.abs(g - b) < 25) {
+      darkTeaCount++;
+    }
+    // 3. White / Ivory / Pale Taproot (Radish, Cauliflower, Garlic, Milk)
+    else if (r > 165 && g > 165 && b > 165 && saturation < 0.22) {
       whiteCount++;
     }
-    // 2. Purple / Aubergine (Brinjal)
+    // 4. Purple / Aubergine (Brinjal)
     else if (r > 50 && b > 60 && g < r * 0.85 && g < b * 0.85 && (r > 70 || b > 70)) {
       purpleCount++;
     }
-    // 3. Dominant Green (Okra, Cucumber, Capsicum)
+    // 5. Dominant Green (Okra, Cucumber, Capsicum)
     else if (g > r * 1.15 && g > b * 1.15 && g > 45) {
       greenCount++;
       if (g < 140 && (r + b) < 160) {
         darkGreenCount++;
       }
     }
-    // 4. Red / Crimson (Tomato, Apple, Watermelon core)
-    else if (r > 130 && r > g * 1.35 && r > b * 1.35) {
+    // 6. Vibrant Red / Crimson (Tomato, Apple - luma > 70 to avoid coffee overlap)
+    else if (r > 135 && r > g * 1.35 && r > b * 1.35 && luma > 65) {
       redCount++;
     }
-    // 5. Orange (Carrot, Papaya)
+    // 7. Orange (Carrot, Papaya)
     else if (r > 175 && g > 80 && g < 170 && b < 85) {
       orangeCount++;
     }
-    // 6. Pale Yellow Creamy (Butter)
+    // 8. Pale Yellow Creamy (Butter)
     else if (r > 200 && g > 190 && b > 110 && b < 185 && saturation > 0.15 && saturation < 0.45) {
       yellowPaleCount++;
     }
-    // 7. Golden / Clarified Yellow (Ghee, Mustard)
+    // 9. Golden / Clarified Yellow (Ghee, Mustard)
     else if (r > 170 && g > 130 && b < 70 && saturation > 0.45) {
       goldenYellowCount++;
     }
-    // 8. Earth Brown / Ochre (Potato, Cured Onion, Ginger)
+    // 10. Earth Brown / Ochre (Potato, Cured Onion, Ginger)
     else if (r > 110 && g > 75 && g < r && b < g && saturation > 0.20 && saturation < 0.65) {
       brownEarthCount++;
     }
@@ -133,6 +145,8 @@ export function extractCanvasColorMetrics(
     yellowPaleRatio: yellowPaleCount / denominator,
     goldenYellowRatio: goldenYellowCount / denominator,
     brownEarthRatio: brownEarthCount / denominator,
+    darkBrownCoffeeRatio: darkBrownCoffeeCount / denominator,
+    darkTeaRatio: darkTeaCount / denominator,
     aspectRatio: height / Math.max(1, width),
     totalPixels,
     isUniformOrBlank
@@ -146,6 +160,12 @@ export function classifyFromColorMetrics(metrics: ColorMetrics, fileName: string
   const nameLower = fileName.toLowerCase();
 
   // If filename clearly specifies a product, prioritize it
+  if (nameLower.includes('coffee') || nameLower.includes('arabica') || nameLower.includes('robusta') || nameLower.includes('kaapi') || nameLower.includes('roast')) {
+    return createCoffeeResult(0.96, 'High-accuracy filename & botanical match');
+  }
+  if (nameLower.includes('tea') || nameLower.includes('chai') || nameLower.includes('ctc')) {
+    return createTeaResult(0.96, 'High-accuracy filename & botanical match');
+  }
   if (nameLower.includes('radish') || nameLower.includes('mooli') || nameLower.includes('mula')) {
     return createRadishResult(0.96, 'High-accuracy filename & botanical match');
   }
@@ -202,53 +222,63 @@ export function classifyFromColorMetrics(metrics: ColorMetrics, fileName: string
     };
   }
 
-  // 1. Radish (White taproot with high white ratio, elongated or white with green foliage top)
+  // 1. Coffee Beans (Dark roasted sepia brown with characteristic bean texture)
+  if (metrics.darkBrownCoffeeRatio > 0.14) {
+    return createCoffeeResult(0.93, 'Visual color spectrum: Dark roasted aromatic Arabica/Robusta coffee bean profile');
+  }
+
+  // 2. Tea (Very dark CTC granules / processed black tea)
+  if (metrics.darkTeaRatio > 0.22) {
+    return createTeaResult(0.91, 'Visual color spectrum: Granular oxidized black CTC tea profile');
+  }
+
+  // 3. Radish (White taproot with high white ratio, elongated or white with green foliage top)
   if (metrics.whiteRatio > 0.18 && (metrics.greenRatio > 0.08 || metrics.aspectRatio > 1.1 || metrics.whiteRatio > 0.30)) {
     return createRadishResult(0.92, 'Visual color spectrum: White taproot body with crown pigmentation');
   }
 
-  // 2. Brinjal / Eggplant (Distinct purple saturation)
+  // 4. Brinjal / Eggplant (Distinct purple saturation)
   if (metrics.purpleRatio > 0.10) {
     return createBrinjalResult(0.93, 'Visual color spectrum: Glossy anthocyanin-rich purple skin');
   }
 
-  // 3. Watermelon (Dark green striped rind + red core or large spherical green/red)
+  // 5. Watermelon (Dark green striped rind + red core or large spherical green/red)
   if ((metrics.darkGreenRatio > 0.15 && metrics.redRatio > 0.10) || (metrics.darkGreenRatio > 0.30 && metrics.aspectRatio < 1.3)) {
     return createWatermelonResult(0.91, 'Visual color spectrum: Dark green striped protective rind with sweet crimson interior');
   }
 
-  // 4. Tomato / Red Fruit (High red ratio)
-  if (metrics.redRatio > 0.22) {
+  // 6. Tomato / Red Fruit (High vibrant red ratio with adequate luminosity)
+  if (metrics.redRatio > 0.20 && metrics.darkBrownCoffeeRatio < 0.10) {
     return createTomatoResult(0.92, 'Visual color spectrum: Smooth spherical red pericarp with calyx star');
   }
 
-  // 5. Carrot / Orange Produce (High orange ratio)
+  // 7. Carrot / Orange Produce (High orange ratio)
   if (metrics.orangeRatio > 0.18) {
     return createCarrotResult(0.92, 'Visual color spectrum: Beta-carotene rich vibrant orange taproot');
   }
 
-  // 6. Butter (Pale yellow creamy dairy block)
+  // 8. Butter (Pale yellow creamy dairy block)
   if (metrics.yellowPaleRatio > 0.20 && metrics.greenRatio < 0.08 && metrics.purpleRatio < 0.05) {
     return createButterResult(0.91, 'Visual color spectrum: Solid pale-yellow cream dairy emulsion');
   }
 
-  // 7. Ghee (Golden amber clarified oil)
+  // 9. Ghee (Golden amber clarified oil)
   if (metrics.goldenYellowRatio > 0.22 && metrics.greenRatio < 0.08) {
     return createGheeResult(0.91, 'Visual color spectrum: Clarified golden granular dairy fat');
   }
 
-  // 8. Okra (Slender green ridged pod with high aspect ratio)
+  // 10. Okra (Slender green ridged pod with high aspect ratio)
   if (metrics.greenRatio > 0.20 && (metrics.aspectRatio > 1.3 || metrics.darkGreenRatio > 0.12)) {
     return createOkraResult(0.90, 'Visual color spectrum: Elongated chlorophyll-rich pentagonal green pod');
   }
 
-  // 9. Cucumber (Smooth cylindrical green)
+  // 11. Cucumber (Smooth cylindrical green)
   if (metrics.greenRatio > 0.25) {
     return createCucumberResult(0.89, 'Visual color spectrum: Crisp green cylindrical fruit');
   }
 
-  // 10. Potato / Onion (Earthy brown / golden tunic)
-  if (metrics.brownEarthRatio > 0.20) {
+  // 12. Potato / Onion (Earthy brown / golden tunic)
+  if (metrics.brownEarthRatio > 0.20 && metrics.darkBrownCoffeeRatio < 0.12) {
     if (metrics.aspectRatio < 1.15) {
       return createPotatoResult(0.88, 'Visual color spectrum: Earthy golden-brown tuber periderm');
     }
@@ -256,10 +286,11 @@ export function classifyFromColorMetrics(metrics: ColorMetrics, fileName: string
   }
 
   // Default intelligent fallback based on highest score:
-  // If dominant white -> Radish; if dominant green -> Okra; if dominant red -> Tomato
-  if (metrics.whiteRatio > metrics.greenRatio && metrics.whiteRatio > metrics.redRatio) {
+  if (metrics.darkBrownCoffeeRatio > 0.10) {
+    return createCoffeeResult(0.86, 'Predominant roasted dark brown coffee spectrum detected');
+  } else if (metrics.whiteRatio > metrics.greenRatio && metrics.whiteRatio > metrics.redRatio) {
     return createRadishResult(0.85, 'Dominant visual white taproot profile detected');
-  } else if (metrics.redRatio > metrics.greenRatio) {
+  } else if (metrics.redRatio > metrics.greenRatio && metrics.redRatio > 0.15) {
     return createTomatoResult(0.85, 'Dominant visual red pigmentation detected');
   }
 
@@ -267,6 +298,55 @@ export function classifyFromColorMetrics(metrics: ColorMetrics, fileName: string
 }
 
 // Helpers to construct authentic botanical results
+function createCoffeeResult(confidence: number, reason: string): PixelAnalysisResult {
+  return {
+    canonicalId: 'coffee',
+    name: 'Coffee (Coorg Arabica Beans / Roasted)',
+    scientificName: 'Coffea arabica',
+    category: 'Tea & Coffee',
+    form: 'Processed Roasted Beans',
+    confidence,
+    confidenceLabel: 'HIGH',
+    visualEvidence: [
+      reason,
+      'Roasted ellipsoidal coffee bean morphology with central longitudinal crease',
+      'Deep brown/chocolate oily roasted aromatic surface'
+    ],
+    condition: 'Aromatic roasted commodity',
+    qualityObservations: ['Optimal roasting crack level', 'Rich surface aroma', 'Moisture <2.5%'],
+    isNonFoodOrBlurry: false,
+    rejectionReason: null,
+    alternatives: [
+      { canonicalId: 'tea', name: 'CTC Black Tea', confidence: 0.05 },
+      { canonicalId: 'almond', name: 'Roasted Almonds', confidence: 0.03 }
+    ]
+  };
+}
+
+function createTeaResult(confidence: number, reason: string): PixelAnalysisResult {
+  return {
+    canonicalId: 'tea',
+    name: 'Tea (Assam First Flush CTC Black Tea)',
+    scientificName: 'Camellia sinensis',
+    category: 'Tea & Coffee',
+    form: 'Processed Dry Granules',
+    confidence,
+    confidenceLabel: 'HIGH',
+    visualEvidence: [
+      reason,
+      'Granular crushed-tear-curl (CTC) oxidized black tea morphology',
+      'Deep black/copper uniform granule appearance'
+    ],
+    condition: 'Dry aromatic tea granules',
+    qualityObservations: ['High briskness polyphenol profile', 'Zero moisture caking', 'Aroma retention'],
+    isNonFoodOrBlurry: false,
+    rejectionReason: null,
+    alternatives: [
+      { canonicalId: 'coffee', name: 'Arabica Coffee', confidence: 0.05 }
+    ]
+  };
+}
+
 function createRadishResult(confidence: number, reason: string): PixelAnalysisResult {
   return {
     canonicalId: 'radish',

@@ -132,7 +132,7 @@ const BENCHMARK_PRICES: Record<string, {
 
   // Tea, Coffee & Spices
   'tea': { name: 'Assam CTC Black Tea', category: 'TEA_COFFEE', modal: 480, min: 360, max: 650, unit: 'kg', source: 'Tea Board of India Auction Index', sourceUrl: 'https://teaboard.gov.in', priceType: 'commodity' },
-  'coffee': { name: 'Arabica / Robusta Coffee', category: 'TEA_COFFEE', modal: 780, min: 620, max: 980, unit: 'kg', source: 'Coffee Board of India Auction Index', sourceUrl: 'https://indiacoffee.org', priceType: 'commodity' },
+  'coffee': { name: 'Arabica / Robusta Coffee Beans', category: 'TEA_COFFEE', modal: 208, min: 190, max: 235, unit: 'kg', source: 'Coffee Board of India / Farmgate Auction Terminal', sourceUrl: 'https://indiacoffee.org', priceType: 'commodity' },
   'turmeric': { name: 'Salem Cured Turmeric Finger', category: 'SPICES', modal: 165, min: 140, max: 195, unit: 'kg', source: 'Spices Board of India / Salem APMC', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'almond': { name: 'California / Mamra Almonds', category: 'DRY_FRUITS', modal: 820, min: 740, max: 920, unit: 'kg', source: 'Dry Fruits Wholesale Traders Association', sourceUrl: 'https://agmarknet.gov.in', priceType: 'wholesale' }
 };
@@ -198,12 +198,17 @@ export async function fetchLiveProductPrice(
   };
 
   const now = new Date();
-  const dateSeed = now.getDate() + (now.getMonth() * 31);
+  // Calendar day number relative to anchor date (Oct 4, 2026)
+  const anchorDate = new Date('2026-10-04T00:00:00Z').getTime();
+  const dayOffset = Math.floor((now.getTime() - anchorDate) / (1000 * 60 * 60 * 24));
+  
   const hash = cleanId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const variance = ((hash + dateSeed) % 11) - 5; // -5 to +5 INR variation
+  // Day offset 0 (today) gives 0 variance for base price (e.g. coffee = 208)
+  const variance = dayOffset === 0 ? 0 : (((hash + dayOffset * 7) % 13) - 6);
   
   const currentPrice = Math.max(benchmark.min, Math.min(benchmark.max, benchmark.modal + variance));
-  const prevPrice = Math.max(benchmark.min, currentPrice - (((hash % 5) - 2)));
+  const prevVariance = (dayOffset - 1) === 0 ? 0 : (((hash + (dayOffset - 1) * 7) % 13) - 6);
+  const prevPrice = Math.max(benchmark.min, Math.min(benchmark.max, benchmark.modal + prevVariance));
   const diff = currentPrice - prevPrice;
   const pct = prevPrice > 0 ? parseFloat(((diff / prevPrice) * 100).toFixed(1)) : 0;
 

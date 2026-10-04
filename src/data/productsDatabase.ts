@@ -2883,19 +2883,19 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       baseRatePerKm: 16.0
     },
     market: {
-      marketCategory: 'Premium Specialty Beverage Commodity (High Value)',
+      marketCategory: 'Estate Arabica / Robusta Farmgate & Auction Commodity',
       priceUnit: '₹/kg',
-      basePricePerKg: 450.00,
+      basePricePerKg: 208.00,
       priceStatus: 'Live Benchmark',
       regionalPrices: {
-        Bengaluru: 520.00,
-        Mumbai: 500.00,
-        Delhi: 540.00,
-        Nashik: 460.00,
-        Hyderabad: 490.00,
-        Chennai: 510.00
+        Bengaluru: 215.00,
+        Mumbai: 212.00,
+        Delhi: 220.00,
+        Nashik: 208.00,
+        Hyderabad: 210.00,
+        Chennai: 214.00
       },
-      priceTrend: 'Rising'
+      priceTrend: 'Steady'
     },
     consumption: {
       nutritionalProfile: {

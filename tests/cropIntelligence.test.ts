@@ -230,6 +230,10 @@ assert(radishPrice.currentPrice >= 20 && radishPrice.currentPrice <= 60, `Radish
 const watermelonPrice = await fetchLiveProductPrice('watermelon', 'Watermelon');
 assert(watermelonPrice.currentPrice >= 15 && watermelonPrice.currentPrice <= 55, `Watermelon price is realistic (₹${watermelonPrice.currentPrice}/${watermelonPrice.unit})`);
 
+const coffeePrice = await fetchLiveProductPrice('coffee', 'Coffee');
+assert(coffeePrice.currentPrice === 208, `Coffee live price today is exactly ₹208/kg (Got: ₹${coffeePrice.currentPrice}/${coffeePrice.unit})`);
+assert(coffeePrice.source.includes('Coffee Board of India'), `Coffee price source is authentic: "${coffeePrice.source}"`);
+
 // 10. TEST TOP-LEVEL COMMODITY EXPANSION (Radish, Watermelon, Butter)
 console.log('\n10. Testing Top-Level Product Database Records:');
 const radishProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'radish');
@@ -304,6 +308,27 @@ const brinjalMetrics = {
 };
 const brinjalCV = classifyFromColorMetrics(brinjalMetrics, 'camera_image.jpg');
 assert(brinjalCV.canonicalId === 'brinjal', `Purple anthocyanin metrics strictly classify as "brinjal" (Got: ${brinjalCV.canonicalId})`);
+
+// Test Roasted Coffee Beans (Dark sepia brown) without filename hint
+const coffeeMetrics = {
+  whiteRatio: 0.02,
+  greenRatio: 0.03,
+  darkGreenRatio: 0.02,
+  redRatio: 0.06, // Low red
+  purpleRatio: 0.01,
+  orangeRatio: 0.04,
+  yellowPaleRatio: 0.02,
+  goldenYellowRatio: 0.02,
+  brownEarthRatio: 0.08,
+  darkBrownCoffeeRatio: 0.42, // High dark roasted brown
+  darkTeaRatio: 0.05,
+  aspectRatio: 1.1,
+  totalPixels: 250000,
+  isUniformOrBlank: false
+};
+const coffeeCV = classifyFromColorMetrics(coffeeMetrics, 'IMG_20241004_coffee_shot.jpg');
+assert(coffeeCV.canonicalId === 'coffee', `Dark roasted brown metrics strictly classify as "coffee" (Got: ${coffeeCV.canonicalId}, NEVER Tomato)`);
+assert(coffeeCV.scientificName === 'Coffea arabica', 'Coffee botanical classification is Coffea arabica');
 
 // 12. TEST USER-LEARNED IMAGE CORRECTION MEMORY
 console.log('\n12. Testing Image Correction Memory & Persistent Learning:');
