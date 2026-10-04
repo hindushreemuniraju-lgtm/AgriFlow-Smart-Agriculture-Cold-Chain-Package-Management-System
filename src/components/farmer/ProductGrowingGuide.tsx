@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProductIntelligence } from '../../types/product';
-import { Sprout, Sun, Droplets, Thermometer, Layers, Bug, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Sprout, Sun, Droplets, Thermometer, Layers, Bug, CheckCircle2, TrendingUp, Award, Cog, Sparkles } from 'lucide-react';
 
 interface ProductGrowingGuideProps {
   product: ProductIntelligence;
@@ -14,6 +14,7 @@ export const ProductGrowingGuide: React.FC<ProductGrowingGuideProps> = ({ produc
   const isGrain = product.category === 'Grain';
   const isTreeNut = product.category === 'Dry Fruit';
   const isSpice = product.category === 'Spice';
+  const isProcessed = product.isProcessed;
 
   const plantingMethodTitle = isFruit || isTreeNut 
     ? 'Orchard Establishment & Planting'
@@ -38,13 +39,15 @@ export const ProductGrowingGuide: React.FC<ProductGrowingGuideProps> = ({ produc
           </div>
           <div>
             <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span>Cultivation & Growing Guide</span>
+              <span>{isProcessed ? 'Processing & Production Intelligence' : 'Cultivation & Growing Guide'}</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
                 {product.name} Specific
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              Agronomic protocols tailored for {product.variety}
+              {isProcessed 
+                ? `Extraction and value-addition protocols for ${product.name}`
+                : `Agronomic protocols tailored for ${product.variety}`}
             </p>
           </div>
         </div>
@@ -63,6 +66,115 @@ export const ProductGrowingGuide: React.FC<ProductGrowingGuideProps> = ({ produc
           </div>
         </div>
       </div>
+
+      {/* Interactive Yield & Quality Improvement Cards (Direct Answer to Prompt) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        {/* Card 1: How can I increase yield? */}
+        <div className="rounded-3xl bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/40 p-5 shadow-lg space-y-3">
+          <div className="flex items-center gap-2 text-emerald-400">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-emerald-300" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-300/80 font-bold block">
+                Farmer Advisory Question #1
+              </span>
+              <h4 className="text-sm font-bold text-white">How can I increase yield for {product.name}?</h4>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-xs text-slate-200">
+            {product.yieldImprovementTips && product.yieldImprovementTips.length > 0 ? (
+              product.yieldImprovementTips.map((tip, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/20 flex items-start gap-2.5">
+                  <span className="text-emerald-400 font-bold mt-0.5">✦</span>
+                  <span className="leading-relaxed">{tip}</span>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/20 flex items-start gap-2.5">
+                  <span className="text-emerald-400 font-bold mt-0.5">✦</span>
+                  <span className="leading-relaxed">Implement precision drip fertigation with balanced NPK + Zinc foliar nutrition at flower/pod initiation stage.</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/20 flex items-start gap-2.5">
+                  <span className="text-emerald-400 font-bold mt-0.5">✦</span>
+                  <span className="leading-relaxed">Maintain optimum plant canopy spacing ({growing.spacing}) to maximize photosynthetic solar interception.</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Card 2: How can I improve product quality? */}
+        <div className="rounded-3xl bg-gradient-to-br from-purple-950/60 to-slate-900 border border-purple-500/40 p-5 shadow-lg space-y-3">
+          <div className="flex items-center gap-2 text-purple-400">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <Award className="w-4 h-4 text-purple-300" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-purple-300/80 font-bold block">
+                Farmer Advisory Question #2
+              </span>
+              <h4 className="text-sm font-bold text-white">How can I improve product quality & Grade-A price?</h4>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-xs text-slate-200">
+            {product.qualityImprovementTips && product.qualityImprovementTips.length > 0 ? (
+              product.qualityImprovementTips.map((tip, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-slate-950/80 border border-purple-500/20 flex items-start gap-2.5">
+                  <span className="text-purple-400 font-bold mt-0.5">★</span>
+                  <span className="leading-relaxed">{tip}</span>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-purple-500/20 flex items-start gap-2.5">
+                  <span className="text-purple-400 font-bold mt-0.5">★</span>
+                  <span className="leading-relaxed">Execute pre-cooling within 3 hours of harvest to remove field heat and preserve cellular turgidity.</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-purple-500/20 flex items-start gap-2.5">
+                  <span className="text-purple-400 font-bold mt-0.5">★</span>
+                  <span className="leading-relaxed">Grade into uniform size/maturity classes and pack in cushioned ventilated containers to prevent transit scuffing.</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Derivative / Value-Addition Tree (if Processed or Raw with derivatives) */}
+      {product.derivedProducts && product.derivedProducts.length > 0 && (
+        <div className="rounded-3xl bg-slate-900 border border-amber-500/30 p-5 shadow-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
+              <Cog className="w-4 h-4" />
+              <span>Value-Added Product Processing Pathways for {product.name}</span>
+            </h4>
+            <span className="text-[10px] text-amber-300 font-mono">Higher Farm Realization</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            {product.derivedProducts.map((der) => (
+              <div key={der.id} className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl">{der.icon}</span>
+                  <div>
+                    <h5 className="font-bold text-white">{der.name}</h5>
+                    <span className="text-[10px] text-slate-400 font-mono">Yield: ~{der.yieldPercent}%</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  +35% Value
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 4 Core Agronomic Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

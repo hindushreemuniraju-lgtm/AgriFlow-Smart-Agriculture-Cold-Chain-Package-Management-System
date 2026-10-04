@@ -1,6 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ProductIntelligence } from '../../types/product';
-import { Box, Layers, ShieldCheck, Wind, Droplets, Sparkles, CheckCircle, ArrowRight } from 'lucide-react';
+import { generatePackagingRecommendation } from '../../services/packaging/packagingRecommendationEngine';
+import { 
+  Box, 
+  Layers, 
+  ShieldCheck, 
+  Wind, 
+  Droplets, 
+  Sparkles, 
+  CheckCircle, 
+  ArrowRight, 
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Scale
+} from 'lucide-react';
 
 interface ProductPackagingSectionProps {
   product: ProductIntelligence;
@@ -13,6 +27,22 @@ export const ProductPackagingSection: React.FC<ProductPackagingSectionProps> = (
 }) => {
   const { packaging, storage } = product;
 
+  // Run SIH26236 recommendation engine for this product
+  const packReport = useMemo(() => {
+    return generatePackagingRecommendation({
+      product,
+      quantityKg: 500,
+      targetShelfLifeDays: 14,
+      storageTempC: 13,
+      humidityPercent: 85,
+      distanceKm: 250,
+      estimatedTravelHours: 6,
+      vehicleType: 'Ventilated LCV',
+      budgetPreference: 'balanced',
+      sustainabilityPreference: 'standard'
+    });
+  }, [product]);
+
   return (
     <div className="space-y-6">
       
@@ -24,13 +54,13 @@ export const ProductPackagingSection: React.FC<ProductPackagingSectionProps> = (
           </div>
           <div>
             <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <span>Smart Packaging Architecture</span>
+              <span>SIH26236 Smart Packaging Intelligence</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono">
-                {product.name} Custom
+                {product.name} Engineered
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              Zero-damage packaging matrix engineered for {product.name} transit & shelf-stability
+              ASTM D3985 OTR / ASTM F1249 WVTR & gas exchange barrier engine for {product.name}
             </p>
           </div>
         </div>
@@ -43,56 +73,121 @@ export const ProductPackagingSection: React.FC<ProductPackagingSectionProps> = (
           </div>
           <div className="bg-slate-900/90 border border-purple-500/30 rounded-xl px-3.5 py-1.5 text-right">
             <div className="text-[10px] text-slate-400 uppercase font-mono">Eco Score</div>
-            <div className="text-xs font-bold text-emerald-400 font-mono">100% Certified</div>
+            <div className="text-xs font-bold text-emerald-400 font-mono">{packReport.recommended.ecoScore}/100</div>
           </div>
         </div>
       </div>
 
-      {/* Primary & Secondary Material Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Top 4-Tier Decision Recommendations Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
-        {/* Primary Packaging */}
-        <div className="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-slate-900/80 space-y-1.5">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1.5 text-purple-300">
-            <Box className="w-3.5 h-3.5" />
-            Primary Packaging
+        {/* 🥇 Recommended */}
+        <div className="p-4 rounded-2xl bg-slate-900/90 border-2 border-emerald-500/50 flex flex-col justify-between shadow-lg">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-lg">🥇</span>
+              <span className="text-[9px] font-black uppercase text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">
+                Recommended ({packReport.recommended.score}/100)
+              </span>
+            </div>
+            <h4 className="text-xs font-bold text-white mb-1">{packReport.recommended.material.name}</h4>
+            <p className="text-[11px] text-slate-300 leading-snug line-clamp-3 mb-2">
+              {packReport.recommended.scientificRationale}
+            </p>
           </div>
-          <div className="text-xs sm:text-sm font-bold text-white leading-snug">
-            {packaging.primaryPackaging}
-          </div>
-          <div className="text-[11px] text-emerald-400 font-mono">
-            Est. Cost: ₹{packaging.estimatedPackagingCostPerKg.toFixed(2)}/kg
-          </div>
-        </div>
-
-        {/* Secondary Packaging */}
-        <div className="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-slate-900/80 space-y-1.5">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1.5 text-sky-400">
-            <Layers className="w-3.5 h-3.5" />
-            Secondary / Bulk Containment
-          </div>
-          <div className="text-xs sm:text-sm font-bold text-white leading-snug">
-            {packaging.secondaryPackaging}
-          </div>
-          <div className="text-[11px] text-slate-400 font-mono">
-            Capacity: {packaging.packagingCapacity}
+          <div className="pt-2 border-t border-slate-800 text-[11px] font-mono text-emerald-400 font-bold">
+            ₹{packReport.recommended.costPerKg.toFixed(2)} / kg
           </div>
         </div>
 
-        {/* Cold / Storage Requirement */}
-        <div className="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-slate-900/80 space-y-1.5">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1.5 text-amber-400">
-            <Wind className="w-3.5 h-3.5" />
-            Storage Environment
+        {/* 🥈 Alternative */}
+        <div className="p-4 rounded-2xl bg-slate-900/90 border border-indigo-500/30 flex flex-col justify-between shadow-lg">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-lg">🥈</span>
+              <span className="text-[9px] font-black uppercase text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">
+                Alternative ({packReport.alternative.score}/100)
+              </span>
+            </div>
+            <h4 className="text-xs font-bold text-white mb-1">{packReport.alternative.material.name}</h4>
+            <p className="text-[11px] text-slate-400 leading-snug line-clamp-3 mb-2">
+              {packReport.alternative.scientificRationale}
+            </p>
           </div>
-          <div className="text-xs sm:text-sm font-bold text-amber-300 font-mono leading-snug">
-            {storage.storageTemperature}
-          </div>
-          <div className="text-[11px] text-slate-400 font-mono">
-            Humidity: {storage.humidity}
+          <div className="pt-2 border-t border-slate-800 text-[11px] font-mono text-indigo-300 font-bold">
+            ₹{packReport.alternative.costPerKg.toFixed(2)} / kg
           </div>
         </div>
 
+        {/* 💰 Budget */}
+        <div className="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 flex flex-col justify-between shadow-lg">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-lg">💰</span>
+              <span className="text-[9px] font-black uppercase text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded">
+                Budget ({packReport.budget.score}/100)
+              </span>
+            </div>
+            <h4 className="text-xs font-bold text-white mb-1">{packReport.budget.material.name}</h4>
+            <p className="text-[11px] text-slate-400 leading-snug line-clamp-3 mb-2">
+              {packReport.budget.scientificRationale}
+            </p>
+          </div>
+          <div className="pt-2 border-t border-slate-800 text-[11px] font-mono text-amber-400 font-bold">
+            ₹{packReport.budget.costPerKg.toFixed(2)} / kg
+          </div>
+        </div>
+
+        {/* ❌ Not Recommended */}
+        <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/40 flex flex-col justify-between shadow-lg">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-lg">❌</span>
+              <span className="text-[9px] font-black uppercase text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded">
+                Not Recommended
+              </span>
+            </div>
+            <h4 className="text-xs font-bold text-white mb-1">{packReport.notRecommended.material.name}</h4>
+            <p className="text-[11px] text-rose-200 leading-snug line-clamp-3 mb-2">
+              {packReport.notRecommended.scientificRationale}
+            </p>
+          </div>
+          <div className="pt-2 border-t border-rose-900/50 text-[10px] text-rose-300 font-bold flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> Incompatible
+          </div>
+        </div>
+
+      </div>
+
+      {/* OTR & WVTR Barrier Capability Matrix */}
+      <div className="glass-panel p-5 rounded-3xl border border-purple-500/30 bg-slate-900/90 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
+            <Layers className="w-4 h-4" />
+            <span>Product Barrier Requirements vs Material Capability</span>
+          </h4>
+          <span className="text-[10px] text-slate-400 font-mono">ASTM Standards</span>
+        </div>
+
+        <div className="space-y-2">
+          {packReport.recommended.barrierMatches.map((match, i) => (
+            <div key={i} className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 text-xs">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <strong className="text-white">{match.property}:</strong>
+                  <span className="text-slate-400">{match.productDemand}</span>
+                </div>
+                <p className="text-[11px] text-purple-300 mt-0.5 font-mono">{match.materialCapability} • {match.explanation}</p>
+              </div>
+              <span 
+                className="px-2 py-0.5 rounded text-[10px] font-bold shrink-0"
+                style={{ backgroundColor: `${match.statusColor}20`, color: match.statusColor }}
+              >
+                {match.status}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 3D-Style Layer Stack Breakdown */}
@@ -144,95 +239,6 @@ export const ProductPackagingSection: React.FC<ProductPackagingSectionProps> = (
                 >
                   Verified Barrier
                 </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Atmospheric & Ethylene Management */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        {/* Ventilation & Moisture */}
-        <div className="glass-panel p-5 rounded-2xl border border-sky-500/20 bg-slate-900/90 space-y-3">
-          <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
-            <Wind className="w-4 h-4" />
-            <span>Ventilation & Moisture Dynamics</span>
-          </h4>
-
-          <div className="space-y-2 text-xs">
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-              <strong className="text-slate-300">Ventilation Directive:</strong>
-              <p className="text-slate-200 mt-1">{packaging.ventilationSpec}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-              <strong className="text-slate-300">Moisture & Humidity Barrier:</strong>
-              <p className="text-slate-200 mt-1">{packaging.moistureProtection}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Ethylene & Cushioning */}
-        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-slate-900/90 space-y-3">
-          <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-            <Droplets className="w-4 h-4" />
-            <span>Ethylene & Cushioning Specs</span>
-          </h4>
-
-          <div className="space-y-2 text-xs">
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-              <div className="flex items-center justify-between">
-                <strong className="text-slate-300">Ethylene Sensitivity:</strong>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                  packaging.ethyleneSensitivity === 'High' 
-                    ? 'bg-rose-500/20 text-rose-300' 
-                    : packaging.ethyleneSensitivity === 'Medium'
-                    ? 'bg-amber-500/20 text-amber-300'
-                    : 'bg-emerald-500/20 text-emerald-300'
-                }`}>
-                  {packaging.ethyleneSensitivity} Sensitivity
-                </span>
-              </div>
-              <p className="text-slate-200 mt-1">{packaging.ethyleneControl}</p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-              <strong className="text-slate-300">Vibration Cushioning:</strong>
-              <p className="text-slate-200 mt-1">{packaging.cushioningSpecs}</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Step-by-Step Packing Guide */}
-      <div className="glass-panel p-6 rounded-3xl border border-purple-500/30 bg-slate-900/90 space-y-4">
-        <h4 className="text-sm font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          <span>Standard Operating Packing Procedure for {product.name}</span>
-        </h4>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {packaging.packingSteps.map((step) => (
-            <div 
-              key={step.step}
-              className="p-4 rounded-2xl bg-slate-950/60 border border-purple-500/20 space-y-2 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center font-mono">
-                    {step.step}
-                  </span>
-                  <h5 className="text-xs font-bold text-white">
-                    {step.title}
-                  </h5>
-                </div>
-                <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-              <div className="text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-800">
-                Phase {step.step} Checklist
               </div>
             </div>
           ))}
