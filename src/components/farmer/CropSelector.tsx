@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { CropInfo } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { Search, Sparkles, Check, X, PlusCircle, Filter } from 'lucide-react';
+import { getAllProductsAsCrops, getProductIntelligence, productToCropInfo } from '../../data/productsDatabase';
 import { generateDynamicCrop } from '../../data/cropsFallback';
 import confetti from 'canvas-confetti';
 
@@ -17,22 +18,31 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [customCropsList, setCustomCropsList] = useState<CropInfo[]>([]);
 
-  // Combined crops catalog including custom-added ones
+  // Comprehensive catalog initialized from both product database and fallback crops
   const allAvailableCrops = useMemo(() => {
     const map = new Map<string, CropInfo>();
-    crops.forEach(c => map.set(c.id, c));
+    
+    // First, load from the primary high-fidelity database
+    getAllProductsAsCrops().forEach(c => map.set(c.id, c));
+
+    // Also include any prop crops and custom crops
+    crops.forEach(c => {
+      if (!map.has(c.id)) map.set(c.id, c);
+    });
     customCropsList.forEach(c => map.set(c.id, c));
+
     return Array.from(map.values());
   }, [crops, customCropsList]);
 
   // Filtered by search and category
   const filteredCrops = useMemo(() => {
     return allAvailableCrops.filter(crop => {
+      const cat = crop.category;
       const matchesCategory = selectedCategory === 'All' || 
-        (selectedCategory === 'Fruit' && crop.category === 'Fruit') ||
-        (selectedCategory === 'Vegetable' && (crop.category === 'Vegetable' || crop.category === 'Greens')) ||
-        (selectedCategory === 'Grain' && crop.category === 'Grain') ||
-        (selectedCategory === 'Dry Fruit' && crop.category === 'Dry Fruit');
+        (selectedCategory === 'Vegetable' && (cat === 'Vegetable' || (cat as string) === 'Greens')) ||
+        (selectedCategory === 'Fruit' && cat === 'Fruit') ||
+        (selectedCategory === 'Grain' && (cat === 'Grain' || (cat as string) === 'Pulse')) ||
+        (selectedCategory === 'Dry Fruit' && cat === 'Dry Fruit');
 
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch = !q || 
@@ -47,10 +57,19 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
 
   const handleCreateCustomCrop = () => {
     if (!searchQuery.trim()) return;
-    const cat = selectedCategory !== 'All' ? selectedCategory as any : undefined;
-    const newCrop = generateDynamicCrop(searchQuery, cat);
-    setCustomCropsList(prev => [newCrop, ...prev]);
-    onSelectCrop(newCrop);
+    
+    // Check if alias resolution exists in database first
+    const prod = getProductIntelligence(searchQuery);
+    if (prod && prod.id) {
+      const crop = productToCropInfo(prod);
+      onSelectCrop(crop);
+    } else {
+      const cat = selectedCategory !== 'All' ? selectedCategory as any : undefined;
+      const newCrop = generateDynamicCrop(searchQuery, cat);
+      setCustomCropsList(prev => [newCrop, ...prev]);
+      onSelectCrop(newCrop);
+    }
+    
     setSearchQuery('');
     
     confetti({
@@ -63,10 +82,10 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
 
   const categories = [
     { id: 'All', label: 'All Catalog', icon: '🌱' },
-    { id: 'Fruit', label: 'Fruits', icon: '🍎' },
-    { id: 'Vegetable', label: 'Vegetables & Greens', icon: '🥦' },
-    { id: 'Grain', label: 'Grains & Millets', icon: '🌾' },
-    { id: 'Dry Fruit', label: 'Dry Fruits & Nuts', icon: '🥜' }
+    { id: 'Vegetable', label: 'Vegetables & Greens', icon: '🧅' },
+    { id: 'Fruit', label: 'Fruits & Orchards', icon: '🥭' },
+    { id: 'Grain', label: 'Grains, Pulses & Cereals', icon: '🌾' },
+    { id: 'Dry Fruit', label: 'Dry Fruits, Nuts & Spices', icon: '🌰' }
   ];
 
   return (
@@ -81,7 +100,7 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
             </span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Search or select any fruit, vegetable, grain, or dry fruit to generate live agronomic telemetry, ripening timelines, and smart packaging architecture.
+            Search or select any crop to dynamically compute 100% product-specific agronomy, harvesting, curing, APMC prices, and smart packaging.
           </p>
         </div>
 
@@ -99,7 +118,7 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search any crop, grain (Basmati, Wheat, Ragi), fruit (Mango, Apple, Grapes), vegetable (Tomato, Peppers), or dry fruit (Almonds, Walnuts, Cashews, Pista)..."
+            placeholder="Search Onion, Potato, Tomato, Mango, Rice, Chickpea, Almond, Turmeric, Apple, Banana, Garlic..."
             className="w-full bg-slate-900/90 border border-purple-500/30 rounded-2xl pl-12 pr-10 py-3 text-xs sm:text-sm text-white placeholder-slate-500 outline-none focus:border-purple-400 shadow-inner"
           />
           {searchQuery && (
@@ -120,7 +139,7 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md border border-purple-400/50 scale-105'
                     : 'bg-slate-900/80 text-slate-400 border border-slate-800 hover:border-purple-500/30 hover:text-slate-200'
@@ -134,7 +153,7 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
         </div>
       </div>
 
-      {/* Custom Crop Creation Prompt if search yields few/no results */}
+      {/* Custom Crop Creation Prompt if search query exists */}
       {searchQuery.trim().length > 1 && (
         <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/50 via-slate-900 to-sky-950/40 border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-scale-in">
           <div className="flex items-center gap-3">
@@ -153,7 +172,7 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
 
           <button
             onClick={handleCreateCustomCrop}
-            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-sky-500 hover:from-purple-500 hover:to-sky-400 text-white text-xs font-bold shadow-md transition-all whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-sky-500 hover:from-purple-500 hover:to-sky-400 text-white text-xs font-bold shadow-md transition-all whitespace-nowrap cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Generate & Analyze "{searchQuery}"</span>
@@ -173,7 +192,7 @@ export const CropSelector: React.FC<CropSelectorProps> = ({ crops, selectedCrop,
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {filteredCrops.map((crop) => {
-            const isSelected = crop.id === selectedCrop.id;
+            const isSelected = crop.id === selectedCrop.id || crop.name.toLowerCase() === selectedCrop.name.toLowerCase();
             return (
               <div
                 key={crop.id}

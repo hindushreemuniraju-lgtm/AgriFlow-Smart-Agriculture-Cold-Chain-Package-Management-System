@@ -2,6 +2,92 @@ import { CropInfo } from '../types';
 
 export const CROPS_DATA: CropInfo[] = [
   {
+    id: 'crop-onion',
+    name: 'Nashik Red Onion',
+    scientificName: 'Allium cepa',
+    category: 'Vegetable',
+    icon: '🧅',
+    color: '#fb923c',
+    variety: 'Bhima Super / Nashik Red',
+    basePricePerKg: 28.5,
+    optimalTempRange: [0, 2],
+    optimalHumidityRange: [65, 70],
+    ripenessDays: 14,
+    currentMaturityStage: 85,
+    ethyleneSensitivity: 'Low',
+    respirationRate: 'Low',
+    qualityTechniques: [
+      {
+        title: 'Shade Curing & Neck Tightening',
+        description: 'Cure harvested bulbs in well-ventilated shade structures for 10-14 days until neck moisture drops below 12%.',
+        impact: 'Prevents 95% fungal neck rot and extends storage to 6 months',
+        urgency: 'Immediate'
+      },
+      {
+        title: 'Withhold Pre-Harvest Irrigation',
+        description: 'Stop irrigation 15 days prior to harvest when 50% neck fall is observed.',
+        impact: 'Dries outer scale layers and prevents thick neck spongy bulbs',
+        urgency: 'Scheduled'
+      }
+    ],
+    harvestingGuidance: {
+      daysRemaining: 14,
+      recommendedWindow: 'October 10 - October 16',
+      sugarBrixTarget: '11.0 - 13.5 °Bx',
+      firmnessKgCm2: '4.8 - 5.2 kg/cm²',
+      idealTimeOfDay: '06:00 AM - 10:00 AM (Dry morning)',
+      fieldPrecautions: [
+        'Harvest when 50-70% foliage has naturally fallen over at pseudostem neck',
+        'Trim foliage leaving 2.5 cm neck to seal off fungal spore entry',
+        'Never pack fresh un-cured bulbs into airtight non-ventilated bags'
+      ]
+    },
+    packagingPresets: {
+      recommendedMaterial: 'High-Density Polyethylene Open-Weave Leno Mesh Bags (25kg / 50kg)',
+      coldChainTier: 'Ventilated Dry Logistics (20°C - 26°C Ambient with 35% airflow)',
+      idealStorageTemp: '0°C - 2°C (Cold) or 25°C (Ventilated Chawl)',
+      humidityTarget: '65% - 70% RH',
+      shockDampeningRating: 3.2,
+      ventilationType: 'Open weave mesh matrix with minimum 35% air permeability',
+      ethyleneControl: 'Isolate from high ethylene fruit emitters',
+      cushioningSpecs: 'Non-abrasive Leno knit yarn',
+      estimatedCostPerKg: 1.2
+    },
+    nutrition: {
+      calories: 40,
+      vitaminC_mg: 7.4,
+      vitaminA_IU: 2,
+      dietaryFiber_g: 1.7,
+      potassium_mg: 146,
+      antioxidantIndex: 88,
+      glycemicIndex: 15,
+      highlights: ['Rich in Quercetin bioflavonoid', 'Prebiotic inulin for gut microbiota', 'Sulfur compounds promote heart wellness']
+    },
+    shelfLife: {
+      ambientDays: 120,
+      recommendedColdDays: 240,
+      optimalPreservationSteps: [
+        'Store in cool, dry, dark and well-ventilated wire baskets or mesh racks',
+        'Maintain relative humidity strictly below 70% to stop eye sprouting',
+        'Never store in sealed plastic bags which trap moisture and induce rot'
+      ],
+      spoilageIndicators: ['Sprouting green shoot from neck', 'Watery soft rot in basal plate', 'Black powdery mold (Aspergillus)']
+    },
+    recipes: [
+      {
+        title: 'Caramelized Onion & Herb Lentil Broth',
+        prepTime: '25 mins',
+        healthBenefit: 'High quercetin bioavailability and gut prebiotic nourishment',
+        ingredients: ['3 Large Nasik Onions', '1 cup Toor/Moong dal', '1 tsp Cumin', '2 Garlic cloves', '1 tbsp Ghee'],
+        steps: [
+          'Gently caramelize sliced onions in ghee until golden brown',
+          'Add crushed garlic and cumin seeds',
+          'Pour in boiled dal broth and simmer 10 mins'
+        ]
+      }
+    ]
+  },
+  {
     id: 'crop-tomatoes',
     name: 'Vine-Ripened Roma Tomatoes',
     scientificName: 'Solanum lycopersicum',

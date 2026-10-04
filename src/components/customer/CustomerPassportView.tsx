@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { QRScannerSimulator } from './QRScannerSimulator';
 import { DigitalPassportCard } from './DigitalPassportCard';
 import { FarmerGratitudeModal } from './FarmerGratitudeModal';
+import { getProductIntelligence } from '../../data/productsDatabase';
 import { QrCode, Sparkles } from 'lucide-react';
 
 interface CustomerPassportViewProps {
@@ -26,80 +27,69 @@ export const CustomerPassportView: React.FC<CustomerPassportViewProps> = ({ init
     try {
       const res = await fetch(`/api/passport/${batchId}`);
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.passport) {
         setPassport(data.passport);
+      } else {
+        generateDynamicProductPassport(batchId);
       }
     } catch {
-      // Local fallback
-      generateFallbackPassport(batchId);
+      // Offline fallback using rich product database
+      generateDynamicProductPassport(batchId);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateFallbackPassport = (batchId: string) => {
+  const generateDynamicProductPassport = (batchId: string) => {
+    const prod = getProductIntelligence(batchId);
+    const targetTempNum = parseFloat(prod.transportation.targetTemp) || 12.5;
+
     setPassport({
       batchId,
       verifiedBadge: 'AgriFlow Provenance Certified ✓',
-      verificationHash: '0x8f2a93b41c098e7d2358891aa38914',
+      verificationHash: `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`,
       crop: {
-        id: 'crop-tomatoes',
-        name: 'Vine-Ripened Roma Tomatoes',
-        variety: 'San Marzano Hybrid',
-        icon: '🍅',
-        category: 'Vegetable',
-        scientificName: 'Solanum lycopersicum'
+        id: `crop-${prod.id}`,
+        name: prod.name,
+        variety: prod.variety,
+        icon: prod.icon,
+        category: prod.category,
+        scientificName: prod.scientificName
       },
       origin: {
-        farmerName: 'Dnyaneshwar Shinde',
-        farmerPhone: '+91 94220 89112',
-        farmLocation: 'Dindori Valley Certified Orchards, Nashik',
-        soilHealthScore: '96/100 (Rich Organic Microbial Density)',
-        chemicalResidueStatus: 'Zero Detected (APEDA / FSSAI Tested)',
-        harvestTimestamp: '2026-10-03 at 06:15 AM (Dawn Harvest)'
+        farmerName: 'Ramesh Patil & Agro FPO',
+        farmerPhone: '+91 98230 45192',
+        farmLocation: 'Sahyadri Agri Valley Orchards, Nashik Cluster',
+        soilHealthScore: '96/100 (High Organic Carbon & Mycorrhizae)',
+        chemicalResidueStatus: 'Zero Chemical Residue (APEDA Tested)',
+        harvestTimestamp: 'Harvested at 06:15 AM (Dawn Pick)'
       },
       coldChainLog: [
-        { stage: 'Farm Pre-Cooling', timestamp: '03-Oct 07:30 AM', temperature: '13°C', status: 'Pre-cooled' },
-        { stage: 'Smart Packaging', timestamp: '03-Oct 08:45 AM', temperature: '13.2°C', status: '5-Ply Kraft + KMnO4' },
-        { stage: 'IoT Reefer Transit', timestamp: '03-Oct 10:15 AM', temperature: '13.4°C', status: 'Vibration & GPS Logged' },
-        { stage: 'Supermarket Display', timestamp: '03-Oct 02:00 PM', temperature: '13.0°C', status: 'Delivered Fresh' }
+        { stage: 'Field Harvest & De-sapping/Curing', timestamp: 'Day 0 • 06:15 AM', temperature: `${targetTempNum}°C`, status: 'Farm Cleared' },
+        { stage: 'Smart Multi-Layer Packaging', timestamp: 'Day 0 • 08:30 AM', temperature: `${targetTempNum}°C`, status: prod.packaging.primaryPackaging },
+        { stage: 'IoT Reefer Fleet Transit', timestamp: 'Day 0 • 11:00 AM', temperature: `${targetTempNum + 0.2}°C`, status: 'GPS & Shock Monitored' },
+        { stage: 'Retail Mandi Distribution Center', timestamp: 'Day 0 • 03:30 PM', temperature: `${targetTempNum}°C`, status: '100% Freshness Retained' }
       ],
       shelfLifeStatus: {
-        ambientDaysRemaining: 5,
-        refrigeratedDaysRemaining: 14,
-        freshnessIndexPercent: 94,
-        spoilageIndicators: ['Soft watery shoulder depressions', 'Wrinkled outer skin', 'Off-odor'],
-        homePreservationSteps: [
-          'Store stem-end down on a shallow breathable dish at 13°C - 16°C pantry',
-          'Avoid storing near bananas or ethylene emitters',
-          'Never refrigerate below 10°C to preserve aroma enzymes'
-        ]
+        ambientDaysRemaining: prod.storage.ambientDays,
+        refrigeratedDaysRemaining: prod.storage.coldDays,
+        freshnessIndexPercent: 96,
+        spoilageIndicators: prod.storage.spoilageIndicators,
+        homePreservationSteps: prod.storage.preservationSteps
       },
       nutritionalBreakdown: {
-        calories: 22,
-        vitaminC_mg: 19.5,
-        vitaminA_IU: 1025,
-        dietaryFiber_g: 1.8,
-        potassium_mg: 292,
-        antioxidantIndex: 94,
-        glycemicIndex: 15,
-        highlights: ['Ultra-rich in bioavailable Lycopene', 'Cardiovascular support', 'Natural L-glutamate umami']
+        calories: prod.consumption.nutritionalProfile.calories,
+        vitaminC_mg: prod.consumption.nutritionalProfile.vitaminC_mg,
+        vitaminA_IU: prod.consumption.nutritionalProfile.vitaminA_IU,
+        dietaryFiber_g: prod.consumption.nutritionalProfile.dietaryFiber_g,
+        potassium_mg: prod.consumption.nutritionalProfile.potassium_mg,
+        antioxidantIndex: prod.consumption.nutritionalProfile.antioxidantIndex,
+        glycemicIndex: prod.consumption.nutritionalProfile.glycemicIndex,
+        highlights: prod.consumption.nutritionalProfile.highlights
       },
       optimalConsumption: {
-        bioavailabilityTip: 'Pair with cold-pressed olive oil to increase lycopene absorption by up to 400%.',
-        recipes: [
-          {
-            title: 'Slow-Confit Roma Tomato & Rosemary Medley',
-            prepTime: '45 mins',
-            healthBenefit: 'Heat-activates cis-lycopene for higher bloodstream bioavailability',
-            ingredients: ['8 ripe Roma tomatoes', '4 garlic cloves', 'Fresh rosemary', 'Extra virgin olive oil', 'Sea salt'],
-            steps: [
-              'Halve tomatoes and arrange in skillet',
-              'Add crushed garlic and rosemary sprigs',
-              'Submerge in olive oil and simmer at 110°C for 40 mins'
-            ]
-          }
-        ]
+        bioavailabilityTip: prod.consumption.bioavailabilityTip,
+        recipes: prod.consumption.recipes
       }
     });
   };
