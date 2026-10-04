@@ -1,0 +1,407 @@
+import React, { useState, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
+import { ProductIntelligence } from '../../types/product';
+import { getVerifiedCropVisual } from '../../services/crop/cropImageService';
+import { 
+  ShoppingCart, 
+  Search, 
+  Filter, 
+  QrCode, 
+  ShieldCheck, 
+  Sparkles, 
+  Truck, 
+  MapPin, 
+  CheckCircle2, 
+  Layers, 
+  Thermometer, 
+  ArrowRight, 
+  CreditCard,
+  Heart,
+  Star,
+  ExternalLink
+} from 'lucide-react';
+
+interface CustomerMarketplaceProps {
+  onOpenPassport: (batchId: string) => void;
+}
+
+export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ onOpenPassport }) => {
+  const { user, updateUser } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedProductForModal, setSelectedProductForModal] = useState<ProductIntelligence | null>(null);
+  const [cartCount, setCartCount] = useState<number>(2);
+  const [orderSuccessModal, setOrderSuccessModal] = useState<{ isOpen: boolean; product: ProductIntelligence | null; orderId: string; total: number }>({
+    isOpen: false,
+    product: null,
+    orderId: '',
+    total: 0
+  });
+
+  const categories = [
+    { label: 'All Items', value: 'All', icon: '🛒' },
+    { label: '🥬 Vegetables', value: 'Vegetable', icon: '🥬' },
+    { label: '🍎 Fruits', value: 'Fruit', icon: '🍎' },
+    { label: '🌾 Grains & Cereals', value: 'Grain', icon: '🌾' },
+    { label: '🫘 Pulses', value: 'Pulse', icon: '🫘' },
+    { label: '🥜 Dry Fruits & Nuts', value: 'Dry Fruit', icon: '🥜' },
+    { label: '🛢️ Oils', value: 'Oil & Oilseed', icon: '🛢️' },
+    { label: '🥛 Dairy', value: 'Dairy', icon: '🥛' },
+    { label: '🌾 Flour', value: 'Flour', icon: '🌾' },
+    { label: '🌶️ Spices', value: 'Spice', icon: '🌶️' },
+    { label: '☕ Tea & Coffee', value: 'Tea & Coffee', icon: '☕' }
+  ];
+
+  // Filter products by category and search query
+  const filteredProducts = useMemo(() => {
+    return COMPREHENSIVE_PRODUCT_DATABASE.filter(product => {
+      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+      const matchesSearch = searchQuery === '' || 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.scientificName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.aliases.some(a => a.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
+
+  const handleBuyNow = (product: ProductIntelligence) => {
+    const qty = 5; // 5 kg/units default
+    const total = Math.round(product.market.basePricePerKg * qty);
+    
+    // Deduct from wallet if available
+    if (user.walletBalance >= total) {
+      updateUser({ walletBalance: user.walletBalance - total });
+    }
+
+    const orderId = `AGF-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+    setOrderSuccessModal({
+      isOpen: true,
+      product,
+      orderId,
+      total
+    });
+    setCartCount(prev => prev + 1);
+  };
+
+  return (
+    <div className="space-y-8 pb-16">
+      
+      {/* Customer Header & Wallet Bar */}
+      <div className="rounded-3xl bg-gradient-to-r from-purple-950/80 via-slate-900 to-pink-950/80 border border-purple-500/30 p-6 sm:p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-3 py-1 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <ShoppingCart className="w-3.5 h-3.5" /> Farm-to-Table Verified Marketplace
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> 100% Traceable
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white">
+            Direct Farm Produce & Artisan Processed Foods
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            Purchase directly from certified organic farmers and food producers with complete cold-chain transparency, scientific packaging, and batch authenticity.
+          </p>
+        </div>
+
+        {/* User Account & Cart Status */}
+        <div className="flex items-center gap-4 bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+          <div className="text-right">
+            <span className="text-[10px] text-slate-400 block uppercase font-bold">Wallet Balance</span>
+            <span className="text-base font-black text-emerald-400 font-mono">₹{user.walletBalance.toLocaleString()}</span>
+          </div>
+          <div className="h-8 w-[1px] bg-slate-800" />
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-300 relative">
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-pink-500 text-white text-[10px] font-black flex items-center justify-center shadow">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Category Filter Navigation */}
+      <div className="space-y-4">
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search produce, commodities, regional names (e.g., Brinjal, Baingan, A2 Ghee, Groundnut Oil, Atta, Assam Tea)..."
+            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-900 border border-purple-500/30 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 shadow-inner"
+          />
+        </div>
+
+        {/* Category Pills Slider */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {categories.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => setSelectedCategory(cat.value)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                selectedCategory === cat.value
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-[0_0_20px_rgba(217,70,239,0.4)] border border-pink-400/40'
+                  : 'bg-slate-900/90 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'
+              }`}
+            >
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProducts.map((product) => {
+          const visual = getVerifiedCropVisual(product.id, product.name);
+          const isProcessed = product.isProcessed;
+
+          return (
+            <div
+              key={product.id}
+              className="rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-purple-500/40 p-5 shadow-xl transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] flex flex-col justify-between group"
+            >
+              <div>
+                
+                {/* Visual Header & Category Badge */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 shadow-md group-hover:scale-105 transition-transform"
+                      style={{ background: `linear-gradient(135deg, ${visual.gradient[0]}, ${visual.gradient[1]})` }}
+                    >
+                      {visual.emoji}
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded uppercase tracking-wider">
+                        {product.category}
+                      </span>
+                      <h3 className="text-base font-bold text-white mt-1 group-hover:text-purple-300 transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="text-xs text-slate-400 italic font-mono">{product.scientificName}</p>
+                    </div>
+                  </div>
+
+                  <button className="text-slate-500 hover:text-pink-400 transition-colors">
+                    <Heart className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Description & Processing Info */}
+                <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mb-3">
+                  {product.description}
+                </p>
+
+                {/* Packaging & Origin Badges */}
+                <div className="space-y-1.5 mb-4 text-[11px]">
+                  <div className="flex items-center gap-1.5 text-slate-300">
+                    <Layers className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <span className="truncate"><b>Pack:</b> {product.packaging.primaryPackaging}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-slate-300">
+                    <Truck className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                    <span><b>Transit:</b> {product.transportation.temperatureControlled ? '❄️ Cold Reefer' : '🚛 Dry Express'} • 2-4 Days ETA</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-slate-300">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span><b>Origin:</b> Certified Farmer Cluster (APMC Verified)</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Price & Action Row */}
+              <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold">Direct Price</span>
+                  <div className="text-base font-black text-emerald-400 font-mono">
+                    ₹{product.market.basePricePerKg.toFixed(2)} <span className="text-xs text-slate-400 font-sans font-normal">/ {product.market.priceUnit.replace('₹/', '')}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedProductForModal(product)}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 hover:text-white transition-colors flex items-center gap-1 text-xs font-bold"
+                    title="View Farm-to-Table Traceability Passport"
+                  >
+                    <QrCode className="w-4 h-4" />
+                    <span className="hidden sm:inline">Trace</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleBuyNow(product)}
+                    className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>Buy</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Product Traceability Modal */}
+      {selectedProductForModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-2xl rounded-3xl bg-slate-900 border border-purple-500/30 p-6 sm:p-8 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+            
+            <div className="flex items-center justify-between pb-4 border-b border-purple-500/20 mb-5">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{getVerifiedCropVisual(selectedProductForModal.id, selectedProductForModal.name).emoji}</span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">{selectedProductForModal.name}</h3>
+                  <p className="text-xs text-purple-300 font-mono">Digital Product Passport & Supply-Chain Traceability</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedProductForModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 6-Stage Farm-to-Customer Pipeline */}
+            <div className="space-y-4 text-xs">
+              <h4 className="font-bold text-slate-300 uppercase tracking-wider text-[11px]">
+                6-Stage Farm-to-Fork Verified Journey
+              </h4>
+
+              <div className="space-y-3 relative before:absolute before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-purple-500/30">
+                
+                <div className="relative pl-9">
+                  <div className="absolute left-2.5 top-1 w-3.5 h-3.5 rounded-full bg-emerald-500 shadow" />
+                  <h5 className="font-bold text-white">1. Farm Origin & Cultivation</h5>
+                  <p className="text-slate-400 mt-0.5">Harvested under certified Good Agricultural Practices (GAP). Soil: {selectedProductForModal.growing.soil}.</p>
+                </div>
+
+                <div className="relative pl-9">
+                  <div className="absolute left-2.5 top-1 w-3.5 h-3.5 rounded-full bg-sky-500 shadow" />
+                  <h5 className="font-bold text-white">2. Harvesting & Pre-Cooling</h5>
+                  <p className="text-slate-400 mt-0.5">{selectedProductForModal.harvesting.harvestingMethod} at {selectedProductForModal.harvesting.bestHarvestTime}.</p>
+                </div>
+
+                {selectedProductForModal.isProcessed && (
+                  <div className="relative pl-9">
+                    <div className="absolute left-2.5 top-1 w-3.5 h-3.5 rounded-full bg-amber-500 shadow" />
+                    <h5 className="font-bold text-white">3. Processing & Value Addition</h5>
+                    <p className="text-slate-400 mt-0.5">{selectedProductForModal.processingMethod}</p>
+                  </div>
+                )}
+
+                <div className="relative pl-9">
+                  <div className="absolute left-2.5 top-1 w-3.5 h-3.5 rounded-full bg-purple-500 shadow" />
+                  <h5 className="font-bold text-white">4. Engineered Food Packaging (SIH26236)</h5>
+                  <p className="text-slate-400 mt-0.5">{selectedProductForModal.packaging.primaryPackaging} ({selectedProductForModal.packaging.ecoCertification}).</p>
+                </div>
+
+                <div className="relative pl-9">
+                  <div className="absolute left-2.5 top-1 w-3.5 h-3.5 rounded-full bg-indigo-500 shadow" />
+                  <h5 className="font-bold text-white">5. Cold-Chain Logistics & Telemetry</h5>
+                  <p className="text-slate-400 mt-0.5">{selectedProductForModal.transportation.recommendedVehicle} ({selectedProductForModal.transportation.targetTemp}).</p>
+                </div>
+
+                <div className="relative pl-9">
+                  <div className="absolute left-2.5 top-1 w-3.5 h-3.5 rounded-full bg-pink-500 shadow" />
+                  <h5 className="font-bold text-white">6. Consumer Delivery & Freshness</h5>
+                  <p className="text-slate-400 mt-0.5">Delivered directly to consumer with verifiable batch cryptographic hash.</p>
+                </div>
+
+              </div>
+
+              {/* Nutritional Highlights */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 mt-4">
+                <h5 className="font-bold text-white mb-2">Nutritional & Health Highlights</h5>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedProductForModal.consumption.nutritionalProfile.highlights.map((h, i) => (
+                    <span key={i} className="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px]">
+                      ✨ {h}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+              <button
+                onClick={() => {
+                  onOpenPassport('AGF-8921');
+                  setSelectedProductForModal(null);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5"
+              >
+                <span>Open Full Passport Simulator</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Order Success Modal */}
+      {orderSuccessModal.isOpen && orderSuccessModal.product && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md rounded-3xl bg-slate-900 border border-emerald-500/40 p-6 sm:p-8 shadow-2xl text-slate-100 text-center">
+            
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+              ✓
+            </div>
+
+            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Order Confirmed & Farm Dispatched
+            </span>
+
+            <h3 className="text-xl font-black text-white mt-2">
+              Purchase Successful!
+            </h3>
+            <p className="text-xs text-slate-300 mt-1">
+              Your order for <b>{orderSuccessModal.product.name}</b> has been placed with direct cold-chain transport lock.
+            </p>
+
+            <div className="my-5 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-left space-y-2 font-mono">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Order Batch ID:</span>
+                <span className="text-purple-300 font-bold">{orderSuccessModal.orderId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Amount Paid:</span>
+                <span className="text-emerald-400 font-bold">₹{orderSuccessModal.total}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Packaging:</span>
+                <span className="text-slate-200 truncate">{orderSuccessModal.product.packaging.primaryPackaging}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setOrderSuccessModal({ isOpen: false, product: null, orderId: '', total: 0 })}
+              className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-lg transition-all"
+            >
+              Continue Browsing Marketplace
+            </button>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};

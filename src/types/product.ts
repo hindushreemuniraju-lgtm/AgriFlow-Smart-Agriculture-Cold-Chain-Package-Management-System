@@ -1,4 +1,16 @@
-export type ProductCategory = 'Vegetable' | 'Fruit' | 'Grain' | 'Pulse' | 'Dry Fruit' | 'Spice';
+export type ProductCategory = 
+  | 'Vegetable' 
+  | 'Fruit' 
+  | 'Grain' 
+  | 'Pulse' 
+  | 'Dry Fruit' 
+  | 'Oil & Oilseed'
+  | 'Dairy'
+  | 'Flour'
+  | 'Spice' 
+  | 'Tea & Coffee'
+  | 'Processed Product'
+  | 'Greens';
 
 export interface FertilizerStage {
   stage: string;
@@ -42,6 +54,15 @@ export interface ProductIntelligence {
   icon: string;
   color: string;
   aliases: string[]; // e.g. ["onion", "pyaz", "kanda", "allium cepa"]
+
+  // Processing & Derivative Relationships
+  isProcessed?: boolean;
+  rawCommodityId?: string;
+  derivedProducts?: { id: string; name: string; icon: string; yieldPercent: number }[];
+  processingMethod?: string;
+  processingStage?: string;
+  yieldImprovementTips?: string[];
+  qualityImprovementTips?: string[];
 
   // Images
   images: {

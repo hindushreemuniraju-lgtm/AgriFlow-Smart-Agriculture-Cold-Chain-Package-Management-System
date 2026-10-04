@@ -1,12 +1,31 @@
 export type LanguageCode = 'en' | 'hi' | 'kn' | 'te' | 'ta' | 'mr' | 'pa';
 
-export type UserRole = 'farmer' | 'logistics' | 'customer';
+export type UserRole = 'farmer' | 'logistics' | 'customer' | 'packaging';
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  avatar: string;
+  location: string;
+  district: string;
+  state: string;
+  address: string;
+  preferredLanguage: LanguageCode;
+  roles: ('farmer' | 'logistics' | 'customer' | 'packaging')[];
+  activeRole: UserRole;
+  walletBalance: number;
+  isLoggedIn: boolean;
+  onboardingCompleted: boolean;
+  createdAt: string;
+}
 
 export interface CropInfo {
   id: string;
   name: string;
   scientificName: string;
-  category: 'Fruit' | 'Vegetable' | 'Grain' | 'Greens' | 'Dry Fruit';
+  category: 'Fruit' | 'Vegetable' | 'Grain' | 'Pulse' | 'Dry Fruit' | 'Greens' | 'Oil & Oilseed' | 'Dairy' | 'Flour' | 'Spice' | 'Tea & Coffee' | 'Processed Product';
   icon: string;
   color: string;
   variety: string;

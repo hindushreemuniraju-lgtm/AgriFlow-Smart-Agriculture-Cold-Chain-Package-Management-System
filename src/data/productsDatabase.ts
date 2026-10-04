@@ -1522,6 +1522,1251 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       transitShockRisk: 'Low; protect packaging from puncture and moisture leaks.',
       mitigationStrategy: 'Follow proper boiling curing, sun dry thoroughly to 9% moisture, and pack in UV/moisture-barrier laminated sacks.'
     }
+  },
+
+  // 9. GROUNDNUT (RAW COMMODITY)
+  {
+    id: 'groundnut',
+    name: 'Groundnut (Peanut)',
+    category: 'Oil & Oilseed',
+    subcategory: 'Oilseed & Protein Legume',
+    scientificName: 'Arachis hypogaea',
+    variety: 'TG 37A / Kadiri 6 / JL 24',
+    description: 'Premier oilseed and protein powerhouse with subterranean pods, critical for edible oil extraction, confectionery, and seed cake protein.',
+    icon: '🥜',
+    color: '#d97706',
+    aliases: ['groundnut', 'peanut', 'mungfali', 'shengdana', 'kadalai', 'kadale kayi', 'arachis hypogaea'],
+    isProcessed: false,
+    derivedProducts: [
+      { id: 'groundnut-oil', name: 'Cold-Pressed Groundnut Oil', icon: '🛢️', yieldPercent: 42 },
+      { id: 'peanut-butter', name: 'High-Protein Peanut Butter', icon: '🥜', yieldPercent: 88 },
+      { id: 'groundnut-cake', name: 'Defatted Cattle Feed Cake', icon: '🧱', yieldPercent: 55 }
+    ],
+    yieldImprovementTips: [
+      'Apply Gypsum @ 400 kg/ha at pegging stage (40-45 DAS) for superior pod filling and bold kernel formation.',
+      'Inoculate seeds with Rhizobium and Phosphobacteria biofertilizers to boost nitrogen nodulation by 25%.'
+    ],
+    qualityImprovementTips: [
+      'Dry harvested pods to <8% moisture immediately to prevent carcinogenic Aflatoxin (Aspergillus flavus) buildup.',
+      'Sort and remove immature and split pods before bagging to guarantee Grade-A oil recovery.'
+    ],
+    images: {
+      productImage: 'groundnut',
+      productImageAlt: 'Dried Bold Groundnut Pods & Kernels'
+    },
+    growing: {
+      climate: 'Tropical and subtropical warm climate (22°C - 30°C) with bright sunshine during pod development.',
+      soil: 'Well-drained sandy loam or light sandy soil rich in calcium and organic matter.',
+      idealSoilPh: '6.0 - 7.5',
+      temperatureRange: [20, 34],
+      rainfallRequirement: '500 - 750 mm',
+      sowingMethod: 'Seed drill or bullock/tractor drawn planter at 5 cm depth in friable moist soil',
+      sowingSeason: 'Kharif (June-July) / Rabi-Summer (Jan-Feb)',
+      seedRequirement: '100 - 120 kg kernels / hectare',
+      spacing: '30 cm between rows x 10 cm between plants',
+      growthDuration: '105 - 120 days',
+      growthDays: 110,
+      currentMaturityStage: 90,
+      irrigation: 'Critical pegging and pod development stages require light sprinkler or furrow irrigation.',
+      fertilizerGuidance: [
+        { stage: 'Basal Sowing', recommendation: '20 kg N + 40 kg P2O5 + 40 kg K2O + 20 kg Zinc Sulfate / ha', impact: 'Early root vigor and nodule establishment', urgency: 'Immediate' },
+        { stage: 'Pegging (40-45 DAS)', recommendation: 'Apply Gypsum 400 kg/ha around root zone followed by light earthing', impact: 'Direct calcium delivery for solid pod shells', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Leaf Miner (Aproaerema modicella)', 'Red Hairy Caterpillar', 'Aphids', 'White Grub'],
+      diseaseRisks: ['Tikka Leaf Spot (Cercospora arachidicola)', 'Rust (Puccinia arachidis)', 'Collar Rot'],
+      criticalCareTips: [
+        'Avoid deep cultivation once pegs start entering the soil to prevent peg severance.',
+        'Install light traps to monitor and catch nocturnal hairy caterpillar moths.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 8,
+      recommendedWindow: 'When inner shell lining turns dark brown/blackish and leaves turn yellow',
+      maturityIndicators: [
+        'Foliage turns yellow and lower leaves start shedding naturally.',
+        'Inner surface of pod shell turns dark brown or black when opened.',
+        'Kernels display tight plump skin with true varietal color.'
+      ],
+      harvestingMethod: 'Tractor-drawn blade digger or manual pulling in moist soil; shake off root soil.',
+      bestHarvestTime: 'Clear dry sunny morning',
+      firmnessTarget: 'Hard dry pod shell',
+      postHarvestHandling: [
+        'Field curing in small windrows for 3-5 days to reduce moisture from 35% down to 15%.',
+        'Mechanical threshing or pod stripping followed by sun yard drying down to <8% moisture.',
+        'Grading into Bold Table Grade and Crushing Grade.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '9 to 12 Months (at <8% kernel moisture)',
+      shelfLifeCold: '18 to 24 Months in cold silos (5°C - 8°C)',
+      ambientDays: 270,
+      coldDays: 600,
+      storageTemperature: '15°C - 20°C (Ambient) / 5°C - 8°C (Cold godown)',
+      humidity: '55% - 60% RH (Crucial: Keep under 65% RH to stop Aflatoxins)',
+      coldStorageRequired: false,
+      storageMethod: 'Breathable HDPE mesh sacks or hermetic GrainPro bags on elevated pallets',
+      preservationSteps: [
+        'Ensure kernel moisture is strictly below 8%.',
+        'Dust godown with inert desiccants and maintain continuous cross-ventilation.'
+      ],
+      spoilageIndicators: ['Aflatoxin greenish-yellow Aspergillus mold on kernel', 'Rancid oily smell', 'Borer beetle holes'],
+      curingRequired: true,
+      curingInstructions: 'Sun-cure whole pods on tarpaulins for 5-7 days until pods rattle audibly when shaken.'
+    },
+    packaging: {
+      primaryPackaging: 'Breathable Woven HDPE / Jute Gunny Sacks (40kg / 50kg)',
+      secondaryPackaging: 'Palletized units with corner edge boards',
+      recommendedMaterials: ['HDPE Woven Sacks with UV Stabilizer', 'Natural Jute Burlap', 'Multi-layer hermetic liners'],
+      ventilationRequired: true,
+      ventilationSpec: 'Breathable weave to prevent sweating and mold generation',
+      moistureProtection: 'High protection against atmospheric dampness',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Standard drop resistance',
+      shockRating: 2.2,
+      estimatedPackagingCostPerKg: 0.90,
+      packagingCapacity: '50kg commercial sacks',
+      ecoCertification: '100% Recyclable Packaging',
+      layers: [
+        { layer: 1, name: 'Breathable Woven Sacks', material: 'High-Tenacity HDPE / Jute', function: 'Allows natural airflow while preventing physical damage', icon: '🌾', glowColor: '#d97706' },
+        { layer: 2, name: 'Moisture Barrier Pallet Wrap', material: 'Breathable Top Tarpaulin', function: 'Protects from monsoon rain and floor moisture seepage', icon: '📦', glowColor: '#f59e0b' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Moisture Verification', description: 'Sample batch with digital meter to verify <7.5% moisture.' },
+        { step: 2, title: 'Aflatoxin Visual Screening', description: 'Discard discolored, shriveled, or cracked pods.' },
+        { step: 3, title: 'Machine Stitching', description: 'Stitch top hem with heavy poly twine.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Covered Dry Cargo Truck with tarpaulins',
+      temperatureControlled: false,
+      targetTemp: 'Ambient Dry (18°C - 26°C)',
+      maximumRecommendedDistance: '3,000 km',
+      handlingRequirements: ['Strict moisture protection during transit', 'Never stack directly on wet truck floors'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 15.0
+    },
+    market: {
+      marketCategory: 'High-Demand Oilseed & Protein Commodity (APMC Major)',
+      priceUnit: '₹/kg',
+      basePricePerKg: 72.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 76.00,
+        Mumbai: 74.00,
+        Delhi: 78.00,
+        Nashik: 70.00,
+        Hyderabad: 72.00,
+        Chennai: 75.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 567,
+        protein_g: 25.8,
+        carbs_g: 16.1,
+        fat_g: 49.2,
+        vitaminC_mg: 0,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 8.5,
+        potassium_mg: 705,
+        iron_mg: 4.58,
+        antioxidantIndex: 86,
+        glycemicIndex: 14,
+        highlights: ['Exceptional Plant Protein (25.8g / 100g)', 'Heart-healthy Monounsaturated Oleic Acid', 'Rich in Resveratrol & Biotin']
+      },
+      consumptionMethods: ['Dry-roasted crunchy snack', 'Stone-ground cold-pressed oil', 'Boiled salted pods', 'Creamy wholesome peanut butter'],
+      preparationMethods: ['Roast kernels gently on medium heat to unlock sweet aroma and enhance resveratrol bioavailability.'],
+      nutrientPreservationTips: ['Store roasted peanuts in airtight glass containers to stop air oxidation of unsaturated fatty acids.'],
+      recommendedPreparation: 'Lightly roast with a pinch of rock salt and crushed cumin.',
+      servingGuidance: 'A handful (30g) provides 8g of protein and sustaining energy.',
+      bioavailabilityTip: 'Combine with whole grains (e.g. jowar or wheat) to form a complete amino acid profile.',
+      recipes: [
+        {
+          title: 'High-Protein Roasted Peanut & Herb Chutney',
+          prepTime: '10 mins',
+          healthBenefit: 'High protein, healthy fats, and active plant sterols',
+          ingredients: ['1 cup Roasted Peanuts', '2 Green Chillies', '1 clove Garlic', 'Fresh Coriander', '1 tbsp Lemon Juice', 'Rock Salt'],
+          steps: [
+            'Blend roasted peanuts, green chillies, garlic, and coriander with minimal water.',
+            'Stir in fresh lemon juice and rock salt.',
+            'Enjoy as a nutritious accompaniment with millets or rotis.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Humidity above 65% triggers deadly Aflatoxin B1 fungal contamination (Aspergillus flavus).',
+      highTempRisk: 'Storage above 35°C accelerates oil rancidity and kernel discoloration.',
+      frostRisk: 'Cold shock during pod filling aborts late peg development.',
+      excessRainRisk: 'Waterlogged fields at harvest cause viviparous kernel sprouting inside pods.',
+      transitShockRisk: 'Low; protect sacks from puncture and roof rain leaks.',
+      mitigationStrategy: 'Dry pods to <8% moisture before packaging, test for zero aflatoxin, and transit in dry covered fleets.'
+    }
+  },
+
+  // 10. GROUNDNUT OIL (PROCESSED COMMODITY DERIVATIVE)
+  {
+    id: 'groundnut-oil',
+    name: 'Groundnut Oil (Cold-Pressed Kachi Ghani)',
+    category: 'Oil & Oilseed',
+    subcategory: 'Processed Edible Oil',
+    scientificName: 'Oleum Arachis (Cold-Pressed)',
+    variety: 'Virgin Wood-Pressed (Mara Chekku)',
+    description: 'Aromatic, golden-yellow edible oil extracted at low temperatures (<45°C) without chemical refining, preserving natural tocopherols and phytosterols.',
+    icon: '🛢️',
+    color: '#f59e0b',
+    aliases: ['groundnut oil', 'peanut oil', 'mungfali tel', 'sing tel', 'kadalai ennai', 'cold pressed groundnut oil'],
+    isProcessed: true,
+    rawCommodityId: 'groundnut',
+    processingMethod: 'Traditional wood-pressed expeller (cold press <45°C) followed by natural gravity sedimentation and micro-filtration.',
+    processingStage: 'Secondary Food Processing',
+    qualityImprovementTips: [
+      'Maintain pressing temperature strictly below 45°C to preserve natural Vitamin E and polyphenol antioxidants.',
+      'Allow natural gravity settling for 48 hours instead of chemical bleaching to retain authentic nutty aroma and golden hue.'
+    ],
+    images: {
+      productImage: 'groundnut-oil',
+      productImageAlt: 'Golden Cold-Pressed Groundnut Oil in Glass & Tin'
+    },
+    growing: {
+      climate: 'Derived from high-oil TG-37A groundnut kernels cultivated in semi-arid zones.',
+      soil: 'Rich loamy soils yielding kernels with >48% oil content.',
+      idealSoilPh: '6.5 - 7.5',
+      temperatureRange: [20, 32],
+      rainfallRequirement: '600 mm',
+      sowingMethod: 'Kernel processing in certified hygienic oil mills',
+      sowingSeason: 'Year-round processing post seed curing',
+      seedRequirement: '2.4 kg raw kernels yield 1 Liter of pure cold-pressed oil (42% extraction)',
+      spacing: 'N/A (Processing Unit)',
+      growthDuration: '48 hours extraction and natural sedimentation cycle',
+      growthDays: 2,
+      currentMaturityStage: 100,
+      irrigation: 'Not applicable (Processed product)',
+      fertilizerGuidance: [
+        { stage: 'Raw Material Selection', recommendation: 'Select moisture-tested (<7%) bold seeds free from aflatoxin', impact: 'Purity and extended shelf stability', urgency: 'Immediate' },
+        { stage: 'Filtration', recommendation: 'Pass through food-grade cotton micro-cloth filters', impact: 'Removes seed sediment without stripping antioxidants', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Storage Pests in Raw Kernel Godowns'],
+      diseaseRisks: ['Microbial contamination in unhygienic bottling tanks'],
+      criticalCareTips: [
+        'Store bulk oil in stainless steel (SS-304) food-grade storage tanks.',
+        'Purge headspace with food-grade Nitrogen (N2) to eliminate oxygen-induced rancidity.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 1,
+      recommendedWindow: 'Freshly pressed batches bottled within 24 hours of filtration',
+      maturityIndicators: [
+        'Free Fatty Acid (FFA) level strictly below 0.8%.',
+        'Peroxide Value under 2.0 meq O2/kg.',
+        'Clear golden amber translucence without chemical cloudiness.'
+      ],
+      harvestingMethod: 'Automated gravimetric bottling in nitrogen-purged containers.',
+      bestHarvestTime: 'Controlled temperature cleanroom bottling',
+      firmnessTarget: 'Liquid viscosity 35-40 cP at 25°C',
+      postHarvestHandling: [
+        'Hermetic induction cap sealing on PET/Glass/Tin containers.',
+        'Nitrogen gas flush in headspace to displace air.',
+        'Lot trace QR coding with extraction date and FFA certificate.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '12 Months (in dark hermetic tinplate or amber glass)',
+      shelfLifeCold: '18 Months at 15°C - 18°C',
+      ambientDays: 365,
+      coldDays: 540,
+      storageTemperature: '15°C - 22°C (Cool, Dark Pantry - Away from UV Light)',
+      humidity: '40% - 50% RH',
+      coldStorageRequired: false,
+      storageMethod: 'Dark tinplate cans, amber glass bottles, or opaque food-grade HDPE jars',
+      preservationSteps: [
+        'Keep strictly away from direct sunlight to stop photo-oxidation.',
+        'Reseal container cap tightly after every pour.'
+      ],
+      spoilageIndicators: ['Acrid bitter taste and sharp paint-like smell (rancidity)', 'Peroxide value >10 meq/kg', 'Cloudy precipitate'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Food-Grade Tinplate Cans (1L / 5L) or UV-Protected Amber Glass / Recyclable HDPE Jars',
+      secondaryPackaging: '5-Ply Corrugated Shipping Cartons with cellular grid dividers',
+      recommendedMaterials: ['Food-Contact Tinplate', 'Amber Flint Glass', 'Fluorinated HDPE with Induction Seal', 'PET with UV-Scavenger'],
+      ventilationRequired: false,
+      ventilationSpec: 'Hermetically sealed with nitrogen headspace purge (0% OTR)',
+      moistureProtection: 'Impermeable barrier to stop ambient moisture and water entry',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Grid partition dividers prevent bottle-to-bottle impact',
+      shockRating: 4.5,
+      estimatedPackagingCostPerKg: 3.80,
+      packagingCapacity: '1 Liter / 5 Liter containers',
+      ecoCertification: '100% Recyclable Tinplate / Glass',
+      layers: [
+        { layer: 1, name: 'Hermetic Induction Seal', material: 'Aluminium Foil Induction Liner', function: '100% airtight liquid and oxygen barrier', icon: '🛡️', glowColor: '#f59e0b' },
+        { layer: 2, name: 'UV-Blocking Tin / Amber Container', material: 'Tinplate / Amber Glass', function: 'Blocks 100% UV photons preventing lipid rancidity', icon: '🛢️', glowColor: '#fbbf24' },
+        { layer: 3, name: 'Cellular Master Carton', material: '5-Ply Heavy Kraft CFB Box', function: 'Protects bottles from transit compression and drop shock', icon: '📦', glowColor: '#ca8a04' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Nitrogen Headspace Flush', description: 'Inject 99.9% pure N2 to displace ambient oxygen before capping.' },
+        { step: 2, title: 'Induction Heat Sealing', description: 'Electromagnetically bond foil liner to container mouth.' },
+        { step: 3, title: 'Leak & Torque Test', description: 'Inspect torque cap integrity under 30 kPa vacuum test.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Covered Dry Cargo Truck with vibration dampening',
+      temperatureControlled: false,
+      targetTemp: '18°C - 25°C',
+      maximumRecommendedDistance: '4,000 km',
+      handlingRequirements: ['Strict "This Side Up" orientation', 'Never expose boxes to direct noon sun on open beds'],
+      vibrationSensitivity: 'Medium',
+      baseRatePerKm: 16.0
+    },
+    market: {
+      marketCategory: 'Premium Cold-Pressed Health Oil (High Value FMCG)',
+      priceUnit: '₹/Liter',
+      basePricePerKg: 195.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 210.00,
+        Mumbai: 205.00,
+        Delhi: 215.00,
+        Nashik: 190.00,
+        Hyderabad: 198.00,
+        Chennai: 200.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 884,
+        protein_g: 0,
+        carbs_g: 0,
+        fat_g: 100.0,
+        vitaminC_mg: 0,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 0,
+        potassium_mg: 0,
+        iron_mg: 0.05,
+        antioxidantIndex: 92,
+        glycemicIndex: 0,
+        highlights: ['High Smoke Point (225°C / 437°F)', 'Rich in Natural Vitamin E (Alpha-Tocopherol)', 'High Monounsaturated Fatty Acids (MUFA)']
+      },
+      consumptionMethods: ['Everyday sautéing and traditional stir-frying', 'Deep frying (high thermal stability)', 'Salad dressings and tempering (tadka)'],
+      preparationMethods: ['Ideal for high-heat cooking due to high smoke point (225°C) without forming harmful trans-fats.'],
+      nutrientPreservationTips: ['Never overheat repeatedly; avoid reusing deep-frying oil more than once.'],
+      recommendedPreparation: 'Warm 1 tbsp in a pan, add mustard seeds and curry leaves for authentic aroma.',
+      servingGuidance: '15-20ml daily per person as part of balanced culinary fat intake.',
+      bioavailabilityTip: 'Natural fat matrix unlocks 4x higher absorption of fat-soluble vitamins (A, D, E, K) from vegetables.',
+      recipes: [
+        {
+          title: 'Aromatic Curry Leaf & Mustard Tempered Dal',
+          prepTime: '15 mins',
+          healthBenefit: 'Maximized fat-soluble nutrient absorption & heart wellness',
+          ingredients: ['1.5 tbsp Cold-Pressed Groundnut Oil', '1 cup Cooked Toor Dal', '1 tsp Mustard Seeds', '8 Fresh Curry Leaves', '2 Dried Red Chillies', '1 pinch Hing'],
+          steps: [
+            'Heat groundnut oil in a small tempering pan.',
+            'Add mustard seeds, dried red chillies, and hing; let them splutter.',
+            'Toss in fresh curry leaves, pour immediately over piping hot dal, and cover with lid to trap aroma.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Water droplet contamination induces hydrolytic rancidity and bacterial clouding.',
+      highTempRisk: 'Thermal exposure above 40°C on open trucks breaks down unsaturated fatty acids into bitter peroxides.',
+      frostRisk: 'Low; oil becomes cloudy/solid below 3°C but liquifies naturally at room temperature with zero quality loss.',
+      excessRainRisk: 'Damp cartons cause shipping box collapse and bottle leakage.',
+      transitShockRisk: 'High drop impact can crack glass bottles or dent tin seams.',
+      mitigationStrategy: 'Use nitrogen-flushed tinplate or induction-sealed HDPE with heavy-duty cellular carton dividers.'
+    }
+  },
+
+  // 11. FRESH COW MILK (RAW DAIRY COMMODITY)
+  {
+    id: 'milk',
+    name: 'Fresh Cow Milk (A2 Gir Cow)',
+    category: 'Dairy',
+    subcategory: 'Raw Liquid Dairy',
+    scientificName: 'Lac Vaccinum (A2 Beta-Casein)',
+    variety: 'Farm Fresh Pure Raw Milk (A2 Gir / Sahiwal)',
+    description: 'Fresh, nutrient-dense whole milk rich in A2 beta-casein protein, bioavailable calcium, and beneficial enzymes, requiring strict 4°C cold-chain logistics.',
+    icon: '🥛',
+    color: '#38bdf8',
+    aliases: ['milk', 'cow milk', 'doodh', 'palu', 'haalu', 'paal', 'fresh milk', 'a2 milk'],
+    isProcessed: false,
+    derivedProducts: [
+      { id: 'curd', name: 'Probiotic Farm Curd (Dahi)', icon: '🥣', yieldPercent: 95 },
+      { id: 'paneer', name: 'Fresh Soft Cottage Cheese (Paneer)', icon: '🧀', yieldPercent: 18 },
+      { id: 'butter', name: 'Cultured Cultivated Makkan / Butter', icon: '🧈', yieldPercent: 6 },
+      { id: 'ghee', name: 'Pure Bilona Desi Ghee', icon: '🫙', yieldPercent: 4.5 }
+    ],
+    yieldImprovementTips: [
+      'Feed lactating cows balanced Total Mixed Ration (TMR) comprising 60% green fodder (lucerne/maize) + 40% protein concentrate.',
+      'Ensure 24x7 ad-libitum fresh drinking water access (cows require 4-5 liters of water per liter of milk produced).'
+    ],
+    qualityImprovementTips: [
+      'Pre-chill milk down to 4°C within 2 hours of milking in bulk milk coolers (BMC) to suppress bacterial multiplication.',
+      'Enforce strict pre-milking teat sanitization and automated stainless-steel milking pipelines (SS-316).'
+    ],
+    images: {
+      productImage: 'milk',
+      productImageAlt: 'Farm Fresh Pure A2 Gir Cow Milk in Glass Bottle'
+    },
+    growing: {
+      climate: 'Clean, well-ventilated cattle sheds with misting fans for thermal comfort (18°C - 25°C).',
+      soil: 'Organic fodder cultivation paddocks (Napier grass / Berseem).',
+      idealSoilPh: '6.5 - 7.5 (Fodder soil)',
+      temperatureRange: [15, 28],
+      rainfallRequirement: 'Ample water supply for clean dairy hygiene',
+      sowingMethod: 'Hygienic machine milking in automated sanitary parlors',
+      sowingSeason: 'Continuous daily morning & evening lactation cycles',
+      seedRequirement: 'Pedigree certified A2 Gir/Sahiwal dairy cattle',
+      spacing: '12 sq. meters open paddock space per cow',
+      growthDuration: 'Daily 2-milking cycle (Morning 5 AM / Evening 5 PM)',
+      growthDays: 1,
+      currentMaturityStage: 100,
+      irrigation: 'Automated drinking troughs with clean potable RO water',
+      fertilizerGuidance: [
+        { stage: 'Daily Nutrition', recommendation: 'Mineral mixture (50g) + Calcium liquid tonic + Salt licks', impact: 'Maintains high SNF (>8.5%) and Fat (>4.2%)', urgency: 'Immediate' },
+        { stage: 'Udder Health', recommendation: 'Post-milking organic iodine teat dip', impact: '100% prevention of sub-clinical mastitis', urgency: 'Immediate' }
+      ],
+      commonPests: ['Ticks (Boophilus microplus)', 'Flies in barn'],
+      diseaseRisks: ['Mastitis', 'Foot and Mouth Disease (FMD)', 'Bacterial spoilage (Lactic acid fermentation)'],
+      criticalCareTips: [
+        'Chill milk to 4°C immediately post-milking to halt bacterial colony forming units (CFU).',
+        'Clean milk pipelines with CIP (Clean-In-Place) caustic/acid wash daily.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 1,
+      recommendedWindow: 'Immediate cold dispatch within 4 hours of morning milking',
+      maturityIndicators: [
+        'Methylene Blue Reduction Time (MBRT) exceeds 5.0 hours (Superior microbial grade).',
+        'Fat percentage > 4.0%, Solid-Not-Fat (SNF) > 8.5%.',
+        'Specific gravity 1.028 - 1.032 at 20°C.'
+      ],
+      harvestingMethod: 'Automated SS-316 milking cluster directly piped into bulk milk chiller (BMC).',
+      bestHarvestTime: 'Early morning (05:00 AM) & evening (05:00 PM)',
+      firmnessTarget: 'Liquid density 1.030 g/cm³',
+      postHarvestHandling: [
+        'Rapid chilling from 37°C down to 4°C within 90 minutes in refrigerated BMC tanks.',
+        'Sanitary pouch packaging or sterile glass bottling.',
+        'Insulated reefer dispatch with continuous temperature datalogging.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '4 to 6 Hours (at room temperature 25°C - Sours rapidly)',
+      shelfLifeCold: '3 to 5 Days (at strict 2°C - 4°C chilled cold chain)',
+      ambientDays: 0.25,
+      coldDays: 4,
+      storageTemperature: '2°C - 4°C (STRICT CONTINUOUS COLD CHAIN MANDATORY)',
+      humidity: '85% - 90% RH',
+      coldStorageRequired: true,
+      storageMethod: 'Insulated milk chillers or cold storage vaults (2°C - 4°C)',
+      preservationSteps: [
+        'Maintain unbroken cold chain from farm chiller to consumer refrigerator.',
+        'Pasteurize at 72°C for 15 seconds (HTST) if extended shelf-life is required.'
+      ],
+      spoilageIndicators: ['Sour acidic odor and curdling upon boiling (clot-on-boiling positive)', 'pH drops below 6.4', 'Phase separation'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: '5-Layer Co-Extruded EVOH Barrier Pouch (500ml / 1L) or Sterilized Glass Bottles with Tamper Seal',
+      secondaryPackaging: 'Returnable Stackable HDPE Dairy Crates (12 x 1L / 24 x 500ml)',
+      recommendedMaterials: ['5-Layer PE/EVOH/PE Co-Ex Pouch with Black UV Barrier Core', 'Sterilized Flint Glass Bottle', 'Aseptic Brick Carton'],
+      ventilationRequired: false,
+      ventilationSpec: 'Hermetically heat-sealed liquid containment',
+      moistureProtection: '100% Liquid leakproof barrier',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Interlocking HDPE crates prevent pouch rupture under hydraulic transit shock',
+      shockRating: 4.6,
+      estimatedPackagingCostPerKg: 2.10,
+      packagingCapacity: '1 Liter pouches / crates of 12 liters',
+      ecoCertification: '100% Recyclable Polyethylene / Reusable Glass',
+      layers: [
+        { layer: 1, name: 'Food-Contact Inner Poly', material: 'Virgin Metallocene LLDPE', function: 'Hermetic liquid seal with zero chemical migration', icon: '🥛', glowColor: '#38bdf8' },
+        { layer: 2, name: 'Black Light Barrier Layer', material: 'Carbon Black Co-Extruded Core', function: 'Blocks 100% UV light preventing riboflavin breakdown', icon: '🛡️', glowColor: '#0ea5e9' },
+        { layer: 3, name: 'Interlocking Dairy Crate', material: 'High-Density Polyethylene RPC', function: 'Absorbs transit road vibrations and enables 6-high stacking', icon: '🧺', glowColor: '#0284c7' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'In-Line Chilling Verification', description: 'Confirm milk core temp is below 3.5°C before filler bowl.' },
+        { step: 2, title: 'Hermetic Form-Fill-Seal', description: 'Ultrasonic or thermal impulse jaw seal with zero headspace leak.' },
+        { step: 3, title: 'Crate Nesting & Cold Vault', description: 'Load pouches into sanitised crates and transfer to 2°C cold room.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Dedicated Refrigerated Insulated Reefer Van (2°C - 4°C)',
+      temperatureControlled: true,
+      targetTemp: '2°C - 4°C (MANDATORY REEFER)',
+      maximumRecommendedDistance: '300 km (for raw/pasteurized milk) or 1,500 km in Insulated Tankers',
+      handlingRequirements: ['Unbroken cold chain', 'Real-time GPS + IoT temperature datalogging', 'Zero ambient layovers'],
+      vibrationSensitivity: 'High',
+      baseRatePerKm: 28.0
+    },
+    market: {
+      marketCategory: 'Daily High-Frequency Dairy Essential (Perishable)',
+      priceUnit: '₹/Liter',
+      basePricePerKg: 65.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 68.00,
+        Mumbai: 72.00,
+        Delhi: 66.00,
+        Nashik: 60.00,
+        Hyderabad: 65.00,
+        Chennai: 70.00
+      },
+      priceTrend: 'Stable'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 67,
+        protein_g: 3.4,
+        carbs_g: 4.8,
+        fat_g: 4.1,
+        vitaminC_mg: 1.0,
+        vitaminA_IU: 160,
+        dietaryFiber_g: 0,
+        potassium_mg: 150,
+        iron_mg: 0.05,
+        antioxidantIndex: 78,
+        glycemicIndex: 30,
+        highlights: ['Easy to Digest A2 Beta-Casein Protein', 'High Bioavailable Calcium (120mg / 100ml)', 'Natural Conjugated Linoleic Acid (CLA)']
+      },
+      consumptionMethods: ['Warm soothing bedtime drink with turmeric', 'Culture into live probiotic curd/dahi', 'Fresh homemade soft paneer', 'Traditional tea and coffee base'],
+      preparationMethods: ['Bring to a gentle rolling boil for 2 minutes to ensure microbiological safety while preserving delicate lactoferrin proteins.'],
+      nutrientPreservationTips: ['Do not overheat repeatedly in microwave; cool boiled milk with lid covered to retain moisture and volatile vitamins.'],
+      recommendedPreparation: 'Simmer gently with a crushed cardamom pod and a pinch of pure saffron.',
+      servingGuidance: '1 glass (250ml) provides 30% of daily calcium and 8.5g of complete protein.',
+      bioavailabilityTip: 'Natural milk fat enhances absorption of Vitamin D and calcium into bones.',
+      recipes: [
+        {
+          title: 'Ayurvedic Golden Turmeric & Nutmeg Night Elixir',
+          prepTime: '5 mins',
+          healthBenefit: 'Promotes deep restful sleep & strengthens bone density',
+          ingredients: ['1 cup Pure A2 Cow Milk', '1/4 tsp Salem Turmeric', '1 pinch Fresh Grated Nutmeg', '1 Crushed Green Cardamom', '1 tsp Raw Honey'],
+          steps: [
+            'Warm the milk in a small saucepan over medium heat.',
+            'Whisk in turmeric, crushed cardamom, and grated nutmeg; bring to a light simmer.',
+            'Pour into a mug, stir in raw honey when warm (not boiling), and drink before bedtime.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Not applicable to liquid packaging; protect cartons from pooling floor water.',
+      highTempRisk: 'CRITICAL: Temperature rising above 7°C causes exponential bacterial proliferation (Lactobacillus/Coliforms) and irreversible souring within 3 hours.',
+      frostRisk: 'Freezing solid (-2°C) causes fat emulsion destabilization and protein precipitation upon thawing.',
+      excessRainRisk: 'Road delays during monsoon jeopardize the short 4-hour raw milk transit window.',
+      transitShockRisk: 'High hydraulic surging in liquid tanks can cause pouch friction tears if crates are loose.',
+      mitigationStrategy: 'Enforce continuous 2°C-4°C reefer transport, automated IoT temperature alarms, and 6-hour delivery radius.'
+    }
+  },
+
+  // 12. PURE DESI GHEE (PROCESSED DAIRY DERIVATIVE)
+  {
+    id: 'ghee',
+    name: 'Pure Desi Ghee (Bilona Churned A2)',
+    category: 'Dairy',
+    subcategory: 'Processed Clarified Butterfat',
+    scientificName: 'Butyrum Purificatum (A2 Milk Fat)',
+    variety: 'Traditional Vedic Bilona Hand-Churned',
+    description: 'Golden clarified butterfat prepared by slow-simmering cultured makkhan over woodfire, rich in butyric acid, fat-soluble vitamins, and rich nutty aroma.',
+    icon: '🫙',
+    color: '#eab308',
+    aliases: ['ghee', 'desi ghee', 'bilona ghee', 'clarified butter', 'a2 ghee', 'cow ghee', 'neyyi', 'tuppa', 'ghee butter'],
+    isProcessed: true,
+    rawCommodityId: 'milk',
+    processingMethod: 'Traditional 5-Samskara Vedic Process: Raw A2 Milk -> Boiled -> Cultured into Curd -> Bilated in Wooden Churner -> Makkhan Extracted -> Slow Woodfire Simmering -> Golden Ghee.',
+    processingStage: 'High-Value Artisan Dairy Processing',
+    qualityImprovementTips: [
+      'Simmer cultured butter on low flame (<110°C) with betel/curry leaves to precipitate milk solids without scorching.',
+      'Allow ghee to cool undisturbed in cool room (18°C) for 24 hours to develop characteristic granular (Danedar) crystal texture.'
+    ],
+    images: {
+      productImage: 'ghee',
+      productImageAlt: 'Granular Golden Bilona Desi Ghee in Glass Jar'
+    },
+    growing: {
+      climate: 'Derived from whole A2 Gir cow milk cultured with natural lactobacillus starter.',
+      soil: 'Pristine organic pastures supporting grazing dairy cattle.',
+      idealSoilPh: '6.5 - 7.5',
+      temperatureRange: [15, 26],
+      rainfallRequirement: 'N/A (Processing unit)',
+      sowingMethod: 'Traditional wooden bilona bi-directional churning',
+      sowingSeason: 'Year-round processing in certified clean artisan facilities',
+      seedRequirement: '25-28 Liters of pure A2 milk yield 1 Kg of pure Bilona Desi Ghee (3.8% yield ratio)',
+      spacing: 'Artisan processing floor',
+      growthDuration: '48-hour traditional culturing, churning, and slow clarification cycle',
+      growthDays: 2,
+      currentMaturityStage: 100,
+      irrigation: 'Not applicable',
+      fertilizerGuidance: [
+        { stage: 'Curd Fermentation', recommendation: 'Culture milk at 28°C for 16 hours', impact: 'Maximizes probiotic lactic aroma and short-chain fatty acids', urgency: 'Immediate' },
+        { stage: 'Clarification', recommendation: 'Filter hot ghee through multi-layer sanitized muslin', impact: 'Zero burnt milk solids; 99.8% pure butterfat', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Storage ants/insects in open jars'],
+      diseaseRisks: ['Oxidative rancidity if exposed to moisture and direct sun'],
+      criticalCareTips: [
+        'Store in airtight glass jars or food-grade tinplate; strictly avoid moisture ingress.',
+        'Never insert wet spoons into ghee jar.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 1,
+      recommendedWindow: 'Granulated batches packed into sterilized dry containers at 40°C',
+      maturityIndicators: [
+        'Moisture content strictly under 0.3% (FSSAI standard).',
+        'Free Fatty Acid (as Oleic) < 0.5%.',
+        'Rich golden granular consistency with authentic nutty aroma.'
+      ],
+      harvestingMethod: 'Manual filling into sterilized hot dry glass jars with induction seal.',
+      bestHarvestTime: 'Hygienic dust-free cleanroom',
+      firmnessTarget: 'Granular semi-solid at 20°C',
+      postHarvestHandling: [
+        'Slow cooling at 18°C-20°C for 24 hours to promote large granular crystals.',
+        'Hermetic induction cap sealing to lock out ambient moisture.',
+        'Holographic provenance QR tag.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '12 to 18 Months (at room temperature in dark pantry)',
+      shelfLifeCold: '24+ Months in cold storage',
+      ambientDays: 450,
+      coldDays: 730,
+      storageTemperature: '18°C - 24°C (Ambient Dark Pantry - No refrigeration required)',
+      humidity: '40% - 50% RH (Must avoid steam/condensation)',
+      coldStorageRequired: false,
+      storageMethod: 'Airtight amber glass jars, ceramic Martaban crocks, or food-grade tinplate cans',
+      preservationSteps: [
+        'Ensure container is completely hermetic to stop air and moisture entry.',
+        'Store in dark pantry away from kitchen stove heat and sunlight.'
+      ],
+      spoilageIndicators: ['Bleached pale color', 'Rancid paint-like aroma', 'Tallowy taste due to oxidation'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Flint / Amber Glass Jars with Hermetic Lug Cap (500ml / 1L) or Heavy Food-Grade Tinplate Cans',
+      secondaryPackaging: '5-Ply Corrugated Cartons with full-height partitions',
+      recommendedMaterials: ['Flint Glass Jar', 'Amber UV Glass', 'Food-Contact Tinplate Can', 'Multi-Layer Barrier Pouches with AL Foil'],
+      ventilationRequired: false,
+      ventilationSpec: 'Hermetically sealed with nitrogen flush (100% Gas & Moisture Barrier)',
+      moistureProtection: 'Zero water vapor transmission required',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Corrugated divider cells protect glass jars from vibration fracturing',
+      shockRating: 4.8,
+      estimatedPackagingCostPerKg: 7.50,
+      packagingCapacity: '500g / 1kg glass jars & 5kg tins',
+      ecoCertification: '100% Reusable & Recyclable Glass & Tin',
+      layers: [
+        { layer: 1, name: 'Induction Foil Liner', material: 'Aluminium Heat-Seal Membrane', function: 'Guarantees zero oxygen ingress and tamper evidence', icon: '🛡️', glowColor: '#eab308' },
+        { layer: 2, name: 'Heavy Amber Glass Jar', material: '100% Inert Silica Glass', function: 'Protects delicate butyric aroma and prevents UV photo-oxidation', icon: '🫙', glowColor: '#f59e0b' },
+        { layer: 3, name: 'Cushioned Master Box', material: '5-Ply Heavy Virgin Kraft Carton', function: 'Absorbs 450kg top-load stacking compression', icon: '📦', glowColor: '#ca8a04' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Sterile Thermal Drying', description: 'Bake glass jars at 110°C for 20 mins to ensure zero residual moisture.' },
+        { step: 2, title: 'Warm Liquid Pouring', description: 'Pour liquid ghee at 42°C with automated volumetric nozzles.' },
+        { step: 3, title: 'Granulation Resting', description: 'Rest filled jars undisturbed at 18°C for 24h to develop granular texture.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Covered Dry Cargo Truck with air-ride suspension',
+      temperatureControlled: false,
+      targetTemp: 'Ambient Dry (18°C - 25°C)',
+      maximumRecommendedDistance: '5,000 km (National & Export Shipping)',
+      handlingRequirements: ['Handle glass with care; no rough tipping', 'Keep out of direct solar heat'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 16.0
+    },
+    market: {
+      marketCategory: 'Super-Premium Artisan Wellness Commodity (High Margin)',
+      priceUnit: '₹/kg',
+      basePricePerKg: 950.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 1100.00,
+        Mumbai: 1150.00,
+        Delhi: 1200.00,
+        Nashik: 950.00,
+        Hyderabad: 1050.00,
+        Chennai: 1080.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 897,
+        protein_g: 0.1,
+        carbs_g: 0,
+        fat_g: 99.5,
+        vitaminC_mg: 0,
+        vitaminA_IU: 3069,
+        dietaryFiber_g: 0,
+        potassium_mg: 5,
+        iron_mg: 0.02,
+        antioxidantIndex: 96,
+        glycemicIndex: 0,
+        highlights: ['Rich in Butyric Acid (Nourishes Gut Lining)', 'Abundant Fat-Soluble Vitamins (A, D, E, K2)', 'High Smoke Point (252°C / 485°F)']
+      },
+      consumptionMethods: ['Drizzle over piping hot rotis, dal, and rice', 'Ayurvedic morning tablespoon with warm water', 'High-heat sacred roasting and baking', 'Skin healing and massage'],
+      preparationMethods: ['Add a spoonful to hot rice or soup right before eating to preserve active fat-soluble enzymes.'],
+      nutrientPreservationTips: ['Use a clean dry spoon; do not leave the jar open in humid steam.'],
+      recommendedPreparation: 'Warm 1 tsp and drizzle over steamed ragi mudde or whole wheat rotis.',
+      servingGuidance: '1-2 teaspoons (10-15g) daily supports joint mobility and optimal digestion.',
+      bioavailabilityTip: 'Butyrate strengthens intestinal tight junctions and enhances cellular nutrient absorption across the colon.',
+      recipes: [
+        {
+          title: 'Vedic Granular Ghee & Jaggery Energy Laddu',
+          prepTime: '20 mins',
+          healthBenefit: 'Instant sustained vitality, rich in iron, zinc, and healthy fats',
+          ingredients: ['1/2 cup Pure Desi Ghee', '1 cup Roasted Wheat Flour', '1/2 cup Organic Jaggery Powder', '1/4 tsp Cardamom', 'Crushed Almonds'],
+          steps: [
+            'Roast wheat flour in warm ghee on low flame until aromatic and golden.',
+            'Remove from heat, let cool to lukewarm, then mix in organic jaggery powder and cardamom.',
+            'Shape into round nourishing energy laddus and store in an airtight glass jar.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Moisture ingress triggers hydrolytic rancidity and fungal colonization.',
+      highTempRisk: 'Storage above 40°C melts granular crystals into liquid, causing phase separation.',
+      frostRisk: 'Zero risk; solidifies below 15°C naturally without any nutritional compromise.',
+      excessRainRisk: 'Damp cardboard master boxes can soften and collapse.',
+      transitShockRisk: 'Glass jar cracking if transport pallets lack corner protection.',
+      mitigationStrategy: 'Seal with induction foil, pack in partitioned corrugated boxes, and ship in dry covered trucks.'
+    }
+  },
+
+  // 13. WHEAT FLOUR (PROCESSED GRAIN DERIVATIVE)
+  {
+    id: 'wheat-flour',
+    name: 'Whole Wheat Flour (Stone-Ground Chakki Atta)',
+    category: 'Flour',
+    subcategory: 'Processed Cereal Flour',
+    scientificName: 'Triticum aestivum (Whole Meal)',
+    variety: '100% Whole Grain Sharbati Chakki Fresh',
+    description: 'Traditional slow stone-ground whole wheat flour retaining 100% of the wheat germ, bran fiber, and endosperm nutrients without chemical bleaching or refining.',
+    icon: '🌾',
+    color: '#ca8a04',
+    aliases: ['wheat flour', 'atta', 'gehu ka atta', 'chakki atta', 'whole wheat flour', 'godhumai maavu', 'godhi hittu'],
+    isProcessed: true,
+    rawCommodityId: 'wheat',
+    processingMethod: 'Pre-cleaning, destoning, controlled 2-hour conditioning, and slow cold stone milling (<40°C) with 0% maida separation.',
+    processingStage: 'Milled Grain Commodity',
+    qualityImprovementTips: [
+      'Maintain stone milling speed under 350 RPM to keep flour temperature <40°C, preserving heat-sensitive Vitamin E and wheat germ oils.',
+      'Control grain conditioning moisture strictly to 12.0% prior to milling for optimal soft dough elasticity and water absorption (>68%).'
+    ],
+    images: {
+      productImage: 'wheat-flour',
+      productImageAlt: 'Stone Ground Whole Wheat Chakki Atta Pack'
+    },
+    growing: {
+      climate: 'Milled from high-protein MP Sharbati wheat grown in cool dry winter seasons.',
+      soil: 'Deep fertile black cotton soils.',
+      idealSoilPh: '6.5 - 8.0',
+      temperatureRange: [15, 25],
+      rainfallRequirement: 'N/A (Milling Facility)',
+      sowingMethod: 'Traditional emery/granite chakki stone milling',
+      sowingSeason: 'Year-round fresh milling on demand',
+      seedRequirement: '1.05 kg whole wheat grain yields 1.0 kg 100% whole meal atta (95% extraction rate)',
+      spacing: 'Milling plant',
+      growthDuration: 'Continuous automated milling and packing',
+      growthDays: 1,
+      currentMaturityStage: 100,
+      irrigation: 'Not applicable',
+      fertilizerGuidance: [
+        { stage: 'Grain Cleaning', recommendation: 'Aspiration + magnetic destoning + gravity separation', impact: '100% zero grit/sand particles', urgency: 'Immediate' },
+        { stage: 'Moisture Check', recommendation: 'Verify finished flour moisture < 11.5%', impact: 'Prevents insect infestation and mold', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Flour Beetle (Tribolium castaneum)', 'Rice Weevil', 'Flour Mites'],
+      diseaseRisks: ['Fungal mold if stored in damp godowns (>65% RH)'],
+      criticalCareTips: [
+        'Store in airtight nitrogen-flushed or vacuum-sealed bags with moisture barrier liners.',
+        'Keep bags off cold damp floors on wooden or plastic pallets.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 1,
+      recommendedWindow: 'Immediate packaging post air-cooling to 25°C',
+      maturityIndicators: [
+        'Flour moisture strictly under 12.0%.',
+        'Gluten content (wet) > 28%, Protein > 11.5%.',
+        'Granulation: 95% passes through 60-mesh sieve (balanced coarse bran).'
+      ],
+      harvestingMethod: 'Automated screw feeder into multi-layer barrier pouches.',
+      bestHarvestTime: 'Clean dry milling plant',
+      firmnessTarget: 'Soft powdery texture with visible golden bran flakes',
+      postHarvestHandling: [
+        'Pneumatic cyclone air-cooling of freshly ground flour down to 25°C.',
+        'Metal detector screening (Ferrous/Non-Ferrous/SS 1.0mm).',
+        'Automatic bag heat-sealing and tamper-evident coding.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '3 to 4 Months (in standard paper/poly bag) or 9 Months in Barrier Foil',
+      shelfLifeCold: '12 Months at 10°C - 15°C',
+      ambientDays: 100,
+      coldDays: 365,
+      storageTemperature: '18°C - 24°C (Cool, Dry, Well-Ventilated Godown)',
+      humidity: '50% - 60% RH (STRICT: Must not exceed 65% RH)',
+      coldStorageRequired: false,
+      storageMethod: 'BOPP laminated moisture-proof sacks or multi-wall kraft paper bags on pallets',
+      preservationSteps: [
+        'Ensure moisture stays below 11.5% to stop flour beetles and mold.',
+        'Store 30 cm away from walls and 15 cm above ground on pallets.'
+      ],
+      spoilageIndicators: ['Webbing and live flour beetles (Tribolium)', 'Musty fungal odor', 'Sour dough aroma due to lipid hydrolysis'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'BOPP Laminated Multi-Layer Moisture-Barrier Poly Pouch (5kg / 10kg)',
+      secondaryPackaging: 'Heavy-Duty 5-Ply Master Carton or Woven Outer Sacks (50kg)',
+      recommendedMaterials: ['BOPP / Met-PET / PE Laminate', 'Multi-Wall Kraft Paper with LDPE Liner', 'Sealed Nitrogen-Flushed Foil'],
+      ventilationRequired: false,
+      ventilationSpec: 'Hermetically sealed moisture and insect barrier (Zero Perforation)',
+      moistureProtection: 'High water vapor barrier (WVTR < 2.0 g/m²·day)',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Puncture-resistant film prevents bag burst upon warehouse drop',
+      shockRating: 3.5,
+      estimatedPackagingCostPerKg: 1.20,
+      packagingCapacity: '5kg & 10kg consumer packs',
+      ecoCertification: '100% Recyclable BOPP',
+      layers: [
+        { layer: 1, name: 'Moisture Barrier Inner Liner', material: 'Co-Ex Virgin Polyethylene', function: 'Locks out atmospheric dampness and stops insect penetration', icon: '🛡️', glowColor: '#ca8a04' },
+        { layer: 2, name: 'High-Gloss BOPP Film', material: 'Biaxially Oriented Polypropylene', function: 'Provides high tensile strength and puncture resistance', icon: '📦', glowColor: '#eab308' },
+        { layer: 3, name: 'Smart Traceability Barcode', material: 'Printed High-Speed Lot Code', function: 'Milling date, wheat origin, and gluten analysis certificate', icon: '🏷️', glowColor: '#38bdf8' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Flour Temperature Check', description: 'Ensure flour has cooled below 28°C before bagging.' },
+        { step: 2, title: 'De-Aeration & Compaction', description: 'Vibrate bag to expel trapped air and maximize stacking stability.' },
+        { step: 3, title: 'Hermetic Heat Seal', description: 'Continuous band heat seal with 15mm tamper-proof weld.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Covered Dry Cargo Container Truck',
+      temperatureControlled: false,
+      targetTemp: 'Ambient Dry (<25°C)',
+      maximumRecommendedDistance: '3,000 km',
+      handlingRequirements: ['Zero water leaks in truck container roof', 'Stack max 10 bags high on pallets'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 15.0
+    },
+    market: {
+      marketCategory: 'High-Volume Daily Household Staple (FMCG Core)',
+      priceUnit: '₹/kg',
+      basePricePerKg: 42.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 45.00,
+        Mumbai: 44.00,
+        Delhi: 40.00,
+        Nashik: 38.00,
+        Hyderabad: 43.00,
+        Chennai: 46.00
+      },
+      priceTrend: 'Stable'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 340,
+        protein_g: 12.1,
+        carbs_g: 71.2,
+        fat_g: 1.7,
+        vitaminC_mg: 0,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 11.5,
+        potassium_mg: 363,
+        iron_mg: 3.9,
+        antioxidantIndex: 76,
+        glycemicIndex: 54,
+        highlights: ['100% Whole Grain Bran & Germ Intact', 'High Dietary Fiber (11.5g / 100g)', 'Natural B-Complex Vitamins & Magnesium']
+      },
+      consumptionMethods: ['Soft puffed phulkas and rotis', 'Stuffed parathas', 'Wholesome stone-ground puris', 'Traditional whole wheat halwa / sheera'],
+      preparationMethods: ['Knead with warm water and rest dough covered for 20 minutes to allow gluten network relaxation for super soft rotis.'],
+      nutrientPreservationTips: ['Do not sieve out the coarse bran particles; they contain 80% of the fiber and essential B-vitamins.'],
+      recommendedPreparation: 'Knead with 1 tsp ghee and warm water; roast on a cast-iron tawa until puffed.',
+      servingGuidance: '2-3 phulkas (80-100g flour) provides sustained energy and active digestion support.',
+      bioavailabilityTip: 'Resting the kneaded dough for 30 minutes activates endogenous phytase enzymes, increasing zinc and iron absorption.',
+      recipes: [
+        {
+          title: 'Feather-Soft Whole Wheat Phulkas',
+          prepTime: '25 mins',
+          healthBenefit: 'High dietary fiber, digestive ease, and sustained low-GI energy',
+          ingredients: ['2 cups Whole Wheat Chakki Atta', '3/4 cup Warm Water', '1/2 tsp Salt', '1 tsp Pure Ghee'],
+          steps: [
+            'Mix atta and salt; gradually add warm water and knead into a smooth, elastic dough.',
+            'Coat with 1 tsp ghee, cover with a damp cloth, and rest 20 minutes.',
+            'Roll into thin discs and cook on hot tawa, flipping once until it puffs into a soft golden balloon.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Humidity > 65% causes flour to absorb moisture, leading to clumping, souring, and mold.',
+      highTempRisk: 'Storage > 35°C accelerates oxidation of wheat germ oils, causing stale cardboard taste.',
+      frostRisk: 'None; freeze-thaw stable in dry condition.',
+      excessRainRisk: 'Water leaks through truck tarpaulins ruin entire bottom pallet layers.',
+      transitShockRisk: 'Bag rupture if sharp hooks or rough container walls tear multi-wall paper.',
+      mitigationStrategy: 'Use BOPP moisture-barrier sacks, stack on pallets, and transport in sealed dry container trucks.'
+    }
+  },
+
+  // 14. TEA (PROCESSED AGRO-CASH COMMODITY)
+  {
+    id: 'tea',
+    name: 'Tea (Assam CTC & Orthodox Black Tea)',
+    category: 'Tea & Coffee',
+    subcategory: 'Processed Beverage Leaf',
+    scientificName: 'Camellia sinensis var. assamica',
+    variety: 'Assam Premium Second Flush (CTC BP / BOP)',
+    description: 'Rich, malty, full-bodied black tea produced from hand-plucked two leaves and a bud, processed via traditional CTC (Crush, Tear, Curl) and orthodox rolling.',
+    icon: '🍵',
+    color: '#047857',
+    aliases: ['tea', 'black tea', 'chai', 'assam tea', 'ctc tea', 'tea leaves', 'orthodox tea', 'camellia sinensis'],
+    isProcessed: true,
+    rawCommodityId: 'tea-leaves',
+    processingMethod: 'Withering (14h) -> CTC Maceration -> Controlled Fermentation/Oxidation (28°C, 95% RH) -> Fluidized Bed Drying (120°C) -> Sorting & Cleaning.',
+    processingStage: 'Estate Processed Commodity',
+    qualityImprovementTips: [
+      'Pluck strictly "two leaves and a bud" fine shoot standard for highest theaflavins (TF) and thearubigins (TR).',
+      'Maintain oxidation room temperature under 28°C with 95% RH to achieve bright coppery liquor and malty briskness.'
+    ],
+    images: {
+      productImage: 'tea',
+      productImageAlt: 'Rich Golden CTC Assam Black Tea Grains'
+    },
+    growing: {
+      climate: 'Warm humid tropical climate (22°C - 32°C) with abundant monsoon rainfall (2,000 - 3,000 mm).',
+      soil: 'Deep, well-drained acidic virgin loamy soils with high organic matter.',
+      idealSoilPh: '4.5 - 5.5 (Acidic soil vital)',
+      temperatureRange: [18, 35],
+      rainfallRequirement: '2,000 - 3,500 mm evenly distributed',
+      sowingMethod: 'Vegetative clonal propagation (TV clones) in contoured estate terraces',
+      sowingSeason: 'Spring & Monsoon flushes (March - October)',
+      seedRequirement: '14,000 clonal bushes / hectare in double-hedge system',
+      spacing: '105 cm between rows x 60 cm between bushes',
+      growthDuration: 'Perennial bush lifespan 60+ years; plucking rounds every 7-10 days',
+      growthDays: 7,
+      currentMaturityStage: 92,
+      irrigation: 'Overhead sprinkler irrigation during dry pre-monsoon months (Feb-April)',
+      fertilizerGuidance: [
+        { stage: 'Post-Prune Flush', recommendation: 'NPK 100:40:100 kg/ha + Zinc Sulfate foliar spray', impact: 'Vigorous flush of tender vegetative shoots', urgency: 'Immediate' },
+        { stage: 'Second Flush Quality', recommendation: 'Magnesium Sulfate (1%) + Boron foliar nutrition', impact: 'High theaflavin synthesis and liquor briskness', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Tea Mosquito Bug (Helopeltis theivora)', 'Red Spider Mite', 'Thrips'],
+      diseaseRisks: ['Blister Blight (Exobasidium vexans)', 'Black Rot', 'Red Rust'],
+      criticalCareTips: [
+        'Maintain shade trees (Albizia lebbeck) in plantation to filter intense solar radiation.',
+        'Prune bushes cyclically every 3-4 years to maintain reachable plucking table.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 5,
+      recommendedWindow: 'Fine plucking standard: top two leaves and unopened terminal bud',
+      maturityIndicators: [
+        'Tender succulent shoots with two fully open leaves and a velvety silver bud.',
+        'Zero coarse overgrown foliage on the plucking table.',
+        'Moisture in freshly plucked green leaf: 75% - 78%.'
+      ],
+      harvestingMethod: 'Manual hand plucking or ergonomic estate shears with collection aprons.',
+      bestHarvestTime: 'Early dry morning (07:00 AM - 11:30 AM)',
+      firmnessTarget: 'Crisp dry granules (<3.5% final moisture)',
+      postHarvestHandling: [
+        'Transport green leaf in ventilated leaf baskets within 2 hours to prevent field heating.',
+        'Withering troughs with controlled air fans to reduce leaf moisture to 65%.',
+        'Fluidized bed drying down to <3.0% moisture followed by electrostatic fiber cleaning.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '18 to 24 Months (in hermetic aluminium foil barrier pouches)',
+      shelfLifeCold: '36 Months at 10°C - 15°C',
+      ambientDays: 540,
+      coldDays: 1080,
+      storageTemperature: '18°C - 24°C (Ambient Dry - Odor-Free Warehouse)',
+      humidity: '45% - 55% RH (Must avoid moisture and foreign odors)',
+      coldStorageRequired: false,
+      storageMethod: 'Aluminium-foil lined multi-wall paper sacks or hermetic tinplate canisters',
+      preservationSteps: [
+        'Keep strictly away from high-odor commodities (spices, onions, diesel).',
+        'Ensure moisture stays below 4.0% to prevent loss of briskness and aroma.'
+      ],
+      spoilageIndicators: ['Loss of malty aroma (flat liquor)', 'Moisture pickup >7% (moldy taint)', 'Soft dull liquor color'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Multi-Layer Aluminium Barrier Pouch (PET/AL/PE) with Degassing / Nitrogen Flush (250g / 500g / 1kg)',
+      secondaryPackaging: '5-Ply Master Export Shipping Cartons or Multi-Wall Paper Sacks with Foil Liner (20kg / 35kg)',
+      recommendedMaterials: ['PET / AL / PE Multi-Layer Foil', 'Airtight Tinplate Cans with Hermetic Plug', 'Metallized BOPP Barrier Film'],
+      ventilationRequired: false,
+      ventilationSpec: '100% Hermetically sealed (Zero OTR and Zero WVTR Barrier)',
+      moistureProtection: 'Absolute moisture and aroma barrier',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Standard carton protection',
+      shockRating: 3.2,
+      estimatedPackagingCostPerKg: 3.20,
+      packagingCapacity: '250g / 500g / 1kg pouches & 20kg bulk chests',
+      ecoCertification: '100% Recyclable Outer Cartons / Reusable Tins',
+      layers: [
+        { layer: 1, name: 'Aluminium Foil Aroma Shield', material: 'Pure Aluminium Foil Barrier Core', function: 'Blocks 100% oxygen, moisture, and aromatic volatile escape', icon: '🛡️', glowColor: '#047857' },
+        { layer: 2, name: 'Outer Reverse-Printed PET', material: 'High-Tensile Gloss Polyester', function: 'Protects barrier foil from puncture and flex-cracking', icon: '📦', glowColor: '#10b981' },
+        { layer: 3, name: 'Reclosable Zipper Seal', material: 'Food-Grade PE Lock Zipper', function: 'Enables repeated consumer opening while locking in freshness', icon: '🔒', glowColor: '#38bdf8' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Moisture Quality Assay', description: 'Confirm final tea moisture is strictly below 3.5%.' },
+        { step: 2, title: 'Nitrogen Purge Filling', description: 'Displace residual oxygen to <0.5% in pouch headspace.' },
+        { step: 3, title: 'Hermetic Ultrasonic Seal', description: 'Weld top seal with tamper-evident notch.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Clean, Odor-Free Covered Dry Container Truck',
+      temperatureControlled: false,
+      targetTemp: 'Ambient Dry (18°C - 28°C)',
+      maximumRecommendedDistance: '5,000 km (Domestic & Global Container Export)',
+      handlingRequirements: ['Strictly odor-free container; never ship with chemical or spice loads', 'Protect from container sweat'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 16.0
+    },
+    market: {
+      marketCategory: 'High-Value Agro-Beverage Commodity (Tea Board Auction)',
+      priceUnit: '₹/kg',
+      basePricePerKg: 280.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 320.00,
+        Mumbai: 310.00,
+        Delhi: 295.00,
+        Nashik: 275.00,
+        Hyderabad: 300.00,
+        Chennai: 315.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 2,
+        protein_g: 0.1,
+        carbs_g: 0.3,
+        fat_g: 0,
+        vitaminC_mg: 0,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 0,
+        potassium_mg: 37,
+        iron_mg: 0.02,
+        antioxidantIndex: 98,
+        glycemicIndex: 0,
+        highlights: ['Rich in Theaflavins & Thearubigins', 'Natural L-Theanine for Calm Mental Focus', 'Potent Polyphenol Antioxidants']
+      },
+      consumptionMethods: ['Classic Indian Spiced Masala Chai with milk and ginger', 'Brisk morning black tea with lemon', 'Cold-brewed iced tea with mint'],
+      preparationMethods: ['Steep in freshly boiled water (95°C - 100°C) for 3-4 minutes to release full malty notes without excessive astringency.'],
+      nutrientPreservationTips: ['Do not over-boil tea leaves for >6 minutes to avoid tannin bitterness and caffeine degradation.'],
+      recommendedPreparation: 'Simmer 1 tsp CTC tea in 1/2 cup water with crushed ginger; add 1/2 cup fresh milk and boil 2 mins.',
+      servingGuidance: '2-3 cups daily provides calm mental alertness and cardiovascular protection.',
+      bioavailabilityTip: 'L-Theanine in tea crosses the blood-brain barrier synergistically with caffeine to enhance alpha-wave brain focus without jitters.',
+      recipes: [
+        {
+          title: 'Royal Malty Ginger & Cardamom Masala Chai',
+          prepTime: '8 mins',
+          healthBenefit: 'Immune resilience, enhanced digestion, and focused mental clarity',
+          ingredients: ['1.5 tsp Assam CTC Tea', '1 cup Fresh Cow Milk', '1/2 cup Water', '1 inch Crushed Fresh Ginger', '2 Green Cardamoms', '1 tsp Jaggery / Honey'],
+          steps: [
+            'Boil water with crushed ginger and bruised cardamom pods for 2 minutes.',
+            'Add Assam CTC tea leaves and simmer on low flame for 2 minutes until deep amber.',
+            'Pour in fresh milk, bring to a rolling frothy boil twice, strain into a kulhad, and sweeten with jaggery.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Moisture absorption above 7% destroys briskness and creates sour fungal mold.',
+      highTempRisk: 'Heat above 35°C accelerates the loss of volatile aromatic terpenes and essential oils.',
+      frostRisk: 'Severe frost damages tender plucking tables in high-altitude gardens.',
+      excessRainRisk: 'Heavy monsoon waterlogging lowers leaf polyphenol concentration.',
+      transitShockRisk: 'Low; protect sacks from puncture and odor contamination.',
+      mitigationStrategy: 'Pack in nitrogen-flushed multi-layer aluminium foil pouches and ship in odorless sealed containers.'
+    }
+  },
+
+  // 15. COFFEE (PROCESSED AGRO-CASH COMMODITY)
+  {
+    id: 'coffee',
+    name: 'Coffee (Coorg Arabica Beans / Roasted & Ground)',
+    category: 'Tea & Coffee',
+    subcategory: 'Processed Specialty Beverage',
+    scientificName: 'Coffea arabica',
+    variety: 'Estate Plantation-A / Mysore Nuggets Extra Bold',
+    description: 'Shade-grown specialty Arabica coffee handpicked in the Western Ghats of Coorg, wet-processed (washed), medium-roasted, and degassed with one-way aroma valves.',
+    icon: '☕',
+    color: '#78350f',
+    aliases: ['coffee', 'arabica coffee', 'filter coffee', 'coffee beans', 'kaapi', 'roasted coffee', 'ground coffee', 'coffea arabica'],
+    isProcessed: true,
+    rawCommodityId: 'coffee-cherry',
+    processingMethod: 'Selective Red Cherry Handpicking -> Wet Pulping & Fermentation (36h) -> Patio Sun Drying (10.5% moisture) -> Hulling -> Drum Roasting (215°C) -> Grinding.',
+    processingStage: 'Specialty Roasted & Ground Commodity',
+    qualityImprovementTips: [
+      'Harvest strictly 100% ripe red cherries (Brix >18°) to maximize sweetness and cup acidity.',
+      'Package roasted coffee in pouches with One-Way Aroma Degassing Valves to vent natural CO2 while blocking ambient oxygen.'
+    ],
+    images: {
+      productImage: 'coffee',
+      productImageAlt: 'Rich Roasted Arabica Coffee Beans & Ground Powder'
+    },
+    growing: {
+      climate: 'High-altitude sub-tropical climate (1,000 - 1,500m MSL) with cool temperatures (15°C - 26°C) and canopy shade.',
+      soil: 'Deep, porous, well-drained volcanic or forest loamy soil rich in organic humus.',
+      idealSoilPh: '6.0 - 6.8',
+      temperatureRange: [14, 28],
+      rainfallRequirement: '1,500 - 2,500 mm with crucial Blossom Showers (March-April)',
+      sowingMethod: 'Nursery seedling planting in two-tier shaded agroforestry grids',
+      sowingSeason: 'Monsoon planting (June - August)',
+      seedRequirement: '1,100 - 1,300 plants / acre (Arabica standard)',
+      spacing: '2.0m x 2.0m or 2.5m x 2.5m under silver oak shade canopy',
+      growthDuration: 'Tree lifespan 35+ years; annual fruiting cycle 8-9 months from blossom',
+      growthDays: 240,
+      currentMaturityStage: 95,
+      irrigation: 'Backing irrigation / blossom sprinkler (25mm) in March to trigger uniform synchronized flowering.',
+      fertilizerGuidance: [
+        { stage: 'Post-Blossom (May)', recommendation: 'NPK 120:90:120 kg/ha in 3 split doses', impact: 'Fruit cluster setting and bean density', urgency: 'Immediate' },
+        { stage: 'Berry Swelling (Aug)', recommendation: 'Foliar spray of 0.5% Zinc Sulfate + 0.2% Urea', impact: 'Prevents die-back and maximizes bean size', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Coffee Berry Borer (Hypothenemus hampei)', 'White Stem Borer (Xylotrechus quadripes)', 'Mealybugs'],
+      diseaseRisks: ['Coffee Leaf Rust (Hemileia vastatrix)', 'Black Rot (Koleroga)', 'Anthracnose'],
+      criticalCareTips: [
+        'Maintain 40-50% filtered canopy shade through systematic shade tree lopping.',
+        'Install berry borer brocap traps (10/acre) to keep infestation under 1%.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 7,
+      recommendedWindow: 'Selective selective hand-picking of deep crimson-red ripe cherries only',
+      maturityIndicators: [
+        'Cherries turn uniform dark crimson red with sweet mucilage pulp.',
+        'Zero green or yellow under-ripe berries in picking basket.',
+        'Cherry sugar Brix reaches 19° - 21°.'
+      ],
+      harvestingMethod: 'Manual selective individual cherry plucking in canvas collection bags.',
+      bestHarvestTime: 'Bright dry winter mornings (Dec - Feb)',
+      firmnessTarget: 'Crisp roasted bean density (Moisture <2.5%)',
+      postHarvestHandling: [
+        'Pulping within 6 hours of picking in eco-pulpers.',
+        'Washed fermentation for 36 hours to remove mucilage, followed by sun-drying on tiled patios.',
+        'Precision drum roasting at 215°C followed by rapid air-quenching and packing with degassing valves.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '12 Months (as whole roasted beans in valved foil pouch) or 6 Months (ground)',
+      shelfLifeCold: '18 Months in vacuum-sealed deep freeze (-10°C)',
+      ambientDays: 365,
+      coldDays: 540,
+      storageTemperature: '15°C - 20°C (Cool, Dark, Airtight - Away from Heat & Moisture)',
+      humidity: '40% - 50% RH',
+      coldStorageRequired: false,
+      storageMethod: 'Multi-layer barrier foil bags with One-Way Aroma Degassing Valves',
+      preservationSteps: [
+        'Use One-Way Degassing Valve pouches to release natural roasted CO2 without allowing oxygen ingress.',
+        'Grind right before brewing for peak aroma retention.'
+      ],
+      spoilageIndicators: ['Stale flat taste (loss of crema and aroma)', 'Rancid coffee oil odor due to lipid oxidation', 'Moisture caking'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Tri-Laminated Aluminium Foil Pouch with One-Way Aroma Degassing Valve & Zip Lock (250g / 500g / 1kg)',
+      secondaryPackaging: '5-Ply Master Corrugated Shipping Carton',
+      recommendedMaterials: ['PET / AL / PE Multi-Layer Foil', 'Kraft Paper Foil Laminate with One-Way Valve', 'Hermetic Nitrogen-Flushed Tin Cans'],
+      ventilationRequired: false,
+      ventilationSpec: 'One-Way Gas Degassing Valve (Releases CO2, Blocks 100% External Oxygen & Moisture)',
+      moistureProtection: 'Ultra-High barrier (WVTR < 0.05 g/m²·day, OTR < 0.05 cm³/m²·day)',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Standard carton protection',
+      shockRating: 4.2,
+      estimatedPackagingCostPerKg: 5.20,
+      packagingCapacity: '250g / 500g / 1kg retail packs',
+      ecoCertification: '100% Recyclable Outer Cartons / Recyclable Valved Films',
+      layers: [
+        { layer: 1, name: 'One-Way Aroma Degassing Valve', material: 'Precision Membrane Valve', function: 'Vents post-roast CO2 gas buildup while blocking ambient air', icon: '💨', glowColor: '#78350f' },
+        { layer: 2, name: 'Aluminium Foil Barrier Core', material: '100% Light & Gas Impermeable Foil', function: 'Guarantees absolute zero oxygen ingress to stop coffee oil staling', icon: '🛡️', glowColor: '#92400e' },
+        { layer: 3, name: 'Kraft / PET Outer Shield', material: 'Tear-Resistant Laminated Film', function: 'Structural strength and premium tactile branding', icon: '📦', glowColor: '#b45309' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Post-Roast Cooling', description: 'Air-quench roasted beans to room temperature within 4 minutes.' },
+        { step: 2, title: 'One-Way Valved Bag Filling', description: 'Volumetric nitrogen-assisted dosing into valved pouches.' },
+        { step: 3, title: 'Hermetic Heat Sealing', description: 'Thermal bar seal above reclosable zipper.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Covered Clean Dry Cargo Container Truck',
+      temperatureControlled: false,
+      targetTemp: 'Ambient Dry (15°C - 24°C)',
+      maximumRecommendedDistance: '5,000 km (National & Export Specialty Coffee Shipping)',
+      handlingRequirements: ['Strict odor-free dry shipping', 'Zero exposure to direct sun on open vehicle beds'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 16.0
+    },
+    market: {
+      marketCategory: 'Premium Specialty Beverage Commodity (High Value)',
+      priceUnit: '₹/kg',
+      basePricePerKg: 450.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 520.00,
+        Mumbai: 500.00,
+        Delhi: 540.00,
+        Nashik: 460.00,
+        Hyderabad: 490.00,
+        Chennai: 510.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 2,
+        protein_g: 0.3,
+        carbs_g: 0.2,
+        fat_g: 0.1,
+        vitaminC_mg: 0,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 0,
+        potassium_mg: 116,
+        iron_mg: 0.01,
+        antioxidantIndex: 99,
+        glycemicIndex: 0,
+        highlights: ['Rich in Chlorogenic Acid (Super-Antioxidant)', 'Natural Cognitive & Metabolic Performance Enhancer', 'Zero Sugar & Zero Calories (Black)']
+      },
+      consumptionMethods: ['Traditional South Indian Filter Coffee with frothed milk', 'Espresso shot', 'Cold brew steeped 18 hours', 'Pour-over specialty black brew'],
+      preparationMethods: ['Brew with 92°C-96°C hot water in a traditional stainless-steel coffee filter; let decoction brew 15 minutes.'],
+      nutrientPreservationTips: ['Keep roasted coffee sealed in its valved bag in a dark cupboard; avoid freezing and thawing repeatedly.'],
+      recommendedPreparation: 'Mix 60ml first-drip filter decoction with 120ml frothed hot milk and 1 tsp jaggery.',
+      servingGuidance: '1-2 cups daily delivers powerful antioxidant protection and sustained mental energy.',
+      bioavailabilityTip: 'Chlorogenic acids in fresh roast coffee modulate glucose-6-phosphatase, supporting healthy metabolic glycemic response.',
+      recipes: [
+        {
+          title: 'Authentic South Indian Degree Filter Coffee',
+          prepTime: '15 mins',
+          healthBenefit: 'Maximized chlorogenic antioxidants & metabolic vitality',
+          ingredients: ['3 tbsp Freshly Ground Coorg Arabica Coffee', '1 cup Boiling Water (94°C)', '1 cup Fresh Frothy A2 Cow Milk', '1 tsp Jaggery / Sugar'],
+          steps: [
+            'Add fresh ground coffee into the top compartment of stainless-steel filter; press tamper disc lightly.',
+            'Pour boiling water over the disc and close lid; let decoction drip for 12 minutes.',
+            'Mix 50ml hot decoction with 100ml piping hot frothy milk in a traditional davarah/tumbler; meter-pour back and forth to create velvety foam.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Moisture ingress causes immediate staling, fungal mold, and loss of delicate aromatic crema.',
+      highTempRisk: 'Storage above 30°C causes rapid oxidation of precious coffee lipids and loss of aromatic carbon dioxide.',
+      frostRisk: 'None for dry roasted coffee; keep sealed.',
+      excessRainRisk: 'Damp storage warehouses ruin packaging barriers.',
+      transitShockRisk: 'Low; ensure valve integrity is protected from puncture.',
+      mitigationStrategy: 'Use multi-layer barrier pouches with One-Way Aroma Degassing Valves and ship in dry sealed containers.'
+    }
   }
 ];
 

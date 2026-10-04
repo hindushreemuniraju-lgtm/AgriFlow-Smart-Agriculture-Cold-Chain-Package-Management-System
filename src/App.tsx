@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { UserRole, CropInfo, FarmerOrder, DriverPartner } from './types';
 import { Header } from './components/Header';
 import { FarmerDashboard } from './components/farmer/FarmerDashboard';
 import { LogisticsDashboard } from './components/logistics/LogisticsDashboard';
+import { CustomerMarketplaceView } from './components/customer/CustomerMarketplaceView';
 import { CustomerPassportView } from './components/customer/CustomerPassportView';
+import { PackagingIntelligenceDashboard } from './components/packaging/PackagingIntelligenceDashboard';
+import { AuthModal } from './components/auth/AuthModal';
+import { RoleOnboardingModal } from './components/auth/RoleOnboardingModal';
 import { CROPS_DATA } from './data/cropsFallback';
 import { INITIAL_ORDERS, INITIAL_DRIVERS } from './data/mockFallback';
-import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart } from 'lucide-react';
+import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart, QrCode, ShoppingCart } from 'lucide-react';
 
 const AgriFlowMain: React.FC = () => {
   const { t } = useLanguage();
-  const [currentRole, setCurrentRole] = useState<UserRole>('farmer');
+  const { activeRole, switchRole, user } = useAuth();
   
   const [crops, setCrops] = useState<CropInfo[]>(CROPS_DATA);
   const [selectedCrop, setSelectedCrop] = useState<CropInfo>(CROPS_DATA[0]);
   const [orders, setOrders] = useState<FarmerOrder[]>(INITIAL_ORDERS);
   const [drivers, setDrivers] = useState<DriverPartner[]>(INITIAL_DRIVERS);
   const [notification, setNotification] = useState<{ title: string; desc: string; type: 'success' | 'info' } | null>(null);
+  const [activeCustomerSubView, setActiveCustomerSubView] = useState<'marketplace' | 'passport'>('marketplace');
+  const [currentPassportBatchId, setCurrentPassportBatchId] = useState<string>('AGF-8921');
 
   // Sync with API on mount
   useEffect(() => {
@@ -133,13 +140,18 @@ const AgriFlowMain: React.FC = () => {
     );
   };
 
+  const handleOpenPassportFromMarketplace = (batchId: string) => {
+    setCurrentPassportBatchId(batchId);
+    setActiveCustomerSubView('passport');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-purple-500 selection:text-white">
       
-      {/* Global Header */}
+      {/* Global Header with Multi-Role Switcher */}
       <Header
-        currentRole={currentRole}
-        onSelectRole={(role) => setCurrentRole(role)}
+        currentRole={activeRole}
+        onSelectRole={(role) => switchRole(role)}
         activeOrdersCount={orders.filter(o => o.status === 'Requested').length}
       />
 
@@ -165,8 +177,8 @@ const AgriFlowMain: React.FC = () => {
           </div>
         )}
 
-        {/* 1. Farmer Interface */}
-        {currentRole === 'farmer' && (
+        {/* 1. Farmer Production & Agronomy Interface */}
+        {activeRole === 'farmer' && (
           <FarmerDashboard
             crops={crops}
             selectedCrop={selectedCrop}
@@ -175,8 +187,50 @@ const AgriFlowMain: React.FC = () => {
           />
         )}
 
-        {/* 2. Logistics & Transportation Interface */}
-        {currentRole === 'logistics' && (
+        {/* 2. SIH26236 Food Packaging Intelligence Interface */}
+        {activeRole === 'packaging' && (
+          <PackagingIntelligenceDashboard />
+        )}
+
+        {/* 3. Customer Marketplace & Product Passport Interface */}
+        {activeRole === 'customer' && (
+          <div>
+            <div className="flex items-center justify-end gap-2 mb-4">
+              <button
+                onClick={() => setActiveCustomerSubView('marketplace')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeCustomerSubView === 'marketplace'
+                    ? 'bg-pink-600 text-white shadow-md'
+                    : 'bg-slate-900 text-slate-400 hover:text-white'
+                }`}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>Marketplace</span>
+              </button>
+
+              <button
+                onClick={() => setActiveCustomerSubView('passport')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeCustomerSubView === 'passport'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'bg-slate-900 text-slate-400 hover:text-white'
+                }`}
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>QR Scanner / Passport</span>
+              </button>
+            </div>
+
+            {activeCustomerSubView === 'marketplace' ? (
+              <CustomerMarketplaceView onOpenPassport={handleOpenPassportFromMarketplace} />
+            ) : (
+              <CustomerPassportView initialBatchId={currentPassportBatchId} />
+            )}
+          </div>
+        )}
+
+        {/* 4. Transporter Logistics & Fleet Interface */}
+        {activeRole === 'logistics' && (
           <LogisticsDashboard
             orders={orders}
             drivers={drivers}
@@ -185,14 +239,11 @@ const AgriFlowMain: React.FC = () => {
           />
         )}
 
-        {/* 3. Customer Interface & QR Product Passport */}
-        {currentRole === 'customer' && (
-          <CustomerPassportView
-            initialBatchId={orders[0]?.batchId || 'AGF-8921'}
-          />
-        )}
-
       </main>
+
+      {/* Global Modals */}
+      <AuthModal />
+      <RoleOnboardingModal />
 
       {/* Modern Dark Footer with Live Telemetry Heartbeat */}
       <footer className="border-t border-purple-500/20 bg-slate-950/80 backdrop-blur-md mt-16 py-8">
@@ -201,7 +252,7 @@ const AgriFlowMain: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-base">🌱</span>
             <span className="font-extrabold text-white">{t.appName}</span>
-            <span>• Next-Gen Smart Agriculture & Cold-Chain Management</span>
+            <span>• SIH26236 Intelligent Food Packaging & Farm-to-Table Ecosystem</span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
@@ -212,30 +263,37 @@ const AgriFlowMain: React.FC = () => {
             <span className="text-slate-600">|</span>
             <span className="flex items-center gap-1 text-purple-300">
               <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
-              <span>APEDA & ISO 22000 Provenance</span>
+              <span>APEDA & FSSAI IS 9845 Provenance</span>
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setCurrentRole('farmer')}
-              className={`hover:text-purple-300 transition-colors ${currentRole === 'farmer' ? 'text-purple-400 font-bold' : ''}`}
+              onClick={() => switchRole('farmer')}
+              className={`hover:text-emerald-300 transition-colors ${activeRole === 'farmer' ? 'text-emerald-400 font-bold' : ''}`}
             >
               Farmer
             </button>
             <span>•</span>
             <button
-              onClick={() => setCurrentRole('logistics')}
-              className={`hover:text-sky-300 transition-colors ${currentRole === 'logistics' ? 'text-sky-400 font-bold' : ''}`}
+              onClick={() => switchRole('packaging')}
+              className={`hover:text-purple-300 transition-colors ${activeRole === 'packaging' ? 'text-purple-400 font-bold' : ''}`}
             >
-              Logistics
+              Packaging AI
             </button>
             <span>•</span>
             <button
-              onClick={() => setCurrentRole('customer')}
-              className={`hover:text-pink-300 transition-colors ${currentRole === 'customer' ? 'text-pink-400 font-bold' : ''}`}
+              onClick={() => switchRole('customer')}
+              className={`hover:text-pink-300 transition-colors ${activeRole === 'customer' ? 'text-pink-400 font-bold' : ''}`}
             >
-              Customer Passport
+              Marketplace
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => switchRole('logistics')}
+              className={`hover:text-sky-300 transition-colors ${activeRole === 'logistics' ? 'text-sky-400 font-bold' : ''}`}
+            >
+              Fleet
             </button>
           </div>
 
@@ -249,7 +307,9 @@ const AgriFlowMain: React.FC = () => {
 export default function App() {
   return (
     <LanguageProvider>
-      <AgriFlowMain />
+      <AuthProvider>
+        <AgriFlowMain />
+      </AuthProvider>
     </LanguageProvider>
   );
 }

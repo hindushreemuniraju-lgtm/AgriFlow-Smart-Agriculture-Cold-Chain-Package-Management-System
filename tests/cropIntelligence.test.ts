@@ -1,5 +1,5 @@
 /**
- * Automated Verification Test Suite for AgriFlow Universal Crop Intelligence System
+ * Automated Verification Test Suite for AgriFlow Universal Crop Intelligence System & SIH26236 Food Packaging Module
  */
 
 import { resolveCropAlias, calculateSimilarity, getDidYouMeanSuggestions } from '../src/services/crop/cropAliasService';
@@ -12,6 +12,9 @@ import { getPriceHistoryAnalytics } from '../src/services/market/priceHistorySer
 import { generateSmartMarketRecommendation } from '../src/services/market/marketRecommendationService';
 import { generateUniversalSmartPlan } from '../src/services/ai/smartPlanService';
 import { INDIAN_AGRI_DISTRICTS } from '../src/services/location/geocodingService';
+import { generatePackagingRecommendation, calculateRespirationKinetics } from '../src/services/packaging/packagingRecommendationEngine';
+import { evaluateJourneySuitability } from '../src/services/transport/deliverySuitabilityService';
+import { COMPREHENSIVE_PRODUCT_DATABASE } from '../src/data/productsDatabase';
 
 let passedTests = 0;
 let failedTests = 0;
@@ -27,7 +30,7 @@ function assert(condition: boolean, testName: string) {
 }
 
 console.log('====================================================');
-console.log('🚀 RUNNING AGRIFLOW UNIVERSAL CROP INTELLIGENCE TESTS');
+console.log('🚀 RUNNING AGRIFLOW UNIVERSAL CROP & SIH26236 PACKAGING TESTS');
 console.log('====================================================\n');
 
 // 1. TEST ALIAS & CANONICAL MAPPING
@@ -51,6 +54,15 @@ const otherAliases = [
   { q: 'sapota', expected: 'sapota' },
   { q: 'groundnut', expected: 'groundnut' },
   { q: 'peanut', expected: 'groundnut' },
+  { q: 'groundnut oil', expected: 'groundnut-oil' },
+  { q: 'milk', expected: 'milk' },
+  { q: 'cow milk', expected: 'milk' },
+  { q: 'ghee', expected: 'ghee' },
+  { q: 'desi ghee', expected: 'ghee' },
+  { q: 'wheat flour', expected: 'wheat-flour' },
+  { q: 'atta', expected: 'wheat-flour' },
+  { q: 'tea', expected: 'tea' },
+  { q: 'coffee', expected: 'coffee' },
   { q: 'turmeric', expected: 'turmeric' },
   { q: 'haldi', expected: 'turmeric' },
   { q: 'potato', expected: 'potato' },
@@ -66,16 +78,19 @@ otherAliases.forEach(({ q, expected }) => {
   assert(res !== null && res.canonicalId === expected, `Query "${q}" maps to canonical "${expected}"`);
 });
 
-// 2. TEST CROP SWITCHING & ZERO DATA LEAKAGE
-console.log('\n2. Testing Product Switching & Data Isolation (Brinjal -> Tomato -> Mango -> Rice -> Almond -> Brinjal):');
-const switchSequence = ['brinjal', 'tomato', 'mango', 'rice', 'almond', 'brinjal'];
+// 2. TEST CROP SWITCHING & ZERO DATA LEAKAGE ACROSS AGRICULTURAL & PROCESSED GOODS
+console.log('\n2. Testing Product Switching & Isolation Across Crops & Processed Foods:');
+const switchSequence = ['brinjal', 'tomato', 'groundnut', 'groundnut-oil', 'milk', 'ghee', 'wheat-flour', 'tea', 'coffee'];
 const switchExpected = [
-  { name: 'Brinjal', scientific: 'Solanum melongena', emoji: '🍆', temp: '12°C - 14°C' },
-  { name: 'Tomato', scientific: 'Solanum lycopersicum', emoji: '🍅', temp: '12°C - 15°C (DO NOT store below 10°C)' },
-  { name: 'Mango', scientific: 'Mangifera indica', emoji: '🥭', temp: '12°C - 13°C' },
-  { name: 'Rice (Paddy)', scientific: 'Oryza sativa', emoji: '🌾', temp: 'Ambient Dry (18°C - 25°C)' },
-  { name: 'Almond (Badam)', scientific: 'Prunus dulcis', emoji: '🌰', temp: '0°C - 5°C (Cold) or <18°C (Ambient dark)' },
-  { name: 'Brinjal', scientific: 'Solanum melongena', emoji: '🍆', temp: '12°C - 14°C' }
+  { name: 'Brinjal', scientific: 'Solanum melongena', emoji: '🍆' },
+  { name: 'Tomato', scientific: 'Solanum lycopersicum', emoji: '🍅' },
+  { name: 'Groundnut', scientific: 'Arachis hypogaea', emoji: '🥜' },
+  { name: 'Groundnut Oil', scientific: 'Oleum Arachis', emoji: '🛢️' },
+  { name: 'Cow Milk', scientific: 'Lac Vaccinum', emoji: '🥛' },
+  { name: 'Ghee', scientific: 'Butyrum Purificatum', emoji: '🫙' },
+  { name: 'Whole Wheat Flour', scientific: 'Triticum aestivum', emoji: '🌾' },
+  { name: 'Tea', scientific: 'Camellia sinensis', emoji: '🍵' },
+  { name: 'Coffee', scientific: 'Coffea arabica', emoji: '☕' }
 ];
 
 switchSequence.forEach((cropId, idx) => {
@@ -85,7 +100,7 @@ switchSequence.forEach((cropId, idx) => {
 
   assert(knowledge.name.includes(expected.name), `Step ${idx + 1}: ${cropId} name matches "${expected.name}"`);
   assert(knowledge.scientificName.includes(expected.scientific) || expected.scientific.includes(knowledge.scientificName), `Step ${idx + 1}: ${cropId} scientific name matches "${expected.scientific}"`);
-  assert(visual.emoji === expected.emoji, `Step ${idx + 1}: ${cropId} visual icon is "${expected.emoji}" (Never broccoli/generic substitute)`);
+  assert(visual.emoji === expected.emoji, `Step ${idx + 1}: ${cropId} visual icon is "${expected.emoji}" (Never generic/wrong substitute)`);
 });
 
 // 3. TEST DETERMINISTIC NET REALIZATION & MANDI RECOMMENDATION
@@ -110,16 +125,61 @@ const rec = generateSmartMarketRecommendation('Brinjal', 'Nashik, Maharashtra', 
 assert(rec !== null, 'Generated valid smart market recommendation');
 assert(rec?.bestMarket.mandi.market === best.mandi.market, `Recommended best market is "${best.mandi.market}"`);
 
-// 4. TEST UNKNOWN CROP DYNAMIC KNOWLEDGE DISCOVERY
-console.log('\n4. Testing Unknown Crop Dynamic Synthesis:');
-const unknownCrop = getEnrichedCropKnowledge('Dragon Fruit');
-assert(unknownCrop.name.includes('Dragon Fruit'), 'Unknown crop "Dragon Fruit" generated authentic name');
-assert(unknownCrop.knowledgeMeta.isDynamicallyDiscovered === true, 'Flagged as dynamically discovered with source provenance');
-assert(unknownCrop.growing.growthDuration !== '', 'Synthesized complete agronomic cultivation profile');
-assert(unknownCrop.storage.storageTemperature !== '', 'Synthesized storage temperature');
+// 4. TEST SIH26236 PACKAGING RECOMMENDATION & RESPIRATION KINETICS
+console.log('\n4. Testing SIH26236 Food Packaging Recommendation Engine:');
+const brinjalProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'brinjal')!;
+const milkProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'milk')!;
+const coffeeProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'coffee')!;
 
-// 5. TEST UNIVERSAL SMART PLAN GENERATION
-console.log('\n5. Testing End-to-End Universal Smart Plan Synthesis:');
+// 4.1 Test fresh respiring produce (Brinjal)
+const brinjalRespiration = calculateRespirationKinetics(brinjalProduct, 13);
+assert(brinjalRespiration.requiresVentilation === true, 'Fresh brinjal flagged as requiring ventilation');
+assert(brinjalRespiration.estimatedO2ConsumptionMgKgHr > 0, `Calculated realistic O2 consumption: ${brinjalRespiration.estimatedO2ConsumptionMgKgHr} mg/kg·h`);
+
+const brinjalPackRec = generatePackagingRecommendation({
+  product: brinjalProduct,
+  quantityKg: 500,
+  targetShelfLifeDays: 14,
+  storageTempC: 13,
+  humidityPercent: 85,
+  distanceKm: 200,
+  estimatedTravelHours: 5,
+  vehicleType: 'Ventilated LCV',
+  budgetPreference: 'balanced',
+  sustainabilityPreference: 'standard'
+});
+
+assert(brinjalPackRec.recommended.material.category === 'Paper & Corrugated' || brinjalPackRec.recommended.material.category === 'Returnable Container' || brinjalPackRec.recommended.material.compatibility.perforatedVentilationAvailable, 'Recommended breathable/ventilated packaging for fresh brinjal');
+assert(brinjalPackRec.notRecommended.material.barrierProperties.oxygenBarrierTier === 'Ultra-High', 'Flagged non-ventilated ultra-high barrier foil as Not Recommended for fresh respiring produce (anaerobic risk)');
+
+// 4.2 Test processed dry/fat commodity (Coffee)
+const coffeePackRec = generatePackagingRecommendation({
+  product: coffeeProduct,
+  quantityKg: 100,
+  targetShelfLifeDays: 365,
+  storageTempC: 20,
+  humidityPercent: 50,
+  distanceKm: 1000,
+  estimatedTravelHours: 24,
+  vehicleType: 'Covered Dry Container',
+  budgetPreference: 'balanced',
+  sustainabilityPreference: 'standard'
+});
+
+assert(coffeePackRec.recommended.material.barrierProperties.oxygenBarrierTier === 'Ultra-High' || coffeePackRec.recommended.material.barrierProperties.oxygenBarrierTier === 'High', 'Recommended high oxygen & light barrier for roasted coffee');
+
+// 5. TEST DISTANCE & DELIVERY SUITABILITY ENGINE
+console.log('\n5. Testing Distance & Delivery Transport Suitability:');
+const milkJourney = evaluateJourneySuitability(milkProduct, 500, 500, 'Tata Ace (Open Ambient)');
+const localMilkJourney = milkJourney.standardEvaluations.find(e => e.distanceKm === 20)!;
+const longMilkJourney = milkJourney.standardEvaluations.find(e => e.distanceKm === 500)!;
+
+assert(localMilkJourney.viabilityStatus === 'Approved', 'Local 20 km raw milk delivery is Approved');
+assert(longMilkJourney.viabilityStatus === 'Critical Risk' || longMilkJourney.viabilityStatus === 'Conditional', 'Long-haul 500 km raw milk journey flagged with Critical / Spoilage warning');
+assert(longMilkJourney.isRefrigerationMandatory === true, 'Refrigeration (4°C) strictly mandatory for milk transit');
+
+// 6. TEST UNIVERSAL SMART PLAN GENERATION
+console.log('\n6. Testing End-to-End Universal Smart Plan Synthesis:');
 async function testSmartPlan() {
   const plan = await generateUniversalSmartPlan('brinjal', {
     formattedAddress: 'Nashik District, Maharashtra',

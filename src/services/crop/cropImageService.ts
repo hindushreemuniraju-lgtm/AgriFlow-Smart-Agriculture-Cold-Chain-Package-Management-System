@@ -314,6 +314,76 @@ export const VERIFIED_CROP_IMAGE_MAP: Record<string, VerifiedCropVisual> = {
     altText: 'High-Curcumin Salem Turmeric Finger (Curcuma longa)',
     source: 'AgriFlow Spices Board Registry',
     verificationStatus: 'verified'
+  },
+  'groundnut-oil': {
+    cropId: 'groundnut-oil',
+    emoji: '🛢️',
+    gradient: ['#b45309', '#f59e0b'],
+    accentColor: '#fde047',
+    svgIconPath: 'M12 2l4 4v12a2 2 0 01-2 2H10a2 2 0 01-2-2V6l4-4z',
+    altText: 'Pure Cold-Pressed Groundnut Oil (Mara Chekku)',
+    source: 'AgriFlow Edible Oil Registry',
+    verificationStatus: 'verified'
+  },
+  'milk': {
+    cropId: 'milk',
+    emoji: '🥛',
+    gradient: ['#0369a1', '#38bdf8'],
+    accentColor: '#bae6fd',
+    svgIconPath: 'M7 3h10v3l-2 3v11a2 2 0 01-2 2h-2a2 2 0 01-2-2V9L7 6V3z',
+    altText: 'Farm Fresh Pure Raw A2 Gir Cow Milk',
+    source: 'AgriFlow Dairy Registry',
+    verificationStatus: 'verified'
+  },
+  'ghee': {
+    cropId: 'ghee',
+    emoji: '🫙',
+    gradient: ['#a16207', '#eab308'],
+    accentColor: '#fef08a',
+    svgIconPath: 'M12 4c-3 0-5 2-5 5v7a3 3 0 003 3h4a3 3 0 003-3V9c0-3-2-5-5-5z',
+    altText: 'Pure Bilona Desi Gir Cow Ghee (Vedic Churned)',
+    source: 'AgriFlow Dairy & Clarified Fat Registry',
+    verificationStatus: 'verified'
+  },
+  'wheat-flour': {
+    cropId: 'wheat-flour',
+    emoji: '🌾',
+    gradient: ['#78350f', '#ca8a04'],
+    accentColor: '#fde68a',
+    svgIconPath: 'M12 2v20M8 6c2 1 2 4 0 6m8-6c-2 1-2 4 0 6',
+    altText: '100% Whole Wheat Chakki Atta (Stone-Ground)',
+    source: 'AgriFlow Milled Grains Registry',
+    verificationStatus: 'verified'
+  },
+  'tea': {
+    cropId: 'tea',
+    emoji: '🍵',
+    gradient: ['#064e3b', '#047857'],
+    accentColor: '#6ee7b7',
+    svgIconPath: 'M4 8h12a4 4 0 014 4v1a4 4 0 01-4 4H4V8zm12 3a1 1 0 011 1v1a1 1 0 01-1 1',
+    altText: 'Malty Assam CTC & Orthodox Black Tea',
+    source: 'AgriFlow Tea Board Registry',
+    verificationStatus: 'verified'
+  },
+  'coffee': {
+    cropId: 'coffee',
+    emoji: '☕',
+    gradient: ['#451a03', '#78350f'],
+    accentColor: '#fcd34d',
+    svgIconPath: 'M18 8h1a4 4 0 010 8h-1M4 8h14v8a4 4 0 01-4 4H8a4 4 0 01-4-4V8z',
+    altText: 'Coorg Roasted Arabica Coffee Beans & Ground Powder',
+    source: 'AgriFlow Coffee Board Registry',
+    verificationStatus: 'verified'
+  },
+  'honey': {
+    cropId: 'honey',
+    emoji: '🍯',
+    gradient: ['#92400e', '#d97706'],
+    accentColor: '#fde047',
+    svgIconPath: 'M12 3c-3 0-6 3-6 7 0 5 3 10 6 11 3-1 6-6 6-11 0-4-3-7-6-7z',
+    altText: 'Raw Organic Wild Forest Honey',
+    source: 'AgriFlow Natural Products Registry',
+    verificationStatus: 'verified'
   }
 };
 

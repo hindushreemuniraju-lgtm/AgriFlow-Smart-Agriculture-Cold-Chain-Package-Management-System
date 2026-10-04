@@ -423,6 +423,84 @@ export const CANONICAL_CROP_ALIASES: CropAliasMapping[] = [
       'coriander', 'dhania', 'dhanya', 'kothambari', 'dhaniyalu', 'kothamalli', 
       'coriandrum sativum', 'cilantro'
     ]
+  },
+
+  // PROCESSED OILS & EDIBLE FATS
+  {
+    canonicalId: 'groundnut-oil',
+    name: 'Groundnut Oil (Cold-Pressed)',
+    scientificName: 'Oleum Arachis',
+    category: 'Spice',
+    aliases: [
+      'groundnut oil', 'peanut oil', 'mungfali tel', 'sing tel', 'kadalai ennai', 
+      'shengdana tel', 'mara chekku peanut oil', 'cold pressed groundnut oil', 'wood pressed oil'
+    ]
+  },
+
+  // DAIRY & VALUE-ADDED MILK PRODUCTS
+  {
+    canonicalId: 'milk',
+    name: 'Fresh Cow Milk',
+    scientificName: 'Lac Vaccinum (A2 Beta-Casein)',
+    category: 'Grain',
+    aliases: [
+      'milk', 'cow milk', 'fresh milk', 'doodh', 'a2 milk', 'palu', 'haalu', 
+      'paal', 'raw milk', 'gir cow milk', 'dairy milk'
+    ]
+  },
+  {
+    canonicalId: 'ghee',
+    name: 'Pure Desi Ghee (Bilona)',
+    scientificName: 'Butyrum Purificatum',
+    category: 'Grain',
+    aliases: [
+      'ghee', 'desi ghee', 'bilona ghee', 'clarified butter', 'a2 ghee', 
+      'cow ghee', 'neyyi', 'tuppa', 'ghee butter', 'vedic ghee'
+    ]
+  },
+
+  // PROCESSED GRAINS & FLOUR
+  {
+    canonicalId: 'wheat-flour',
+    name: 'Whole Wheat Flour (Chakki Atta)',
+    scientificName: 'Triticum aestivum',
+    category: 'Grain',
+    aliases: [
+      'wheat flour', 'atta', 'gehu ka atta', 'chakki atta', 'whole wheat flour', 
+      'godhumai maavu', 'godhi hittu', 'wholemeal flour', 'sharbati atta'
+    ]
+  },
+
+  // TEA, COFFEE & BEVERAGE COMMODITIES
+  {
+    canonicalId: 'tea',
+    name: 'Tea (Assam Black Tea)',
+    scientificName: 'Camellia sinensis',
+    category: 'Spice',
+    aliases: [
+      'tea', 'black tea', 'chai', 'assam tea', 'ctc tea', 'tea leaves', 
+      'orthodox tea', 'camellia sinensis', 'masala tea', 'green tea'
+    ]
+  },
+  {
+    canonicalId: 'coffee',
+    name: 'Coffee (Roasted Arabica)',
+    scientificName: 'Coffea arabica',
+    category: 'Spice',
+    aliases: [
+      'coffee', 'arabica coffee', 'filter coffee', 'coffee beans', 'kaapi', 
+      'roasted coffee', 'ground coffee', 'coffea arabica', 'espresso beans'
+    ]
+  },
+  {
+    canonicalId: 'honey',
+    name: 'Pure Wild Forest Honey',
+    scientificName: 'Mel (Apis mellifera)',
+    category: 'Fruit',
+    aliases: [
+      'honey', 'raw honey', 'shahad', 'madhu', 'thone', 'then', 'forest honey', 
+      'organic honey', 'wild honey'
+    ]
   }
 ];
 
