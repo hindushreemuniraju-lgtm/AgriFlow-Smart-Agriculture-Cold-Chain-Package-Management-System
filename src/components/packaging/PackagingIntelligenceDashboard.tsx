@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
 import { generatePackagingRecommendation, PackagingEngineInput } from '../../services/packaging/packagingRecommendationEngine';
 import { evaluateJourneySuitability } from '../../services/transport/deliverySuitabilityService';
 import { getVerifiedCropVisual } from '../../services/crop/cropImageService';
+import { AgriFlowPDFDownloadModal } from '../documents/AgriFlowPDFDownloadModal';
 import { 
   PackageCheck, 
   ShieldCheck, 
@@ -19,7 +20,10 @@ import {
   Info,
   Leaf,
   Scale,
-  DollarSign
+  DollarSign,
+  Loader2,
+  ArrowRight,
+  Activity
 } from 'lucide-react';
 
 export const PackagingIntelligenceDashboard: React.FC = () => {
@@ -33,6 +37,21 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
   const [budgetPreference, setBudgetPreference] = useState<'economy' | 'balanced' | 'premium'>('balanced');
   const [sustainabilityPreference, setSustainabilityPreference] = useState<'standard' | 'high_eco' | 'zero_plastic'>('standard');
   const [activeTab, setActiveTab] = useState<'recommendation' | 'barrier_matrix' | 'respiration' | 'distance_logistics'>('recommendation');
+  
+  // Analysis simulation state (2-3s multi-step loader)
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [analysisStep, setAnalysisStep] = useState<number>(0);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
+
+  const analysisSteps = [
+    'Analyzing botanical & chemical properties...',
+    'Evaluating moisture sensitivity & WVTR limits...',
+    'Checking oxygen sensitivity & OTR threshold...',
+    'Calculating respiration rate & gas exchange kinetics...',
+    'Evaluating transit distance & highway thermal load...',
+    'Matching ASTM D3985 & F1249 packaging materials...',
+    'Synthesizing 4-tier SIH26236 recommendations...'
+  ];
 
   // Selected product intelligence
   const currentProduct = useMemo(() => {
@@ -40,6 +59,28 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
   }, [selectedProductId]);
 
   const visual = getVerifiedCropVisual(currentProduct.id, currentProduct.name);
+
+  // Trigger analysis sequence on product switch
+  const triggerAnalysis = () => {
+    setIsAnalyzing(true);
+    setAnalysisStep(0);
+
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      if (step < analysisSteps.length) {
+        setAnalysisStep(step);
+      } else {
+        clearInterval(interval);
+        setIsAnalyzing(false);
+      }
+    }, 350);
+  };
+
+  const handleProductChange = (newId: string) => {
+    setSelectedProductId(newId);
+    triggerAnalysis();
+  };
 
   // Run SIH26236 Packaging Recommendation Engine
   const recommendationReport = useMemo(() => {
@@ -91,19 +132,17 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => {
-                alert(`Technical Packaging Dossier for ${currentProduct.name} generated successfully! Includes ASTM OTR/WVTR test certificates and FSSAI food contact compliance.`);
-              }}
+              onClick={() => setIsPdfModalOpen(true)}
               className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
-              <span>Export Technical Dossier</span>
+              <span>Export Technical Dossier PDF</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Left Controls (Commodity & Logistics Parameters) vs Right Intelligence Engine */}
+      {/* Interactive Parameters Configurator (Left) vs Right Intelligence Engine */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Interactive Parameters Configurator (4 cols) */}
@@ -125,7 +164,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
               </label>
               <select
                 value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
+                onChange={(e) => handleProductChange(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-purple-400/40 text-xs sm:text-sm font-semibold text-white focus:outline-none focus:border-purple-400"
               >
                 <optgroup label="🥬 Fresh Vegetables">
@@ -259,449 +298,496 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 5. Logistics Fleet Class */}
+            {/* 5. Vehicle Type */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                Logistics Vehicle Fleet
-              </label>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">Transit Vehicle Type</label>
               <select
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-purple-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
               >
-                <option value="Tata Ace (Open Ambient)">Tata Ace (Open Ambient Bed)</option>
-                <option value="Ventilated LCV (Tata 407)">Ventilated LCV (Tata 407)</option>
-                <option value="Temperature-Controlled Reefer Truck (12°C - 14°C)">Temperature-Controlled Reefer Truck (12°C - 14°C)</option>
-                <option value="Insulated Milk Tanker (4°C)">Insulated Milk Tanker / Reefer (4°C)</option>
-                <option value="Covered Dry Container Truck">Covered Dry Container Truck</option>
+                <option value="Ventilated LCV (Tata 407)">🚛 Ventilated LCV (Tata 407)</option>
+                <option value="Refrigerated Reefer Truck (Chilled 4°C - 13°C)">❄️ Refrigerated Reefer Truck (4°C - 13°C)</option>
+                <option value="Covered Dry Freight Truck">🚚 Covered Dry Freight Truck</option>
+                <option value="Open Tarpaulin Multi-Axle Truck">📦 Open Tarpaulin Multi-Axle</option>
               </select>
             </div>
 
-            {/* 6. Optimization Weights */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 mb-1">Budget Weight</label>
-                <select
-                  value={budgetPreference}
-                  onChange={(e) => setBudgetPreference(e.target.value as any)}
-                  className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-200"
-                >
-                  <option value="economy">💰 Economy First</option>
-                  <option value="balanced">⚖️ Balanced</option>
-                  <option value="premium">💎 Maximum Protection</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 mb-1">Sustainability</label>
-                <select
-                  value={sustainabilityPreference}
-                  onChange={(e) => setSustainabilityPreference(e.target.value as any)}
-                  className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-200"
-                >
-                  <option value="standard">Standard</option>
-                  <option value="high_eco">🌿 High Recyclability</option>
-                  <option value="zero_plastic">🌱 100% Bio-Compostable</option>
-                </select>
-              </div>
-            </div>
+            {/* 6. Re-Analyze Trigger Button */}
+            <button
+              onClick={triggerAnalysis}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              <Activity className="w-4 h-4" />
+              <span>Re-Calculate Barrier Optimization</span>
+            </button>
 
           </div>
         </div>
 
-        {/* Right Column: Technical Output Tabs (8 cols) */}
+        {/* Right Column: Dynamic Intelligence Tabs & Results (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Module Navigation Tabs */}
-          <div className="flex flex-wrap items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-purple-500/20">
-            <button
-              onClick={() => setActiveTab('recommendation')}
-              className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'recommendation'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <PackageCheck className="w-4 h-4 text-purple-300" />
-              <span>Material Decision</span>
-            </button>
+          {/* Sequential Analysis Loader Overlay (if analyzing) */}
+          {isAnalyzing ? (
+            <div className="rounded-3xl bg-slate-900 border border-purple-500/40 p-12 text-center space-y-6 shadow-2xl animate-fade-in">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
+                <Loader2 className="w-8 h-8 animate-spin" />
+              </div>
+              <div className="space-y-2">
+                <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-widest bg-purple-500/20 px-3 py-1 rounded-full border border-purple-500/30">
+                  SIH26236 Material Science Engine
+                </span>
+                <h3 className="text-lg font-black text-white">
+                  {analysisSteps[analysisStep]}
+                </h3>
+                <div className="w-48 h-2 bg-slate-950 rounded-full mx-auto overflow-hidden p-0.5 border border-purple-500/30">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
+                    style={{ width: `${((analysisStep + 1) / analysisSteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAnalyzing(false)}
+                className="text-xs text-slate-400 hover:text-white underline font-mono"
+              >
+                Skip Animation
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Tab Navigation Controls */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800">
+                <button
+                  onClick={() => setActiveTab('recommendation')}
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'recommendation'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <PackageCheck className="w-4 h-4" />
+                  <span>4-Tier Material Selection</span>
+                </button>
 
-            <button
-              onClick={() => setActiveTab('barrier_matrix')}
-              className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'barrier_matrix'
-                  ? 'bg-gradient-to-r from-indigo-600 to-sky-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <Layers className="w-4 h-4 text-sky-300" />
-              <span>OTR / WVTR Matrix</span>
-            </button>
+                <button
+                  onClick={() => setActiveTab('barrier_matrix')}
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'barrier_matrix'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Layers className="w-4 h-4" />
+                  <span>OTR / WVTR Radar</span>
+                </button>
 
-            <button
-              onClick={() => setActiveTab('respiration')}
-              className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'respiration'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <Wind className="w-4 h-4 text-emerald-300" />
-              <span>Respiration Kinetics</span>
-            </button>
+                <button
+                  onClick={() => setActiveTab('respiration')}
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'respiration'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Wind className="w-4 h-4" />
+                  <span>Respiration Kinetics</span>
+                </button>
 
-            <button
-              onClick={() => setActiveTab('distance_logistics')}
-              className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'distance_logistics'
-                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <Truck className="w-4 h-4 text-amber-300" />
-              <span>Distance Suitability</span>
-            </button>
-          </div>
+                <button
+                  onClick={() => setActiveTab('distance_logistics')}
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'distance_logistics'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Truck className="w-4 h-4" />
+                  <span>Distance Feasibility</span>
+                </button>
+              </div>
 
-          {/* TAB 1: Material Decision (🥇 Recommended, 🥈 Alternative, 💰 Budget, ❌ Not Recommended) */}
-          {activeTab === 'recommendation' && (
-            <div className="space-y-6">
-              
-              {/* 🥇 Top Recommended Card */}
-              <div className="relative rounded-3xl bg-slate-900 border-2 border-emerald-500/50 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)] overflow-hidden">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">🥇</span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase tracking-widest">
-                          Top Recommended Match (Score: {recommendationReport.recommended.score}/100)
+              {/* TAB 1: 4-Tier Material Selection */}
+              {activeTab === 'recommendation' && (
+                <div className="space-y-6">
+                  
+                  {/* 🥇 RECOMMENDED TIER CARD */}
+                  <div className="rounded-3xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border-2 border-emerald-500/50 p-6 sm:p-7 shadow-[0_0_35px_rgba(16,185,129,0.15)] space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/20 pb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl">🥇</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase tracking-wider">
+                              Primary Recommendation
+                            </span>
+                            <span className="text-xs font-mono font-bold text-emerald-400">
+                              Score: {Math.round(recommendationReport.recommended.overallScore)}%
+                            </span>
+                          </div>
+                          <h3 className="text-lg font-black text-white mt-0.5">
+                            {recommendationReport.recommended.material.name}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Est. Material Cost</span>
+                        <span className="text-base font-black text-emerald-400 font-mono">
+                          ₹{recommendationReport.recommended.material.costPerKgProduce.toFixed(2)} / kg produce
                         </span>
                       </div>
-                      <h3 className="text-lg font-black text-white mt-1">
-                        {recommendationReport.recommended.material.name}
-                      </h3>
-                      <p className="text-xs text-slate-400 font-mono">Code: {recommendationReport.recommended.material.code} • {recommendationReport.recommended.material.category}</p>
                     </div>
-                  </div>
 
-                  <div className="text-right">
-                    <div className="text-lg font-black text-emerald-400 font-mono">
-                      ₹{recommendationReport.recommended.estimatedPackagingCostTotal.toLocaleString()}
-                    </div>
-                    <span className="text-[10px] text-slate-400">₹{recommendationReport.recommended.costPerKg.toFixed(2)} / kg produce</span>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs leading-relaxed text-slate-200 mb-4">
-                  <b className="text-emerald-300">Engineering Rationale: </b>
-                  {recommendationReport.recommended.scientificRationale}
-                </div>
-
-                {/* Key Technical Highlights Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block uppercase">Oxygen Barrier</span>
-                    <span className="font-bold text-white">{recommendationReport.recommended.material.barrierProperties.oxygenBarrierTier}</span>
-                    <span className="text-[10px] text-slate-500 block truncate">{recommendationReport.recommended.material.barrierProperties.otrRange}</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block uppercase">Moisture Barrier</span>
-                    <span className="font-bold text-white">{recommendationReport.recommended.material.barrierProperties.moistureBarrierTier}</span>
-                    <span className="text-[10px] text-slate-500 block truncate">{recommendationReport.recommended.material.barrierProperties.wvtrRange}</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block uppercase">Estimated Shelf-Life</span>
-                    <span className="font-bold text-emerald-400">~{recommendationReport.recommended.estimatedShelfLifeDays} Days</span>
-                    <span className="text-[10px] text-slate-500 block">At {storageTempC}°C Cold Chain</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block uppercase">Eco Sustainability</span>
-                    <span className="font-bold text-teal-300">{recommendationReport.recommended.material.compatibility.sustainabilityScore}/100</span>
-                    <span className="text-[10px] text-slate-500 block">{recommendationReport.recommended.material.compatibility.recyclingSymbol}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Secondary Alternatives Grid: 🥈 Alternative, 💰 Budget, ❌ Not Recommended */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                {/* 🥈 Alternative Card */}
-                <div className="rounded-3xl bg-slate-900/90 border border-indigo-500/30 p-5 shadow-lg flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xl">🥈</span>
-                      <span className="text-[10px] font-bold text-indigo-300 uppercase bg-indigo-500/20 px-2 py-0.5 rounded">
-                        Alternative ({recommendationReport.alternative.score}/100)
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-white mb-1">
-                      {recommendationReport.alternative.material.name}
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3 mb-3">
-                      {recommendationReport.alternative.scientificRationale}
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {recommendationReport.recommended.material.primaryFunction}
                     </p>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Est. Outlay:</span>
-                    <span className="font-bold text-indigo-300 font-mono">₹{recommendationReport.alternative.estimatedPackagingCostTotal.toLocaleString()}</span>
-                  </div>
-                </div>
 
-                {/* 💰 Budget Option */}
-                <div className="rounded-3xl bg-slate-900/90 border border-amber-500/30 p-5 shadow-lg flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xl">💰</span>
-                      <span className="text-[10px] font-bold text-amber-300 uppercase bg-amber-500/20 px-2 py-0.5 rounded">
-                        Budget Choice ({recommendationReport.budget.score}/100)
-                      </span>
+                    {/* Scientific Barrier Properties Strip */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-[11px] font-mono">
+                      <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">ASTM D3985 OTR:</span>
+                        <span className="text-purple-300 font-bold">{recommendationReport.recommended.material.oxygenTransmissionRate}</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">ASTM F1249 WVTR:</span>
+                        <span className="text-sky-300 font-bold">{recommendationReport.recommended.material.waterVaporTransmissionRate}</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Puncture Strength:</span>
+                        <span className="text-emerald-300 font-bold">{recommendationReport.recommended.material.punctureResistance}</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">FSSAI IS 9845:</span>
+                        <span className="text-emerald-400 font-bold">{recommendationReport.recommended.material.foodContactSafe ? 'Certified' : 'Secondary'}</span>
+                      </div>
                     </div>
-                    <h4 className="text-sm font-bold text-white mb-1">
-                      {recommendationReport.budget.material.name}
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3 mb-3">
-                      {recommendationReport.budget.scientificRationale}
-                    </p>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Lowest Outlay:</span>
-                    <span className="font-bold text-amber-400 font-mono">₹{recommendationReport.budget.estimatedPackagingCostTotal.toLocaleString()}</span>
-                  </div>
-                </div>
 
-                {/* ❌ Not Recommended Alert */}
-                <div className="rounded-3xl bg-slate-900/90 border border-rose-500/40 p-5 shadow-lg flex flex-col justify-between bg-rose-950/10">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xl">❌</span>
-                      <span className="text-[10px] font-bold text-rose-300 uppercase bg-rose-500/20 px-2 py-0.5 rounded">
-                        Not Recommended ({recommendationReport.notRecommended.score}/100)
-                      </span>
+                    {/* Why Selected Reasons */}
+                    <div className="p-4 rounded-2xl bg-slate-950/60 border border-emerald-500/20 space-y-2">
+                      <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Why This Material Was Selected:</span>
+                      </h4>
+                      <ul className="text-xs text-slate-300 space-y-1">
+                        {recommendationReport.recommended.whySelected.map((reason, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-emerald-400 font-bold">✓</span>
+                            <span>{reason}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <h4 className="text-sm font-bold text-white mb-1">
-                      {recommendationReport.notRecommended.material.name}
-                    </h4>
-                    <p className="text-[11px] text-rose-200 leading-relaxed line-clamp-3 mb-3">
-                      {recommendationReport.notRecommended.scientificRationale}
-                    </p>
                   </div>
-                  <div className="pt-3 border-t border-rose-900/50 text-[10px] text-rose-300 flex items-center gap-1 font-bold">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                    <span>Incompatible with {currentProduct.name}</span>
-                  </div>
-                </div>
 
-              </div>
-
-            </div>
-          )}
-
-          {/* TAB 2: OTR & WVTR Barrier Matching Matrix */}
-          {activeTab === 'barrier_matrix' && (
-            <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-5">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-sky-400" />
-                  Product Requirement vs Material Capability Matrix
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  ASTM D3985 Oxygen Transmission Rate (OTR) and ASTM F1249 Water Vapor Transmission Rate (WVTR) property compatibility.
-                </p>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-purple-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                      <th className="py-3 px-3">Barrier Property</th>
-                      <th className="py-3 px-3">Commodity Demand ({currentProduct.name})</th>
-                      <th className="py-3 px-3">Top Material Capability</th>
-                      <th className="py-3 px-3">Compatibility</th>
-                      <th className="py-3 px-3">Scientific Explanation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800 font-medium">
-                    {recommendationReport.recommended.barrierMatches.map((match, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-3 font-bold text-white">{match.property}</td>
-                        <td className="py-3 px-3 text-slate-300">{match.productDemand}</td>
-                        <td className="py-3 px-3 text-purple-300 font-mono">{match.materialCapability}</td>
-                        <td className="py-3 px-3">
-                          <span 
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
-                            style={{ backgroundColor: `${match.statusColor}20`, color: match.statusColor }}
-                          >
-                            {match.status === 'Suitable' ? <CheckCircle2 className="w-3 h-3" /> : match.status === 'Acceptable' ? <Info className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                            {match.status}
+                  {/* 🥈 ALTERNATIVE & 💰 BUDGET TIERS */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    {/* Alternative Option */}
+                    {recommendationReport.alternative && (
+                      <div className="rounded-2xl bg-slate-900 border border-yellow-500/30 p-5 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-yellow-300 flex items-center gap-1">
+                            <span>🥈 Alternative Option</span>
                           </span>
-                        </td>
-                        <td className="py-3 px-3 text-slate-400 text-[11px] leading-snug">{match.explanation}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Multi-Layer Structural Assembly View */}
-              <div className="pt-4 border-t border-slate-800">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                  Engineered 3-Tier Packaging Layer Architecture
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {currentProduct.packaging.layers.map((layer) => (
-                    <div key={layer.layer} className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">{layer.icon}</span>
-                        <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Layer {layer.layer}</span>
+                          <span className="text-xs font-mono text-yellow-400 font-bold">
+                            Score: {Math.round(recommendationReport.alternative.overallScore)}%
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-white">
+                          {recommendationReport.alternative.material.name}
+                        </h4>
+                        <p className="text-xs text-slate-400">
+                          {recommendationReport.alternative.whySelected[0] || 'Viable commercial substitute.'}
+                        </p>
+                        <div className="text-xs font-mono text-slate-300 pt-2 border-t border-slate-800">
+                          Unit Cost: ₹{recommendationReport.alternative.material.costPerKgProduce.toFixed(2)}/kg
+                        </div>
                       </div>
-                      <h5 className="text-xs font-bold text-white">{layer.name}</h5>
-                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">{layer.material}</p>
-                      <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">{layer.function}</p>
+                    )}
+
+                    {/* Budget Option */}
+                    {recommendationReport.budgetOption && (
+                      <div className="rounded-2xl bg-slate-900 border border-purple-500/30 p-5 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-purple-300 flex items-center gap-1">
+                            <span>💰 Budget Compliant Option</span>
+                          </span>
+                          <span className="text-xs font-mono text-purple-400 font-bold">
+                            Score: {Math.round(recommendationReport.budgetOption.overallScore)}%
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-white">
+                          {recommendationReport.budgetOption.material.name}
+                        </h4>
+                        <p className="text-xs text-slate-400">
+                          {recommendationReport.budgetOption.whySelected[0] || 'Cost-effective compliant packaging.'}
+                        </p>
+                        <div className="text-xs font-mono text-slate-300 pt-2 border-t border-slate-800">
+                          Unit Cost: ₹{recommendationReport.budgetOption.material.costPerKgProduce.toFixed(2)}/kg
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* ❌ NOT RECOMMENDED MATERIALS (WITH FAILURE MODES) */}
+                  {recommendationReport.notRecommended.length > 0 && (
+                    <div className="rounded-2xl bg-rose-950/30 border border-rose-500/40 p-5 space-y-3">
+                      <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <XCircle className="w-4 h-4 text-rose-400" />
+                        <span>Not Recommended Materials (Scientific Failure Modes)</span>
+                      </h4>
+                      <div className="space-y-2.5">
+                        {recommendationReport.notRecommended.map((item, idx) => (
+                          <div key={idx} className="p-3 rounded-xl bg-slate-950/80 border border-rose-500/20 text-xs">
+                            <div className="font-bold text-white">{item.material.name}</div>
+                            <div className="text-rose-300 mt-0.5"><b>Failure Mode:</b> {item.failureReason}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
+
+                  {/* 5-Layer Engineered Packaging Architecture */}
+                  <div className="pt-4 border-t border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
+                      Engineered Packaging Layer Architecture for {currentProduct.name}
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {currentProduct.packaging.layers.map((layer) => (
+                        <div key={layer.layer} className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-lg">{layer.icon}</span>
+                            <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Layer {layer.layer}</span>
+                          </div>
+                          <h5 className="text-xs font-bold text-white">{layer.name}</h5>
+                          <p className="text-[10px] text-slate-400 font-mono mt-0.5">{layer.material}</p>
+                          <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">{layer.function}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
-              </div>
+              )}
 
-            </div>
-          )}
-
-          {/* TAB 3: Respiration Kinetics & Gas Exchange */}
-          {activeTab === 'respiration' && (
-            <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Wind className="w-5 h-5 text-emerald-400" />
-                  Botanical Respiration Kinetics & Gas Exchange Analysis
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Calculates oxygen consumption rate ($O_2$), carbon dioxide output ($CO_2$), and respiratory heat generation at {storageTempC}°C.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-emerald-500/30">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Respiration Activity Tier</span>
-                  <span className="text-lg font-black text-emerald-400 mt-1 block">
-                    {recommendationReport.respiration.respirationRateClass}
-                  </span>
-                  <p className="text-[11px] text-slate-400 mt-1">{recommendationReport.respiration.commodityType}</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-sky-500/30">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Estimated O₂ Consumption</span>
-                  <span className="text-lg font-black text-sky-400 mt-1 block font-mono">
-                    {recommendationReport.respiration.estimatedO2ConsumptionMgKgHr} mg O₂/kg·h
-                  </span>
-                  <p className="text-[11px] text-slate-400 mt-1">At {storageTempC}°C transit temperature</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-amber-500/30">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Respiratory Heat Load</span>
-                  <span className="text-lg font-black text-amber-400 mt-1 block font-mono">
-                    {recommendationReport.respiration.estimatedHeatGenerationKjKgDay} kJ/kg·day
-                  </span>
-                  <p className="text-[11px] text-slate-400 mt-1">Requires active heat dissipation</p>
-                </div>
-              </div>
-
-              {/* Critical Gas Exchange Warning & Recommendation */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5">💡</span>
+              {/* TAB 2: OTR / WVTR Barrier Radar */}
+              {activeTab === 'barrier_matrix' && (
+                <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
                   <div>
-                    <h5 className="font-bold text-white">Recommended Ventilation & MAP Gas Flush:</h5>
-                    <p className="text-slate-300 mt-0.5 leading-relaxed">{recommendationReport.respiration.recommendedPerforationDensity}</p>
-                    <p className="text-purple-300 mt-1 font-mono text-[11px]">Optimal MAP Gas Mix: {recommendationReport.respiration.optimalAtmosphereGasFlush}</p>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Layers className="w-5 h-5 text-purple-400" />
+                      OTR & WVTR Material Property Matrix (ASTM Validated)
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Oxygen Transmission Rate (ASTM D3985) and Water Vapor Transmission Rate (ASTM F1249) benchmarked against {currentProduct.name} physiological requirements.
+                    </p>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-purple-500/20 text-slate-400 font-mono text-[11px]">
+                          <th className="py-2.5 px-3">Packaging Material</th>
+                          <th className="py-2.5 px-3">OTR (cc/m²·day)</th>
+                          <th className="py-2.5 px-3">WVTR (g/m²·day)</th>
+                          <th className="py-2.5 px-3">Gas Exchange</th>
+                          <th className="py-2.5 px-3">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 font-mono">
+                        {recommendationReport.barrierComparisonTable.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-800/40">
+                            <td className="py-3 px-3 font-bold text-white">{row.materialName}</td>
+                            <td className="py-3 px-3 text-purple-300">{row.otr}</td>
+                            <td className="py-3 px-3 text-sky-300">{row.wvtr}</td>
+                            <td className="py-3 px-3 text-slate-300">{row.breathabilityLevel}</td>
+                            <td className="py-3 px-3">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                row.suitabilityTag === 'RECOMMENDED'
+                                  ? 'bg-emerald-500/20 text-emerald-300'
+                                  : row.suitabilityTag === 'ALTERNATIVE'
+                                  ? 'bg-yellow-500/20 text-yellow-300'
+                                  : 'bg-rose-500/20 text-rose-300'
+                              }`}>
+                                {row.suitabilityTag}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
+              )}
 
-                {recommendationReport.respiration.anaerobicRiskUnderSealedFilm === 'Severe' && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 flex items-center gap-2 text-[11px]">
-                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                    <span><b>CRITICAL ANAEROBIC WARNING:</b> Hermetically sealed non-perforated film will cause internal oxygen depletion below 2%, triggering alcohol fermentation and total crop rotting.</span>
+              {/* TAB 3: Respiration Kinetics & Gas Exchange */}
+              {activeTab === 'respiration' && (
+                <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Wind className="w-5 h-5 text-emerald-400" />
+                      Botanical Respiration Kinetics & Gas Exchange Animation
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Calculates oxygen consumption rate ($O_2$), carbon dioxide output ($CO_2$), and respiratory heat generation at {storageTempC}°C.
+                    </p>
                   </div>
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* TAB 4: Distance & Highway Logistics Suitability */}
-          {activeTab === 'distance_logistics' && (
-            <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-amber-400" />
-                  Distance Suitability & Logistics Decision Engine
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Evaluates whether {currentProduct.name} can safely travel {distanceKm} km under selected packaging and vehicle conditions without spoilage.
-                </p>
-              </div>
+                  {/* Gas Exchange Animation Visual Box */}
+                  <div className="p-6 rounded-2xl bg-slate-950 border border-purple-500/30 flex items-center justify-around text-center">
+                    <div className="space-y-1">
+                      <span className="text-xs font-mono font-bold text-sky-400">Oxygen Inflow (O₂)</span>
+                      <div className="text-2xl animate-pulse">➡️ 💨</div>
+                      <span className="text-[10px] font-mono text-slate-400">{recommendationReport.respiration.estimatedO2ConsumptionMgKgHr} mg/kg·h</span>
+                    </div>
 
-              {/* 5-Question Technical Decision Verdict Matrix */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">1. Can this product be transported this far?</span>
-                  <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.canTransportFar}</p>
-                </div>
+                    <div className="p-4 rounded-2xl bg-slate-900 border border-purple-400/40 shadow-lg">
+                      <span className="text-3xl">{visual.emoji}</span>
+                      <h4 className="text-xs font-bold text-white mt-1">{currentProduct.name}</h4>
+                      <span className="text-[9px] font-mono text-emerald-400 font-bold block">{recommendationReport.respiration.respirationRateClass}</span>
+                    </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">2. How long should delivery take?</span>
-                  <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.deliveryTimeframe}</p>
-                </div>
+                    <div className="space-y-1">
+                      <span className="text-xs font-mono font-bold text-rose-400">Carbon Dioxide Out (CO₂)</span>
+                      <div className="text-2xl animate-pulse">💨 ➡️</div>
+                      <span className="text-[10px] font-mono text-slate-400">{Math.round(recommendationReport.respiration.estimatedO2ConsumptionMgKgHr * 1.3)} mg/kg·h</span>
+                    </div>
+                  </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">3. What packaging is required?</span>
-                  <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.packagingRequirement}</p>
-                </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-emerald-500/30">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Respiration Activity Tier</span>
+                      <span className="text-lg font-black text-emerald-400 mt-1 block">
+                        {recommendationReport.respiration.respirationRateClass}
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-1">{recommendationReport.respiration.commodityType}</p>
+                    </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">4. Does it require refrigeration?</span>
-                  <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.refrigerationVerdict}</p>
-                </div>
-              </div>
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-sky-500/30">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Estimated O₂ Consumption</span>
+                      <span className="text-lg font-black text-sky-400 mt-1 block font-mono">
+                        {recommendationReport.respiration.estimatedO2ConsumptionMgKgHr} mg O₂/kg·h
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-1">At {storageTempC}°C transit temperature</p>
+                    </div>
 
-              {/* Standard Distance Breakdown Comparison (20km, 100km, 500km, 1000km) */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                  Standard Journey Distance Viability Matrix
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                  {journeyReport.standardEvaluations.map((evalItem) => (
-                    <div 
-                      key={evalItem.distanceKm} 
-                      className="p-3.5 rounded-2xl bg-slate-950/80 border transition-all"
-                      style={{ borderColor: `${evalItem.viabilityColor}40` }}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-white">{evalItem.label}</span>
-                        <span 
-                          className="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                          style={{ backgroundColor: `${evalItem.viabilityColor}20`, color: evalItem.viabilityColor }}
-                        >
-                          {evalItem.viabilityStatus}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-slate-400 space-y-1 mt-2 font-mono">
-                        <div>Duration: <b className="text-slate-200">{evalItem.totalDeliveryHours}h</b></div>
-                        <div>Loss Risk: <b className="text-slate-200">{evalItem.spoilageRiskPercent}%</b></div>
-                        <div>Freight: <b className="text-slate-200">₹{evalItem.estimatedFreightCost}</b></div>
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-amber-500/30">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Respiratory Heat Load</span>
+                      <span className="text-lg font-black text-amber-400 mt-1 block font-mono">
+                        {recommendationReport.respiration.estimatedHeatGenerationKjKgDay} kJ/kg·day
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-1">Requires active heat dissipation</p>
+                    </div>
+                  </div>
+
+                  {/* Critical Gas Exchange Warning */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
+                    <div className="flex items-start gap-3">
+                      <span className="text-lg mt-0.5">💡</span>
+                      <div>
+                        <h5 className="font-bold text-white">Recommended Ventilation & MAP Gas Flush:</h5>
+                        <p className="text-slate-300 mt-0.5 leading-relaxed">{recommendationReport.respiration.recommendedPerforationDensity}</p>
+                        <p className="text-purple-300 mt-1 font-mono text-[11px]">Optimal MAP Gas Mix: {recommendationReport.respiration.optimalAtmosphereGasFlush}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-            </div>
+                    {recommendationReport.respiration.anaerobicRiskUnderSealedFilm === 'Severe' && (
+                      <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 flex items-center gap-2 text-[11px]">
+                        <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                        <span><b>CRITICAL ANAEROBIC WARNING:</b> Hermetically sealed non-perforated film will cause internal oxygen depletion below 2%, triggering alcohol fermentation and total crop rotting.</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: Distance & Highway Logistics Suitability */}
+              {activeTab === 'distance_logistics' && (
+                <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Truck className="w-5 h-5 text-amber-400" />
+                      Distance Suitability & Logistics Decision Engine
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Evaluates whether {currentProduct.name} can safely travel {distanceKm} km under selected packaging and vehicle conditions without spoilage.
+                    </p>
+                  </div>
+
+                  {/* 5-Question Technical Decision Verdict Matrix */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">1. Can this product be transported this far?</span>
+                      <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.canTransportFar}</p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">2. How long should delivery take?</span>
+                      <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.deliveryTimeframe}</p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">3. What packaging is required?</span>
+                      <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.packagingRequirement}</p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">4. Does it require refrigeration?</span>
+                      <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.refrigerationVerdict}</p>
+                    </div>
+                  </div>
+
+                  {/* Standard Distance Breakdown Comparison (20km, 100km, 500km, 1000km) */}
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
+                      Standard Journey Distance Viability Matrix
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+                      {journeyReport.standardEvaluations.map((evalItem) => (
+                        <div 
+                          key={evalItem.distanceKm} 
+                          className="p-3.5 rounded-2xl bg-slate-950/80 border transition-all"
+                          style={{ borderColor: `${evalItem.viabilityColor}40` }}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-bold text-white">{evalItem.label}</span>
+                            <span 
+                              className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+                              style={{ backgroundColor: `${evalItem.viabilityColor}20`, color: evalItem.viabilityColor }}
+                            >
+                              {evalItem.viabilityStatus}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 space-y-1 mt-2 font-mono">
+                            <div>Duration: <b className="text-slate-200">{evalItem.totalDeliveryHours}h</b></div>
+                            <div>Loss Risk: <b className="text-slate-200">{evalItem.spoilageRiskPercent}%</b></div>
+                            <div>Freight: <b className="text-slate-200">₹{evalItem.estimatedFreightCost}</b></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+            </>
           )}
 
         </div>
 
       </div>
+
+      {/* Real Technical PDF Dossier Export Modal */}
+      <AgriFlowPDFDownloadModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        product={currentProduct}
+        batchId="SIH-PK-8921"
+      />
 
     </div>
   );

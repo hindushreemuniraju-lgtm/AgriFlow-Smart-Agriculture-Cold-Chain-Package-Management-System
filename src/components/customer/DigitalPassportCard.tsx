@@ -17,8 +17,11 @@ import {
   Info,
   ChevronRight,
   Flame,
-  Award
+  Award,
+  Download
 } from 'lucide-react';
+import { AgriFlowPDFDownloadModal } from '../documents/AgriFlowPDFDownloadModal';
+import { getProductIntelligence } from '../../data/productsDatabase';
 
 interface DigitalPassportCardProps {
   passport: ProductPassport;
@@ -29,8 +32,10 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
   const { t } = useLanguage();
   const [activeRecipeIndex, setActiveRecipeIndex] = useState<number>(0);
   const [showCertificateModal, setShowCertificateModal] = useState<boolean>(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
 
   const activeRecipe = passport.optimalConsumption.recipes[activeRecipeIndex] || passport.optimalConsumption.recipes[0];
+  const currentProd = getProductIntelligence(passport.batchId);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -78,6 +83,13 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
                 {passport.verificationHash}
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsPdfModalOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-[11px] font-semibold text-white shadow transition-all flex items-center gap-1"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Download PDFs</span>
+                </button>
                 <button
                   onClick={() => setShowCertificateModal(true)}
                   className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-purple-300 border border-purple-500/30 transition-all flex items-center gap-1"
@@ -449,6 +461,14 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
           </div>
         </div>
       )}
+
+      {/* AgriFlow Official PDF Download Modal */}
+      <AgriFlowPDFDownloadModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        product={currentProd}
+        batchId={passport.batchId}
+      />
 
     </div>
   );

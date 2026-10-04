@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FarmerOrder } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { AgriFlowPDFDownloadModal } from '../documents/AgriFlowPDFDownloadModal';
 import { 
   Navigation, 
   ThermometerSnowflake, 
@@ -13,7 +14,11 @@ import {
   Radio,
   CheckCircle2,
   AlertTriangle,
-  RotateCw
+  RotateCw,
+  Play,
+  Pause,
+  Compass,
+  Download
 } from 'lucide-react';
 
 interface LiveTrackingScheduleProps {
@@ -29,20 +34,64 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
     selectedOrderId || inTransitOrders[0]?.id || orders[0]?.id || 'ORD-8921'
   );
 
+  const [gpsMode, setGpsMode] = useState<'simulated' | 'browser_gps'>('simulated');
+  const [isTripActive, setIsTripActive] = useState<boolean>(true);
+  const [activeWaypointIndex, setActiveWaypointIndex] = useState<number>(2);
   const [telemetryData, setTelemetryData] = useState<any>(null);
   const [sensorHistory, setSensorHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('Just now');
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   const currentOrder = orders.find(o => o.id === activeOrderId) || orders[0];
+
+  // Simulated Highway Route Waypoints (Bengaluru -> Tumakuru -> Chitradurga -> Anantapur -> Hyderabad)
+  const waypoints = [
+    { name: 'Bengaluru APMC Gateway (Origin)', lat: 12.9716, lng: 77.5946, time: '06:00 AM', status: 'Pre-cooled & Dispatched' },
+    { name: 'Tumakuru Highway Tollway', lat: 13.3379, lng: 77.1006, time: '08:15 AM', status: 'Reefer Temp 13.1°C' },
+    { name: 'Chitradurga Logistics Corridor', lat: 14.2251, lng: 76.3980, time: '11:45 AM', status: 'Cruising at 62 km/h (Active)' },
+    { name: 'Anantapur Interchange Hub', lat: 14.6819, lng: 77.6006, time: '03:30 PM', status: 'Scheduled Checkpoint' },
+    { name: 'Hyderabad Central Food Park (Destination)', lat: 17.3850, lng: 78.4867, time: '07:00 PM', status: 'Final Drop-off' }
+  ];
 
   useEffect(() => {
     fetchTelemetry(activeOrderId);
     const interval = setInterval(() => {
       fetchTelemetry(activeOrderId);
-    }, 10000); // 10s auto-refresh for live IoT telemetry
+      if (isTripActive && gpsMode === 'simulated') {
+        setActiveWaypointIndex((prev) => (prev < waypoints.length - 1 ? prev + 1 : 0));
+      }
+    }, 6000);
     return () => clearInterval(interval);
-  }, [activeOrderId]);
+  }, [activeOrderId, isTripActive, gpsMode]);
+
+  const handleRealGpsToggle = () => {
+    if (gpsMode === 'simulated') {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setGpsMode('browser_gps');
+            setGeoError(null);
+            setTelemetryData((prev: any) => ({
+              ...prev,
+              gpsCoordinates: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+              locationName: `Live Browser Coordinates (${pos.coords.latitude.toFixed(4)}°N, ${pos.coords.longitude.toFixed(4)}°E)`
+            }));
+          },
+          (err) => {
+            setGeoError('Location permission denied. Reverting to Simulated Demo GPS.');
+            setGpsMode('simulated');
+          }
+        );
+      } else {
+        setGeoError('Geolocation not supported by device. Using Demo Mode.');
+      }
+    } else {
+      setGpsMode('simulated');
+      setGeoError(null);
+    }
+  };
 
   const fetchTelemetry = async (id: string) => {
     setLoading(true);
@@ -55,7 +104,6 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
         setLastRefreshed(new Date().toLocaleTimeString());
       }
     } catch {
-      // Local fallback
       generateLocalTelemetry();
     } finally {
       setLoading(false);
@@ -65,16 +113,19 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
   const generateLocalTelemetry = () => {
     const baseTemp = 13.2;
     const currentTemp = (baseTemp + (Math.random() * 0.4 - 0.2)).toFixed(1);
+    const wp = waypoints[activeWaypointIndex] || waypoints[2];
+
     setTelemetryData({
       reeferTemperature: parseFloat(currentTemp),
       targetTemperature: 13.0,
       humidityPercent: 88,
       vehicleSpeedKmph: Math.round(55 + Math.random() * 8),
       doorStatus: 'Locked & Sealed',
-      gpsCoordinates: { lat: 19.4521, lng: 73.5512 },
-      etaMinutes: 65,
-      locationName: 'Igatpuri Expressway Cold Corridor (NH-160)'
+      gpsCoordinates: { lat: wp.lat, lng: wp.lng },
+      etaMinutes: Math.max(15, 120 - activeWaypointIndex * 25),
+      locationName: wp.name
     });
+
     setSensorHistory([
       { time: '10:00 AM', temp: 13.0, humidity: 88 },
       { time: '10:30 AM', temp: 13.2, humidity: 87 },
@@ -84,14 +135,6 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
     ]);
     setLastRefreshed(new Date().toLocaleTimeString());
   };
-
-  const stages = [
-    { label: 'Farm Dispatch', done: true, time: '06:30 AM', desc: 'Pre-cooled cargo loaded' },
-    { label: 'IoT Reefer Active', done: true, time: '07:15 AM', desc: 'Cold seal locked at 13°C' },
-    { label: 'Express Highway Transit', done: true, time: 'Now (Live)', desc: 'Cruising at 58 km/h' },
-    { label: 'Quality Gateway', done: false, time: '11:45 AM', desc: 'Brix & pulp temp audit' },
-    { label: 'Retail Delivery', done: false, time: '01:30 PM', desc: 'Direct display distribution' }
-  ];
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -111,11 +154,24 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Real GPS vs Demo GPS Toggle */}
+          <button
+            onClick={handleRealGpsToggle}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              gpsMode === 'browser_gps'
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'bg-slate-900 text-purple-300 border border-purple-500/30 hover:text-white'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>{gpsMode === 'browser_gps' ? '🛰️ Live Hardware GPS' : '🚗 Simulated Demo GPS'}</span>
+          </button>
+
           <select
             value={activeOrderId}
             onChange={(e) => setActiveOrderId(e.target.value)}
-            className="bg-slate-900 border border-purple-500/40 text-slate-200 text-xs sm:text-sm rounded-xl px-4 py-2.5 outline-none font-semibold cursor-pointer"
+            className="bg-slate-900 border border-purple-500/40 text-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 outline-none font-semibold cursor-pointer"
           >
             {orders.map((o) => (
               <option key={o.id} value={o.id} className="bg-slate-900">
@@ -125,11 +181,37 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
           </select>
 
           <button
-            onClick={() => fetchTelemetry(activeOrderId)}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 hover:text-white border border-purple-500/30 transition-all"
-            title="Refresh Telemetry"
+            onClick={() => setIsPdfModalOpen(true)}
+            className="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow"
           >
-            <RotateCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <Download className="w-3.5 h-3.5" />
+            <span>Audit PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {geoError && (
+        <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>{geoError}</span>
+        </div>
+      )}
+
+      {/* GPS Mode Label Banner */}
+      <div className="p-3 rounded-2xl bg-slate-950/80 border border-purple-500/20 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className={`w-2.5 h-2.5 rounded-full ${gpsMode === 'browser_gps' ? 'bg-emerald-400' : 'bg-sky-400'} animate-ping`} />
+          <span className="font-bold text-white uppercase tracking-wider font-mono text-[11px]">
+            {gpsMode === 'browser_gps' ? 'GPS MODE: VERIFIED HARDWARE SENSOR' : 'GPS MODE: SIMULATED DEMO ROUTE (Bengaluru ➔ Hyderabad Corridor)'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsTripActive(!isTripActive)}
+            className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-purple-300 text-[11px] font-bold border border-purple-500/30 flex items-center gap-1"
+          >
+            {isTripActive ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            <span>{isTripActive ? 'Pause Trip' : 'Resume Trip'}</span>
           </button>
         </div>
       </div>
@@ -164,7 +246,7 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
                     <ThermometerSnowflake className="w-4 h-4" />
                     <span>Reefer Temp</span>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-400">Normal</span>
+                  <span className="text-[10px] font-mono text-emerald-400">Locked</span>
                 </div>
                 <div className="text-2xl font-black text-white font-mono mt-1">
                   {telemetryData?.reeferTemperature || 13.2}°C
@@ -203,7 +285,7 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
                   {telemetryData?.vehicleSpeedKmph || 58} <span className="text-xs font-normal text-slate-400">km/h</span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-mono">
-                  G-Force: 0.12g (Gentle)
+                  Air-Ride Suspension
                 </div>
               </div>
 
@@ -252,16 +334,16 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
           </div>
         </div>
 
-        {/* Visual Route Timeline & Simulated Highway Corridor (Right) */}
+        {/* Visual Route Timeline & Highway Corridor (Right) */}
         <div className="lg:col-span-7 glass-panel rounded-3xl p-6 sm:p-8 border border-purple-500/25 space-y-6 flex flex-col justify-between">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Navigation className="w-5 h-5 text-sky-400" />
-                <h3 className="text-base font-bold text-white">Active Transit Timeline & Waypoints</h3>
+                <h3 className="text-base font-bold text-white">Highway Transit Waypoint Corridor</h3>
               </div>
               <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                Status: In Transit
+                Live Route Tracked ✓
               </span>
             </div>
 
@@ -274,43 +356,50 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
                 <div>
                   <div className="text-[10px] uppercase font-mono text-slate-400">Current Position</div>
                   <div className="text-xs sm:text-sm font-bold text-white">
-                    {telemetryData?.locationName || 'Igatpuri Expressway Cold Corridor (NH-160)'}
+                    {telemetryData?.locationName || waypoints[activeWaypointIndex]?.name}
                   </div>
                 </div>
               </div>
               <div className="text-right text-[11px] font-mono text-slate-400">
-                19.4521° N, 73.5512° E
+                {telemetryData?.gpsCoordinates?.lat?.toFixed(4)}° N, {telemetryData?.gpsCoordinates?.lng?.toFixed(4)}° E
               </div>
             </div>
 
             {/* 5-Stage Chronological Route Progress */}
             <div className="space-y-4 pt-4">
-              {stages.map((stage, idx) => (
-                <div key={idx} className="flex items-start gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all ${
-                      stage.done
-                        ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]'
-                        : 'bg-slate-900 border-slate-700 text-slate-500'
-                    }`}>
-                      {stage.done ? <CheckCircle2 className="w-4 h-4" /> : `0${idx + 1}`}
-                    </div>
-                    {idx < stages.length - 1 && (
-                      <div className={`w-0.5 h-10 ${stage.done ? 'bg-gradient-to-b from-purple-500 to-indigo-500' : 'bg-slate-800'}`} />
-                    )}
-                  </div>
+              {waypoints.map((wp, idx) => {
+                const isPassed = activeWaypointIndex >= idx;
+                const isCurrent = activeWaypointIndex === idx;
 
-                  <div className="flex-1 pb-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className={`text-xs sm:text-sm font-bold ${stage.done ? 'text-white' : 'text-slate-400'}`}>
-                        {stage.label}
-                      </h4>
-                      <span className="text-xs font-mono text-purple-300 font-semibold">{stage.time}</span>
+                return (
+                  <div key={idx} className="flex items-start gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all ${
+                        isCurrent
+                          ? 'bg-sky-600 border-sky-400 text-white shadow-[0_0_15px_rgba(56,189,248,0.6)] scale-110'
+                          : isPassed
+                          ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                          : 'bg-slate-900 border-slate-700 text-slate-500'
+                      }`}>
+                        {isPassed ? <CheckCircle2 className="w-4 h-4" /> : `0${idx + 1}`}
+                      </div>
+                      {idx < waypoints.length - 1 && (
+                        <div className={`w-0.5 h-10 ${isPassed ? 'bg-gradient-to-b from-purple-500 to-indigo-500' : 'bg-slate-800'}`} />
+                      )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{stage.desc}</p>
+
+                    <div className="flex-1 pb-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className={`text-xs sm:text-sm font-bold ${isPassed ? 'text-white' : 'text-slate-400'}`}>
+                          {wp.name}
+                        </h4>
+                        <span className="text-xs font-mono text-purple-300 font-semibold">{wp.time}</span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">{wp.status}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -318,13 +407,21 @@ export const LiveTrackingSchedule: React.FC<LiveTrackingScheduleProps> = ({ orde
           <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 to-slate-950 border border-emerald-500/25 flex items-center justify-between text-xs text-slate-300">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-              <span>Cold-Chain Audit Pass: Zero thermal breaches logged during 172 km journey.</span>
+              <span>Cold-Chain Audit Pass: Zero thermal breaches logged across national highway.</span>
             </div>
             <span className="text-emerald-400 font-bold font-mono">100% COMPLIANT</span>
           </div>
         </div>
 
       </div>
+
+      {/* PDF Download Modal */}
+      <AgriFlowPDFDownloadModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        order={currentOrder}
+        batchId={currentOrder.batchId}
+      />
 
     </div>
   );

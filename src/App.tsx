@@ -14,6 +14,8 @@ import { CROPS_DATA } from './data/cropsFallback';
 import { INITIAL_ORDERS, INITIAL_DRIVERS } from './data/mockFallback';
 import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart, QrCode, ShoppingCart } from 'lucide-react';
 
+import { AgriFlowPipelineVisualizer } from './components/common/AgriFlowPipelineVisualizer';
+
 const AgriFlowMain: React.FC = () => {
   const { t } = useLanguage();
   const { activeRole, switchRole, user } = useAuth();
@@ -156,7 +158,13 @@ const AgriFlowMain: React.FC = () => {
       />
 
       {/* Main Role Interface Content Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        
+        {/* Signature AgriFlow Farm-to-Fork Pipeline Visualizer */}
+        <AgriFlowPipelineVisualizer
+          activeRole={activeRole}
+          onSelectStage={(role) => switchRole(role)}
+        />
         
         {/* Dynamic Toast Notification */}
         {notification && (
