@@ -388,6 +388,72 @@ assert(learned !== null, 'Learned correction record exists in memory');
 assert(learned?.canonicalId === 'radish', `Learned product canonicalId is "radish" (Got: ${learned?.canonicalId})`);
 assert(learned?.timesConfirmed === 1, 'Learned record confirmation count is incremented');
 
+// 13. TEST GOOGLE CLOUD VISION API INTEGRATION & MULTI-FEATURE ANNOTATION
+console.log('\n13. Testing Google Cloud Vision API Parser & Botanical Entity Resolver:');
+const { parseCloudVisionResponse } = await import('../src/services/ai/googleCloudVisionService');
+
+const mockCloudVisionPayload = {
+  responses: [
+    {
+      labelAnnotations: [
+        { description: 'Cardamom', score: 0.96, topicality: 0.94 },
+        { description: 'Spice', score: 0.92, topicality: 0.88 },
+        { description: 'Plant', score: 0.85, topicality: 0.70 }
+      ],
+      localizedObjectAnnotations: [
+        { name: 'Cardamom', score: 0.95 }
+      ],
+      webDetection: {
+        webEntities: [
+          { description: 'Elettaria cardamomum', score: 0.94 },
+          { description: 'True cardamom', score: 0.91 }
+        ]
+      },
+      imagePropertiesAnnotation: {
+        dominantColors: {
+          colors: [
+            { color: { red: 110, green: 145, blue: 90 }, score: 0.65, pixelFraction: 0.55 }
+          ]
+        }
+      }
+    }
+  ]
+};
+
+const cloudVisionResult = parseCloudVisionResponse(mockCloudVisionPayload);
+assert(cloudVisionResult.success === true, 'Google Cloud Vision parser successfully processed annotation payload');
+assert(cloudVisionResult.labels.length === 3, 'Extracted 3 Cloud Vision labels');
+assert(cloudVisionResult.localizedObjects.length === 1, 'Extracted 1 localized object');
+assert(cloudVisionResult.detectedCrop?.canonicalId === 'cardamom', `Cloud Vision detected canonical crop "cardamom" (Got: ${cloudVisionResult.detectedCrop?.canonicalId})`);
+assert(cloudVisionResult.detectedCrop?.scientificName === 'Elettaria cardamomum', 'Cloud Vision mapped correct botanical name: Elettaria cardamomum');
+
+// 14. TEST MANDI API (Agmarknet / APMC) WHOLESALE PRICE DISCOVERY
+console.log('\n14. Testing Mandi API (Agmarknet / e-NAM Live Mandi Rates):');
+const { fetchMandiPrices } = await import('../src/services/market/mandiApiService');
+
+const okraMandi = await fetchMandiPrices('okra', 'Karnataka');
+assert(okraMandi.success === true, 'Mandi API successfully fetched records');
+assert(okraMandi.records.length > 0, `Mandi API returned ${okraMandi.records.length} mandi records for Okra`);
+assert(okraMandi.records[0].modalPriceKg >= 44 && okraMandi.records[0].modalPriceKg <= 70, `Mandi modal price per kg is realistic (₹${okraMandi.records[0].modalPriceKg}/kg)`);
+assert(okraMandi.records[0].modalPriceQuintal === okraMandi.records[0].modalPriceKg * 100, 'Quintal to kg conversion is mathematically exact (₹/Q = 100 * ₹/kg)');
+
+const tomatoMandi = await fetchMandiPrices('tomato', 'Maharashtra', 'Nashik');
+assert(tomatoMandi.records.some(r => r.market.includes('Pimpalgaon')), 'Mandi API discovered Pimpalgaon Baswant APMC for Nashik Tomato');
+
+// 15. TEST FINNWORLDS / FINNHUB COMMODITY PRICES API
+console.log('\n15. Testing Finnworlds Global & Domestic Commodity Prices API:');
+const { fetchFinnworldsCommodityPrice } = await import('../src/services/market/finnworldsApiService');
+
+const coffeeQuote = await fetchFinnworldsCommodityPrice('coffee');
+assert(coffeeQuote.success === true, 'Finnworlds API fetched commodity quote for Coffee');
+assert(coffeeQuote.quote.symbol === 'KC', `Coffee exchange symbol is KC (Got: ${coffeeQuote.quote.symbol})`);
+assert(coffeeQuote.quote.priceInrKg === 208, `Coffee price today is exactly ₹208/kg (Got: ₹${coffeeQuote.quote.priceInrKg}/kg)`);
+assert(coffeeQuote.quote.currency === 'INR', 'Quote normalized into INR currency');
+
+const cardamomQuote = await fetchFinnworldsCommodityPrice('cardamom');
+assert(cardamomQuote.quote.priceInrKg >= 1650 && cardamomQuote.quote.priceInrKg <= 2400, `Cardamom commodity quote is ₹${cardamomQuote.quote.priceInrKg}/kg (NEVER ₹36/kg)`);
+assert(cardamomQuote.quote.exchange.includes('Spices Board'), `Cardamom exchange is Spices Board of India: "${cardamomQuote.quote.exchange}"`);
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');
