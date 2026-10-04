@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { ProductIntelligence } from '../../types/product';
-import { getProductVisual } from '../../utils/productImages';
-import { Sparkles, MapPin, TrendingUp, ShieldCheck, Award, RefreshCw, BarChart2 } from 'lucide-react';
+import { EnrichedProductIntelligence } from '../../services/crop/cropKnowledgeService';
+import { getVerifiedCropVisual } from '../../services/crop/cropImageService';
+import { Sparkles, MapPin, TrendingUp, ShieldCheck, Award, RefreshCw, BarChart2, CheckCircle2 } from 'lucide-react';
 
 interface ProductHeroBannerProps {
-  product: ProductIntelligence;
+  product: EnrichedProductIntelligence;
   onOpenSmartPlan: () => void;
 }
 
 export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, onOpenSmartPlan }) => {
-  const [selectedCity, setSelectedCity] = useState<keyof ProductIntelligence['market']['regionalPrices']>('Bengaluru');
-  const visual = getProductVisual(product.id, product.name, product.category);
+  const [selectedCity, setSelectedCity] = useState<keyof typeof product.market.regionalPrices>('Bengaluru');
+  const visual = getVerifiedCropVisual(product.id, product.name);
 
   const currentRegionalPrice = product.market?.regionalPrices?.[selectedCity] ?? product.market?.basePricePerKg ?? 30;
 
@@ -29,13 +29,14 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
         {/* Left: Product Visual + Identity */}
         <div className="flex items-start sm:items-center gap-5 sm:gap-6">
           
-          {/* Verified Product Badge */}
+          {/* Verified Product Badge with Alt Tag */}
           <div 
             className="relative flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-3xl p-1 shadow-2xl flex items-center justify-center border transition-transform duration-500 hover:scale-105"
             style={{ 
               background: `linear-gradient(135deg, ${visual.gradient[0]}, ${visual.gradient[1]})`,
               borderColor: visual.accentColor
             }}
+            title={visual.altText}
           >
             <div className="w-full h-full rounded-[22px] bg-slate-950/40 backdrop-blur-sm flex flex-col items-center justify-center p-2">
               <span className="text-4xl sm:text-5xl drop-shadow-md select-none">
@@ -46,7 +47,7 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
               </span>
             </div>
 
-            {/* Live active indicator */}
+            {/* Live verified active indicator */}
             <span className="absolute -top-1 -right-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-slate-900"></span>
@@ -64,7 +65,7 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                100% Specific Telemetry
+                {visual.verificationStatus === 'verified' ? 'Verified Botanical Match' : 'Identified Produce'}
               </span>
             </div>
 
@@ -79,10 +80,12 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
               {product.description}
             </p>
 
-            <div className="flex items-center gap-3 text-xs text-slate-400 font-mono pt-0.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono pt-0.5">
               <span>Scientific: <strong className="text-white italic">{product.scientificName}</strong></span>
               <span>•</span>
               <span>Growth Cycle: <strong className="text-purple-300">{product.growing.growthDuration}</strong></span>
+              <span>•</span>
+              <span className="text-[10px] text-slate-500 truncate max-w-[200px]">Src: {product.knowledgeMeta?.source || visual.source}</span>
             </div>
           </div>
         </div>
@@ -133,7 +136,7 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
             </div>
           </div>
 
-          {/* GENERATE SMART PLAN Button */}
+          {/* GENERATE UNIVERSAL SMART PLAN Button */}
           <button
             onClick={onOpenSmartPlan}
             className="group relative flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-sky-500 hover:from-purple-500 hover:to-sky-400 text-white font-extrabold text-sm shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300 transform hover:scale-105 active:scale-95 border border-purple-300/40 cursor-pointer"
@@ -141,7 +144,7 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
             <Sparkles className="w-5 h-5 text-yellow-300 animate-spin" style={{ animationDuration: '4s' }} />
             <span>GENERATE SMART PLAN</span>
             <span className="px-1.5 py-0.5 rounded-md bg-white/20 text-[10px] uppercase font-mono tracking-wider">
-              AI Roadmap
+              Decision AI
             </span>
           </button>
         </div>

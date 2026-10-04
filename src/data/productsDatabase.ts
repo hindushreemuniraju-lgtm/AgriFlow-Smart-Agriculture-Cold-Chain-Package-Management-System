@@ -349,6 +349,175 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
     }
   },
 
+  // 2B. BRINJAL (EGGPLANT / AUBERGINE / BAINGAN)
+  {
+    id: 'brinjal',
+    name: 'Brinjal (Eggplant / Baingan)',
+    category: 'Vegetable',
+    subcategory: 'Nightshade Solanaceous Vegetable',
+    scientificName: 'Solanum melongena',
+    variety: 'Pusa Purple Long / Manjari Gota / Round Black Beauty',
+    description: 'High-yield solanaceous vegetable with lustrous purple skin, rich in chlorogenic acid and dietary nasunin antioxidants.',
+    icon: '🍆',
+    color: '#8b5cf6',
+    aliases: ['brinjal', 'eggplant', 'aubergine', 'baingan', 'baigan', 'vangi', 'badanekayi', 'kathirikai', 'solanum melongena'],
+    images: {
+      productImage: 'brinjal',
+      productImageAlt: 'Glossy Purple Brinjal (Eggplant / Baingan)'
+    },
+    growing: {
+      climate: 'Warm-season crop requiring warm temperatures (21°C - 30°C); susceptible to severe frost.',
+      soil: 'Deep, fertile, well-drained silt loam to clay loam rich in organic matter.',
+      idealSoilPh: '5.8 - 6.8',
+      temperatureRange: [18, 32],
+      rainfallRequirement: '500 - 750 mm',
+      sowingMethod: 'Nursery seedbed raising followed by 30-day sturdy seedling transplanting',
+      sowingSeason: 'Kharif (June-July), Rabi (Oct-Nov), and Summer (Jan-Feb)',
+      seedRequirement: '250 - 300 g / hectare for hybrid varieties',
+      spacing: '75 cm between rows x 60 cm between plants',
+      growthDuration: '100 - 130 days',
+      growthDays: 110,
+      currentMaturityStage: 80,
+      irrigation: 'Regular drip or furrow irrigation every 4-6 days; maintain uniform root zone moisture to prevent fruit bitterness.',
+      fertilizerGuidance: [
+        { stage: 'Basal Soil Prep', recommendation: 'FYM 25 t/ha + 50 kg N + 50 kg P2O5 + 50 kg K2O', impact: 'Vigorous early root network and vegetative branching', urgency: 'Immediate' },
+        { stage: 'Flowering & Fruit Set', recommendation: 'Top-dress 50 kg Nitrogen + 0.2% Boron foliar spray', impact: 'Prevents flower drop and promotes glossy fruit skin', urgency: 'Scheduled' },
+        { stage: 'Peak Harvest Picking', recommendation: '1% Potassium Nitrate (13:0:45) fertigation', impact: 'Continuous fruit sizing and uniform purple pigmentation', urgency: 'Monitoring' }
+      ],
+      commonPests: ['Shoot and Fruit Borer (Leucinodes orbonalis)', 'Jassids', 'Whitefly', 'Epilachna Beetle'],
+      diseaseRisks: ['Phomopsis Blight and Fruit Rot', 'Bacterial Wilt (Ralstonia solanacearum)', 'Little Leaf of Brinjal (Phytoplasma)'],
+      criticalCareTips: [
+        'Install pheromone traps (10/acre) early to suppress shoot and fruit borer infestation.',
+        'Clip off and safely destroy wilted terminal shoots showing borer entry holes.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 7,
+      recommendedWindow: 'Harvest when fruits reach characteristic size with high glossy sheen before seeds harden',
+      maturityIndicators: [
+        'Fruit skin displays deep glossy purple luster (dull skin indicates over-maturity).',
+        'Flesh yields slightly to gentle thumb pressure and rebounds.',
+        'Internal seeds are soft, white, and tender (not brown or hard).'
+      ],
+      harvestingMethod: 'Cut stems with sharp secateurs leaving 2 cm of green calyx stalk attached to the fruit.',
+      bestHarvestTime: 'Cool early morning or late evening',
+      firmnessTarget: '4.0 - 5.0 kg/cm²',
+      postHarvestHandling: [
+        'Move harvested crates to shade immediately to prevent solar heat absorption.',
+        'Wipe with clean dry muslin cloth to maintain glossy market finish.',
+        'Grade by size: Long slender (15-20cm), Round (8-10cm diameter).'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '3 to 5 Days (at 25°C)',
+      shelfLifeCold: '10 to 14 Days (at 10°C - 12°C)',
+      ambientDays: 4,
+      coldDays: 12,
+      storageTemperature: '10°C - 12°C (Sensitive to chilling injury below 8°C)',
+      humidity: '90% - 95% RH',
+      coldStorageRequired: true,
+      storageMethod: 'Perforated plastic crates stacked in high-humidity cool room',
+      preservationSteps: [
+        'Maintain strictly above 10°C to prevent chilling injury, calyx browning, and skin pitting.',
+        'Store away from high-ethylene items like ripe bananas and tomatoes.'
+      ],
+      spoilageIndicators: ['Loss of gloss and skin wrinkling', 'Brown discolored calyx', 'Internal seed browning and bitter pulp'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Ventilated Corrugated Fibreboard (CFB) Boxes (10kg) or Heavy-Duty Plastic Crates',
+      secondaryPackaging: 'Returnable Plastic Crates (RPC) with soft foam bottom liners',
+      recommendedMaterials: ['5-Ply Kraft Corrugated Box with 4% vent holes', 'Food-grade perforated LDPE liners', 'Soft foam sheets'],
+      ventilationRequired: true,
+      ventilationSpec: '4% surface area side ventilation to disperse respiration heat',
+      moistureProtection: 'High humidity maintenance with condensation prevention',
+      ethyleneSensitivity: 'High',
+      ethyleneControl: 'Do not co-ship with climacteric fruit ripening loads',
+      cushioningSpecs: 'Bottom and side corrugated pads prevent abrasion of glossy skin',
+      shockRating: 4.2,
+      estimatedPackagingCostPerKg: 1.80,
+      packagingCapacity: '10kg / 12kg crates',
+      ecoCertification: '100% Recyclable Corrugated Board',
+      layers: [
+        { layer: 1, name: 'Soft Muslin / Foam Base', material: 'Breathable Protective Liner', function: 'Protects delicate calyx and prevents skin scratches', icon: '🧽', glowColor: '#8b5cf6' },
+        { layer: 2, name: 'Ventilated CFB Master Box', material: '5-Ply Kraft Corrugated Carton', function: 'Resists stacking compression in transit trucks', icon: '📦', glowColor: '#a855f7' },
+        { layer: 3, name: 'Smart Farm Origin QR', material: 'Digital Traceability QR Tag', function: 'Farm origin, picking date, and batch authentication', icon: '🏷️', glowColor: '#38bdf8' }
+      ],
+      packingSteps: [
+        { step: 1, title: 'Field Heat Cooling', description: 'Rest in shade down to 18°C prior to boxing.' },
+        { step: 2, title: 'Stalk Alignment', description: 'Pack horizontally with calyx alternating to avoid spine punctures.' },
+        { step: 3, title: 'Top Cushioning', description: 'Place top paper pad before closing box flaps.' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Ventilated LCV or Chilled Reefer Van (11°C - 13°C)',
+      temperatureControlled: true,
+      targetTemp: '11°C - 13°C',
+      maximumRecommendedDistance: '800 km',
+      handlingRequirements: ['Protect from direct sun and wind draft', 'Handle crates gently to avoid calyx detachment'],
+      vibrationSensitivity: 'Medium',
+      baseRatePerKm: 18.0
+    },
+    market: {
+      marketCategory: 'Daily Solanaceous Commodity (High Demand)',
+      priceUnit: '₹/kg',
+      basePricePerKg: 26.00,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 28.00,
+        Mumbai: 30.00,
+        Delhi: 25.00,
+        Nashik: 22.00,
+        Hyderabad: 27.00,
+        Chennai: 32.00
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 25,
+        protein_g: 1.0,
+        carbs_g: 5.9,
+        fat_g: 0.2,
+        vitaminC_mg: 2.2,
+        vitaminA_IU: 23,
+        dietaryFiber_g: 3.0,
+        potassium_mg: 229,
+        iron_mg: 0.23,
+        antioxidantIndex: 91,
+        glycemicIndex: 15,
+        highlights: ['Rich in Nasunin (potent brain cell antioxidant)', 'Abundant Chlorogenic acid for heart health', 'Low calorie & high dietary fiber']
+      },
+      consumptionMethods: ['Smoked and mashed in classic Baingan Bharta', 'Stuffed spicy Bharli Vangi / Ennegayi', 'Grilled / roasted steaks with herbs', 'Slow-cooked in regional sambars and curries'],
+      preparationMethods: ['Keep skin intact during roasting/cooking to maximize nasunin anthocyanin antioxidant intake.'],
+      nutrientPreservationTips: ['Soak cut pieces in lightly salted water for 5 minutes to prevent polyphenol browning.'],
+      recommendedPreparation: 'Char-roast whole on open flame and mash with crushed garlic, green chillies, and cold-pressed mustard oil.',
+      servingGuidance: 'Delicious low-carb nutrient base (100g-150g portion).',
+      bioavailabilityTip: 'Cook with culinary fats like cold-pressed mustard oil or olive oil to enhance bioavailability of fat-soluble phytonutrients.',
+      recipes: [
+        {
+          title: 'Fire-Smoked Rustic Baingan Bharta',
+          prepTime: '25 mins',
+          healthBenefit: 'High nasunin antioxidant & brain protective boost',
+          ingredients: ['1 Large Round Purple Brinjal', '4 Garlic cloves', '2 Tomatoes', '1 Green Chilli', '1 tbsp Mustard Oil', 'Fresh Coriander'],
+          steps: [
+            'Slit brinjal, insert garlic cloves into slits, and roast on open flame until skin is fully charred and flesh is tender.',
+            'Peel off charred skin, mash the warm pulp.',
+            'Sauté chopped onions, tomatoes, and chillies in mustard oil; fold in mashed brinjal and simmer 5 minutes.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Free water on skin triggers rapid Phomopsis fruit rot lesions.',
+      highTempRisk: 'Storage above 30°C causes accelerated moisture loss, flaccidity, and seed hardening.',
+      frostRisk: 'Chilling injury occurs below 8°C causing surface pitting, pulp browning, and off flavors.',
+      excessRainRisk: 'Heavy rains during picking create muddy produce and severe bacterial soft rot.',
+      transitShockRisk: 'Calyx spines can puncture adjacent fruits if stacked carelessly without alignment.',
+      mitigationStrategy: 'Transit in ventilated padded crates at 11°C-13°C and pack with alternating calyx directions.'
+    }
+  },
+
   // 3. POTATO
   {
     id: 'potato',
