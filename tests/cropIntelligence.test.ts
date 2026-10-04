@@ -211,6 +211,41 @@ assert(brinjalPackRec.recommended.estimatedShelfLifeDays > 0, `Estimated shelf-l
 assert(typeof brinjalPackRec.recommended.estimatedShelfLifeRange === 'string', `Shelf-life range is formatted as string ("${brinjalPackRec.recommended.estimatedShelfLifeRange}")`);
 assert(brinjalPackRec.disclaimer.includes('decision-support'), 'Shelf-life includes honest decision-support model estimate disclaimer');
 
+// 9. TEST LIVE MARKET PRICING & COMMODITY CATEGORIZATION
+console.log('\n9. Testing Automated Live Market Pricing & Commodity Type Separation:');
+const { fetchLiveProductPrice } = await import('../src/services/market/livePriceService');
+
+const butterPrice = await fetchLiveProductPrice('butter', 'Butter');
+assert(butterPrice.commodityType === 'DAIRY_PRODUCTS', `Butter commodityType is "DAIRY_PRODUCTS" (Got: ${butterPrice.commodityType})`);
+assert(butterPrice.currentPrice >= 450 && butterPrice.currentPrice <= 750, `Butter live benchmark price is realistic (₹${butterPrice.currentPrice}/${butterPrice.unit})`);
+assert(butterPrice.source.includes('Dairy Federation') || butterPrice.source.includes('Benchmark'), `Butter price source is authentic: "${butterPrice.source}"`);
+
+const okraPrice = await fetchLiveProductPrice('okra', 'Okra');
+assert(okraPrice.commodityType === 'FRESH_PRODUCE', `Okra commodityType is "FRESH_PRODUCE" (Got: ${okraPrice.commodityType})`);
+assert(okraPrice.currentPrice >= 30 && okraPrice.currentPrice <= 90, `Okra price is realistic fresh APMC auction rate (₹${okraPrice.currentPrice}/${okraPrice.unit})`);
+
+const radishPrice = await fetchLiveProductPrice('radish', 'Radish');
+assert(radishPrice.currentPrice >= 20 && radishPrice.currentPrice <= 60, `Radish price is realistic (₹${radishPrice.currentPrice}/${radishPrice.unit})`);
+
+const watermelonPrice = await fetchLiveProductPrice('watermelon', 'Watermelon');
+assert(watermelonPrice.currentPrice >= 15 && watermelonPrice.currentPrice <= 55, `Watermelon price is realistic (₹${watermelonPrice.currentPrice}/${watermelonPrice.unit})`);
+
+// 10. TEST TOP-LEVEL COMMODITY EXPANSION (Radish, Watermelon, Butter)
+console.log('\n10. Testing Top-Level Product Database Records:');
+const radishProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'radish');
+const watermelonProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'watermelon');
+const butterProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'butter');
+
+assert(radishProduct !== undefined, 'Radish is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
+assert(radishProduct?.scientificName === 'Raphanus sativus', 'Radish has correct scientific name');
+assert(radishProduct?.storage.humidity.includes('95%'), 'Radish requires high humidity (95-98% RH)');
+
+assert(watermelonProduct !== undefined, 'Watermelon is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
+assert(watermelonProduct?.storage.storageTemperature.includes('10°C'), 'Watermelon prevents chilling injury (>10°C)');
+
+assert(butterProduct !== undefined, 'Butter is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
+assert(butterProduct?.packaging.layers.length >= 2, 'Butter has multi-layer greaseproof & light barrier packaging');
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');
@@ -221,4 +256,5 @@ assert(brinjalPackRec.disclaimer.includes('decision-support'), 'Shelf-life inclu
 }
 
 testSmartPlan();
+
 

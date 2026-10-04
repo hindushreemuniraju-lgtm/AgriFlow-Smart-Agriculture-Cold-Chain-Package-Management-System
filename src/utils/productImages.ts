@@ -102,11 +102,32 @@ export const PRODUCT_IMAGE_REGISTRY: Record<string, {
     alt: 'Fresh Glossy Eggplant (Brinjal)'
   },
   'okra': {
-    emoji: '🥒',
+    emoji: '🟢',
     gradient: ['#14532d', '#16a34a'],
     accentColor: '#86efac',
-    iconPath: 'M5 19l14-14-3-3L2 16l3 3z',
-    alt: 'Tender Green Okra (Lady Finger)'
+    iconPath: 'M6 18l12-12-2-2L4 16l2 2zm1-3l8-8m-6 9l8-8',
+    alt: 'Tender Pentagonal Okra Pod (Bhindi)'
+  },
+  'green-chilli': {
+    emoji: '🌶️',
+    gradient: ['#065f46', '#10b981'],
+    accentColor: '#6ee7b7',
+    iconPath: 'M5 19C10 20 16 16 19 8c1-3 0-5-2-5-2 0-4 1-5 3-3 4-5 8-12 13z',
+    alt: 'Fresh Pungent Green Chilli'
+  },
+  'green-beans': {
+    emoji: '🫛',
+    gradient: ['#14532d', '#22c55e'],
+    accentColor: '#86efac',
+    iconPath: 'M5 19C7 16 9 10 19 5c-3 8-7 12-14 14z',
+    alt: 'Crisp French Green Beans'
+  },
+  'pumpkin': {
+    emoji: '🎃',
+    gradient: ['#c2410c', '#f97316'],
+    accentColor: '#fdba74',
+    iconPath: 'M12 4C7 4 4 7 4 12c0 5 3 8 8 8s8-3 8-8c0-5-3-8-8-8zm0 0v16M8 5c-2 2-3 5-3 7s1 5 3 7m8-14c2 2 3 5 3 7s-1 5-3 7',
+    alt: 'Mature Golden Pumpkin'
   },
   'capsicum': {
     emoji: '🫑',
@@ -391,19 +412,47 @@ export const PRODUCT_IMAGE_REGISTRY: Record<string, {
     iconPath: 'M12 3C7 4 4 8 4 13c0 5 4 8 8 8 3 0 6-2 7-5 1-4-1-8-4-11-1-2-2-3-3-4-1 0-1 0-2 2z',
     alt: 'Assam First Flush CTC Tea'
   },
-  'sugarcane': {
-    emoji: '🎋',
-    gradient: ['#14532d', '#15803d'],
-    accentColor: '#86efac',
-    iconPath: 'M9 2v20M15 2v20M7 8h10M7 14h10',
-    alt: 'Juicy Tropical Sugarcane Stalk'
+  'watermelon': {
+    emoji: '🍉',
+    gradient: ['#064e3b', '#dc2626'],
+    accentColor: '#f87171',
+    iconPath: 'M12 4C6 4 2 8 2 13c0 5 4 8 10 8s10-3 10-8c0-5-4-9-10-9zm-6 9c0-3 3-5 6-5s6 2 6 5',
+    alt: 'Fresh Sweet Striped Watermelon'
   },
-  'cotton': {
-    emoji: '☁️',
-    gradient: ['#3f3f46', '#e4e4e7'],
-    accentColor: '#ffffff',
-    iconPath: 'M12 4a5 5 0 00-5 5 5 5 0 00-2 4 5 5 0 005 5h8a5 5 0 005-5 5 5 0 00-2-4 5 5 0 00-5-5z',
-    alt: 'Bt Long Staple Raw White Cotton'
+  'milk': {
+    emoji: '🥛',
+    gradient: ['#1e293b', '#38bdf8'],
+    accentColor: '#e0f2fe',
+    iconPath: 'M7 3h10v3H7V3zm-1 5h12l-1 12H7L6 8z',
+    alt: 'Pasteurized Homogenized Fresh Milk'
+  },
+  'ghee': {
+    emoji: '🫙',
+    gradient: ['#78350f', '#eab308'],
+    accentColor: '#fef08a',
+    iconPath: 'M8 4h8v3H8V4zm-2 5h12c1 0 2 1 2 2v9c0 1-1 2-2 2H6c-1 0-2-1-2-2v-9c0-1 1-2 2-2z',
+    alt: 'Pure Desi Cow Ghee'
+  },
+  'butter': {
+    emoji: '🧈',
+    gradient: ['#a16207', '#facc15'],
+    accentColor: '#fef08a',
+    iconPath: 'M4 8h16v8H4V8zm2 2v4h12v-4H6z',
+    alt: 'Creamery Pasteurized Salted Butter'
+  },
+  'groundnut-oil': {
+    emoji: '🫗',
+    gradient: ['#854d0e', '#f59e0b'],
+    accentColor: '#fde047',
+    iconPath: 'M9 3h6v4H9V3zm-3 6h12v11c0 1-1 2-2 2H8c-1 0-2-1-2-2V9z',
+    alt: 'Cold Pressed Filtered Groundnut Oil'
+  },
+  'wheat-flour': {
+    emoji: '🌾',
+    gradient: ['#78350f', '#d97706'],
+    accentColor: '#fde68a',
+    iconPath: 'M6 5h12l2 15H4L6 5zm4 4h4v6h-4V9z',
+    alt: 'Chakki Fresh 100% Whole Wheat Atta'
   }
 };
 

@@ -2940,6 +2940,460 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       transitShockRisk: 'Low; ensure valve integrity is protected from puncture.',
       mitigationStrategy: 'Use multi-layer barrier pouches with One-Way Aroma Degassing Valves and ship in dry sealed containers.'
     }
+  },
+
+  // 16. RADISH (FRESH ROOT VEGETABLE)
+  {
+    id: 'radish',
+    name: 'Radish (White Mooli)',
+    category: 'Vegetable',
+    subcategory: 'Root Crop',
+    scientificName: 'Raphanus sativus',
+    variety: 'Pusa Chetki / Japanese White / Arka Nishant',
+    description: 'Crisp, pungent white taproot vegetable with high water content (>95%), rapid post-harvest respiration, and high moisture sensitivity requiring high humidity storage.',
+    icon: '🌱',
+    color: '#a1a1aa',
+    aliases: ['radish', 'mooli', 'mula', 'mullangi', 'white radish', 'raphanus sativus', 'daikon'],
+    images: {
+      productImage: 'radish',
+      productImageAlt: 'Fresh Crisp White Radish (Mooli)'
+    },
+    growing: {
+      climate: 'Cool-season crop requiring mild temperatures (10°C - 22°C) for crisp texture and low pungency.',
+      soil: 'Deep, loose, fertile sandy loam with friable subsoil to prevent root branching (forking).',
+      idealSoilPh: '6.0 - 6.8',
+      temperatureRange: [10, 25],
+      rainfallRequirement: '450 - 600 mm',
+      sowingMethod: 'Direct ridge and furrow sowing at 2-3 cm depth',
+      sowingSeason: 'Rabi (September - December) & Asiatic summer types (March - April)',
+      seedRequirement: '8 - 10 kg / hectare',
+      spacing: '30 cm between ridges x 8-10 cm between plants',
+      growthDuration: '40 - 55 days from sowing (fast turnaround)',
+      growthDays: 45,
+      currentMaturityStage: 80,
+      irrigation: 'Frequent light irrigations every 4-6 days to maintain uniform soil moisture and prevent pithiness or splitting.',
+      fertilizerGuidance: [
+        { stage: 'Basal', recommendation: 'FYM 20 t/ha + 40 kg N + 50 kg P2O5 + 50 kg K2O', impact: 'Early root elongation without forking', urgency: 'Immediate' },
+        { stage: '20 Days Post-Sowing', recommendation: 'Top-dressing 40 kg Nitrogen (Urea)', impact: 'Foliage development and root swelling', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Mustard Sawfly', 'Flea Beetles', 'Aphids'],
+      diseaseRisks: ['Alternaria Blight', 'White Rust (Albugo candida)', 'Black Rot'],
+      criticalCareTips: [
+        'Avoid heavy clay soils or stony ground to prevent deformed, branched roots.',
+        'Harvest on time; delayed harvest leads to hollow, pithy, fibrous roots.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 5,
+      recommendedWindow: 'Early morning manual pulling when roots reach 25-35 cm length and tender crunch',
+      maturityIndicators: [
+        'Roots reach marketable diameter (3-4.5 cm) and firm cylindrical taper.',
+        'Zero pithiness or hollow cavity at the root core.',
+        'Foliage remains vibrant green and turgid.'
+      ],
+      harvestingMethod: 'Manual hand uprooting after light pre-harvest irrigation.',
+      bestHarvestTime: 'Early morning to preserve crisp turgor pressure',
+      firmnessTarget: '5.5 - 6.5 kg/cm² penetrometer',
+      postHarvestHandling: [
+        'Hydro-cooling / washing in potable chilled water to remove adhering soil and field heat.',
+        'Trimming leaves or tying in 1kg bundles depending on market spec.',
+        'Packing in micro-perforated breathable polyethylene liners.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '2 to 4 Days (high wilting risk)',
+      shelfLifeCold: '3 to 4 Weeks in Cold Storage (0°C - 2°C, 95% RH)',
+      ambientDays: 3,
+      coldDays: 28,
+      storageTemperature: '0°C - 2°C',
+      humidity: '95% - 98% RH (High humidity critical to prevent shriveling)',
+      coldStorageRequired: true,
+      storageMethod: 'Perforated LDPE liners in plastic crates in high-humidity cold chambers',
+      preservationSteps: [
+        'Maintain high humidity to prevent moisture loss (>5% water loss causes flaccid limp roots).',
+        'Top trimming (removing leaves) extends root shelf life by reducing transpiration.',
+        'Avoid exposure to ethylene.'
+      ],
+      spoilageIndicators: ['Limp flaccid texture (pithiness)', 'Black spot rot', 'Browning around root tip'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Micro-perforated Breathable LDPE Bags (1kg / 2kg)',
+      secondaryPackaging: 'Ventilated Plastic Crates (20kg capacity)',
+      recommendedMaterials: ['Micro-perforated 25-30 micron LDPE', 'Anti-fog Polyolefin Film', 'HDPE Crates'],
+      ventilationRequired: true,
+      ventilationSpec: '12-16 micro-perforations per bag for respiration exchange',
+      moistureProtection: 'High humidity retention without free water condensation',
+      ethyleneSensitivity: 'Moderate',
+      ethyleneControl: 'Do not store with apples, bananas, or ripening tomatoes',
+      cushioningSpecs: 'Rigid plastic crates prevent impact bruising and root breakage',
+      shockRating: 3.5,
+      estimatedPackagingCostPerKg: 1.40,
+      packagingCapacity: '20 kg plastic crates',
+      ecoCertification: '100% Recyclable Polyolefin',
+      layers: [
+        { layerNumber: 1, material: 'Anti-fog Micro-perforated LDPE', thicknessMicrons: 30, purpose: 'Turgidity retention and anti-condensation' },
+        { layerNumber: 2, material: 'Food-grade Rigid HDPE Crate', thicknessMicrons: 2500, purpose: 'Transit crush protection and ventilation' }
+      ]
+    },
+    transportation: {
+      preferredMode: 'Refrigerated Reefer Van / Ventilated Insulated Truck',
+      targetTemp: '2°C - 4°C',
+      maxTransitDays: 3,
+      humidityControl: 'Maintain 90-95% RH during transit',
+      temperatureControlled: true,
+      stackingLimit: 'Maximum 8 crate tiers',
+      vibrationTolerance: 'Moderate; prevent root snapping',
+      transitChecklist: ['Pre-cool to 3°C prior to loading', 'Verify air circulation between crate stacks', 'Keep transit under 48 hours for ambient']
+    },
+    market: {
+      basePricePerKg: 36,
+      priceFluctuationRange: [22, 58],
+      marketDemand: 'Steady year-round domestic demand; high winter consumption',
+      exportPotential: 'Moderate (Regional Gulf air freight)',
+      majorMarkets: ['Azadpur Mandi Delhi', 'Vashi APMC Mumbai', 'Koyambedu Chennai', 'Yeshwanthpur Bengaluru'],
+      priceFactors: ['Root diameter & straightness', 'Absence of pithiness or cracks', 'Freshness of root skin']
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 16,
+        vitaminC_mg: 14.8,
+        vitaminA_IU: 7,
+        dietaryFiber_g: 1.6,
+        potassium_mg: 233,
+        antioxidantIndex: 68,
+        glycemicIndex: 15,
+        highlights: ['Rich in Glucosinolates & Isothiocyanates', 'High dietary water (>95%) for hydration', 'Natural digestive and detoxifying properties']
+      },
+      recipes: [
+        {
+          name: 'Crisp Mooli Paratha',
+          prepTimeMinutes: 20,
+          cookTimeMinutes: 15,
+          servings: 4,
+          ingredients: ['2 Grated Radishes (squeezed)', '2 cups Whole Wheat Flour', '1 Green Chilli chopped', '1/2 tsp Ajwain', 'Ghee for roasting'],
+          steps: [
+            'Squeeze excess water from grated radish and mix with spices.',
+            'Stuff seasoned radish filling into whole wheat dough roundels.',
+            'Roll gently and roast on a hot griddle with desi ghee until golden crisp.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Free standing water without ventilation can cause bacterial soft rot.',
+      highTempRisk: 'Temperatures above 25°C cause rapid pithiness, hollow heart, and loss of turgor.',
+      frostRisk: 'Tolerant to light frost; severe freezing causes glassiness.',
+      excessRainRisk: 'Waterlogged soil causes root splitting and fungal root rot.',
+      transitShockRisk: 'Moderate; rough transit causes root breakage and surface abrasions.',
+      mitigationStrategy: 'Hydro-cool immediately, pack in anti-fog perforated liners inside rigid crates, and maintain 1-3°C reefer chain.'
+    }
+  },
+
+  // 17. WATERMELON (FRESH SUMMER FRUIT)
+  {
+    id: 'watermelon',
+    name: 'Watermelon (Sweet Striped / Kiran)',
+    category: 'Fruit',
+    subcategory: 'Vine Fruit',
+    scientificName: 'Citrullus lanatus',
+    variety: 'Kiran / Sugar Baby / Black Beauty / NS 295',
+    description: 'High-volume, hydrating summer vine fruit with sweet crimson pulp, 92% water content, and thick rind. Susceptible to chilling injury below 7°C and pressure bruising during bulk transit.',
+    icon: '🍉',
+    color: '#ef4444',
+    aliases: ['watermelon', 'tarbooz', 'tarbuz', 'kalingad', 'citrullus lanatus', 'melon'],
+    images: {
+      productImage: 'watermelon',
+      productImageAlt: 'Fresh Sweet Striped Watermelon'
+    },
+    growing: {
+      climate: 'Warm, sunny, dry climate requiring high day temperatures (28°C - 35°C) for sugar synthesis.',
+      soil: 'Deep, well-drained sandy loam or riverbed alluvial soil rich in organic matter.',
+      idealSoilPh: '6.5 - 7.5',
+      temperatureRange: [22, 38],
+      rainfallRequirement: '400 - 550 mm (dry ripening period essential)',
+      sowingMethod: 'Direct pit or raised bed sowing with drip irrigation and plastic mulching',
+      sowingSeason: 'Spring / Summer (January - March) & Rabi in peninsular India',
+      seedRequirement: '1.5 - 2.5 kg / hectare',
+      spacing: '2.5m - 3.0m between channels x 0.9m - 1.0m between vines',
+      growthDuration: '85 - 100 days from sowing',
+      growthDays: 90,
+      currentMaturityStage: 85,
+      irrigation: 'Drip fertigation every 3-4 days; reduce irrigation 10-12 days before harvest to concentrate fruit sugars (Brix >11°).',
+      fertilizerGuidance: [
+        { stage: 'Basal', recommendation: 'FYM 25 t/ha + 50 kg N + 75 kg P2O5 + 50 kg K2O', impact: 'Deep vine root run and vigorous branching', urgency: 'Immediate' },
+        { stage: 'Fruit Setting (45 Days)', recommendation: '40 kg Nitrogen + 40 kg Potassium Sulfate (SOP)', impact: 'Fruit cell enlargement and rind strength', urgency: 'Scheduled' },
+        { stage: 'Ripening (70 Days)', recommendation: 'Foliar spray of 0:0:50 Potassium Sulfate (1.5%)', impact: 'Boosts pulp Brix sugar and deep red lycopene color', urgency: 'Immediate' }
+      ],
+      commonPests: ['Fruit Fly (Bactrocera cucurbitae)', 'Red Pumpkin Beetle', 'Thrips'],
+      diseaseRisks: ['Fusarium Wilt', 'Downy Mildew', 'Gummy Stem Blight', 'Anthracnose'],
+      criticalCareTips: [
+        'Withhold excessive irrigation during ripening to prevent fruit bursting and watery taste.',
+        'Place straw cushioning underneath developing melons to prevent soil dampness stains.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 7,
+      recommendedWindow: 'Dry morning hours when ground spot turns buttery yellow and tendril dries',
+      maturityIndicators: [
+        'Tendril at the fruit-attaching node turns completely dry, brown, and withered.',
+        'Ground spot (belly) changes from pale greenish-white to creamy golden yellow.',
+        'Dull, hollow, muffled thumping sound upon tapping with fingers (vs metallic ringing for raw).',
+        'Sugar Brix reaches 10.5° - 12.5°.'
+      ],
+      harvestingMethod: 'Manual cutting with sharp shears leaving 3-5 cm stem attached to prevent stem-end rot.',
+      bestHarvestTime: 'Early dry morning before daytime solar heating',
+      firmnessTarget: 'Rind firmness 8.0 - 9.5 kg/cm²',
+      postHarvestHandling: [
+        'Field shading immediately after harvest to prevent sunscald.',
+        'Stem-end dipping in 0.2% Carbendazim or chlorine water to seal against transit pathogens.',
+        'Grading into Small (2-4 kg), Medium (4-7 kg), and Large (>7 kg).'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '10 to 14 Days at 20°C - 25°C',
+      shelfLifeCold: '2 to 3 Weeks at 10°C - 15°C (DO NOT store below 7°C)',
+      ambientDays: 12,
+      coldDays: 21,
+      storageTemperature: '10°C - 15°C (Chilling injury occurs below 7°C causing watery breakdown)',
+      humidity: '85% - 90% RH',
+      coldStorageRequired: false,
+      storageMethod: 'Well-ventilated ambient shaded sheds or 12°C conditioned cold room with dry floor straw cushioning',
+      preservationSteps: [
+        'Strictly avoid cold storage below 7°C to prevent pitting and loss of pulp flavor.',
+        'Store away from high ethylene emitters like ripe bananas or mangoes to prevent rind thinning.',
+        'Stack on cushioned pallets with dry paddy straw.'
+      ],
+      spoilageIndicators: ['Soft watery stem end rot', 'Pitting on rind (chilling injury)', 'Fermented sour pulp'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Protective Foam Sleeve / Individual Tissue Wrap for Export',
+      secondaryPackaging: 'Heavy-Duty 5-Ply Corrugated Bulk Octabin / Master Carton with Dividers',
+      recommendedMaterials: ['5-Ply Kraft Corrugated Cardboard', 'Paddy Straw Cushioning', 'EPE Foam Net Sleeves'],
+      ventilationRequired: true,
+      ventilationSpec: '4-6 circular 25mm hand/ventilation holes per carton',
+      moistureProtection: 'Dry ventilated storage; avoid moisture condensation on rind',
+      ethyleneSensitivity: 'High (Ethylene causes rind softening and flesh maceration)',
+      ethyleneControl: 'Store and transport in ethylene-free zones',
+      cushioningSpecs: 'Straw layer thickness 50mm or individual EPE foam sleeves',
+      shockRating: 2.8,
+      estimatedPackagingCostPerKg: 0.90,
+      packagingCapacity: '20 kg master cartons or 400 kg corrugated bulk bins',
+      ecoCertification: '100% Biodegradable & Recyclable Kraft Board',
+      layers: [
+        { layerNumber: 1, material: 'EPE Foam Sleeve / Straw Layer', thicknessMicrons: 3000, purpose: 'Individual shock absorption and rind abrasion protection' },
+        { layerNumber: 2, material: '5-Ply Kraft Corrugated Master Box', thicknessMicrons: 4500, purpose: 'Heavy load stacking and compression integrity' }
+      ]
+    },
+    transportation: {
+      preferredMode: 'Ventilated Truck with Straw Bedding or Reefer Container set at 12°C',
+      targetTemp: '12°C - 15°C',
+      maxTransitDays: 6,
+      humidityControl: '85% - 90% RH',
+      temperatureControlled: false,
+      stackingLimit: 'Maximum 4-5 layers on straw bedding; do not over-stack',
+      vibrationTolerance: 'Moderate; prevent internal rind cracking',
+      transitChecklist: ['Lay 75mm clean dry paddy straw on truck floor', 'Stack melons horizontally in interlocking rows', 'Never transport with ethylene-generating fruits']
+    },
+    market: {
+      basePricePerKg: 32,
+      priceFluctuationRange: [18, 52],
+      marketDemand: 'Peak demand March - June across all Indian metros and export corridors',
+      exportPotential: 'High to Middle East (UAE, Saudi Arabia, Oman, Qatar)',
+      majorMarkets: ['APMC Navi Mumbai', 'Azadpur Delhi', 'Kallikuppam Chennai', 'Bowenpally Hyderabad'],
+      priceFactors: ['Brix sugar content (>11.5°)', 'Fruit symmetry and deep crimson flesh color', 'Rind integrity and absence of sunscald']
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 30,
+        vitaminC_mg: 8.1,
+        vitaminA_IU: 569,
+        dietaryFiber_g: 0.4,
+        potassium_mg: 112,
+        antioxidantIndex: 84,
+        glycemicIndex: 72,
+        highlights: ['High Lycopene (superior to raw tomatoes)', 'L-Citrulline for nitric oxide cardiovascular health', '92% natural electrolyte hydration']
+      },
+      recipes: [
+        {
+          name: 'Chilled Watermelon Mint Cooler',
+          prepTimeMinutes: 10,
+          cookTimeMinutes: 0,
+          servings: 4,
+          ingredients: ['4 cups Diced Seedless Watermelon', '10 Fresh Mint Leaves', '1 tbsp Lime Juice', '1/2 tsp Black Salt', 'Crushed Ice'],
+          steps: [
+            'Blend watermelon cubes with fresh mint, black salt, and lime juice for 45 seconds.',
+            'Pour over crushed ice without straining to retain pulp fiber and serve chilled.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Excessive stagnant humidity causes stem-end fungal mold.',
+      highTempRisk: 'Direct sunlight exposure above 38°C causes rapid sunburn bleaching and internal fermentation.',
+      frostRisk: 'Highly frost-sensitive; vines collapse below 5°C.',
+      excessRainRisk: 'Heavy pre-harvest rains cause fruit splitting and dilute sugar Brix.',
+      transitShockRisk: 'High; rough roads cause internal bruising, rind rupture, and mushy pulp breakdown.',
+      mitigationStrategy: 'Use 75mm straw beds, pack in heavy corrugated master bins, and maintain 12-14°C ventilated transport.'
+    }
+  },
+
+  // 18. BUTTER (PROCESSED VALUE-ADDED DAIRY COMMODITY)
+  {
+    id: 'butter',
+    name: 'Butter (Pasteurized Table Butter / Desi Makkhan)',
+    category: 'Dairy Products',
+    subcategory: 'Processed Dairy Fat',
+    scientificName: 'Butyrum (Pasteurized Cream Butter)',
+    variety: 'Pasteurized Salted Table Butter (80% Milk Fat Minimum)',
+    description: 'High-fat dairy emulsion produced by churning pasteurized cream. Highly susceptible to lipid oxidation, hydrolytic rancidity, odor absorption, and temperature melt requiring strict cold chain (-18°C or 2°C - 4°C).',
+    icon: '🧈',
+    color: '#facc15',
+    aliases: ['butter', 'makkhan', 'makhan', 'table butter', 'salted butter', 'creamery butter', 'amul butter', 'dairy butter'],
+    isProcessed: true,
+    rawCommodityId: 'milk',
+    processingMethod: 'Whole Milk Centrifugal Separation -> Sweet Cream Pasteurization (85°C) -> Ageing & Crystallization (4°C, 12h) -> Continuous Churning -> Salting (2.0%) -> Vacuum Working -> Packaging.',
+    processingStage: 'Chilled FMCG Dairy Commodity',
+    qualityImprovementTips: [
+      'Maintain continuous sub-4°C storage to prevent fat separation and oily weeping.',
+      'Use vegetable parchment wrapped inside laminated aluminium foil to block oxygen and UV light oxidation.'
+    ],
+    images: {
+      productImage: 'butter',
+      productImageAlt: 'Creamery Pasteurized Salted Butter'
+    },
+    growing: {
+      climate: 'Controlled sanitary food-grade dairy processing facility.',
+      soil: 'N/A (Derived dairy commodity from high-SNF buffalo and cow milk)',
+      idealSoilPh: '6.5 - 6.8 (Cream pH)',
+      temperatureRange: [2, 6],
+      rainfallRequirement: 'N/A',
+      sowingMethod: 'Centrifugal cream churn continuous processing',
+      sowingSeason: 'Year-round industrial production',
+      seedRequirement: 'Requires ~20-22 Litres of whole milk (4.5% fat) per 1 kg of butter',
+      spacing: 'N/A',
+      growthDuration: '24 hours manufacturing & crystallization cycle',
+      growthDays: 1,
+      currentMaturityStage: 100,
+      irrigation: 'CIP (Clean-In-Place) sanitation water cycles',
+      fertilizerGuidance: [
+        { stage: 'Raw Milk Reception', recommendation: 'Milk fat >4.0%, SNF >8.5%, MBRT >4 hours', impact: 'High butter yield and firm grain structure', urgency: 'Immediate' },
+        { stage: 'Churning & Salting', recommendation: 'Vacuum deaeration + 2% micro-ground vacuum salt', impact: 'Uniform moisture dispersion (<16% water)', urgency: 'Scheduled' }
+      ],
+      commonPests: ['N/A (HACCP Sanitary Clean Room Zone)'],
+      diseaseRisks: ['Psychrotrophic Bacterial Spoilage (Pseudomonas)', 'Yeast & Mold (Geotrichum candidum)'],
+      criticalCareTips: [
+        'Protect butter from light exposure at all times; photo-oxidation creates sharp off-flavors.',
+        'Never store next to pungent aromatic foods (onions, fish, spices) as butter fats absorb volatile odors rapidly.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 1,
+      recommendedWindow: 'Immediate packaging post-churning and vacuum working',
+      maturityIndicators: [
+        'Milk fat minimum 80.0% by weight (FSSAI standard).',
+        'Moisture maximum 16.0% with fine uniform droplet dispersion.',
+        'Curd solids maximum 1.5%, Salt 1.5% - 2.5%.'
+      ],
+      harvestingMethod: 'Automated continuous extrusion and high-speed parchment/foil wrapping.',
+      bestHarvestTime: 'Year-round controlled cold line',
+      firmnessTarget: 'Plastic butter firmness (Penetration 12-16mm at 10°C)',
+      postHarvestHandling: [
+        'Hardening tunnel chilling at -5°C for 24 hours to stabilize fat crystal lattice.',
+        'Packing in multi-layer greaseproof vegetable parchment + light barrier carton.',
+        'Cold room pallet storage at -18°C (Bulk) or 2°C - 4°C (Retail).'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '1 to 2 Days (Melt and rapid rancidity risk above 20°C)',
+      shelfLifeCold: '12 Months in Deep Freeze (-18°C) or 90 Days in Refrigeration (2°C - 4°C)',
+      ambientDays: 2,
+      coldDays: 365,
+      storageTemperature: '-18°C (Deep Frozen Long-Term) or 2°C - 4°C (Retail Active)',
+      humidity: '70% - 75% RH (Dry odorless refrigeration chamber)',
+      coldStorageRequired: true,
+      storageMethod: 'Light-shielded barrier wrap in dedicated refrigerated / frozen dairy rooms',
+      preservationSteps: [
+        'Maintain uninterrupted cold chain; thermal fluctuations cause moisture exudation and coarse texture.',
+        'Seal tightly inside moisture-proof greaseproof wrapper to prevent surface desiccation (primrose color defect).',
+        'Keep strictly segregated from pungent odor-emitting commodities.'
+      ],
+      spoilageIndicators: ['Sour rancid aroma (butyric acid release)', 'Yellow dark crusting on surface (oxidation)', 'Mold spots (black/green colonies)'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Vegetable Parchment Paper / Foil Laminate Wrap (500g / 100g)',
+      secondaryPackaging: 'Duplex Printed Board Carton + 5-Ply Corrugated Reefer Shipper (20kg)',
+      recommendedMaterials: ['Bleached Vegetable Parchment (45 gsm)', 'Aluminium Foil / Polyethylene Laminate', 'Food-grade Duplex Carton'],
+      ventilationRequired: false,
+      ventilationSpec: '100% Hermetic seal; zero ventilation (moisture and oxygen barrier essential)',
+      moistureProtection: 'High grease-resistance and water-vapor barrier',
+      ethyleneSensitivity: 'None (Inorganic gas insensitive, but volatile-odor sensitive)',
+      ethyleneControl: 'Store away from all aromatic and chemical fumes',
+      cushioningSpecs: 'Rigid outer shipper prevents compression deformation of soft butter blocks',
+      shockRating: 4.0,
+      estimatedPackagingCostPerKg: 3.50,
+      packagingCapacity: '20 kg master corrugated cases (40 x 500g bricks)',
+      ecoCertification: 'FSC Certified Recyclable Outer Cartons',
+      layers: [
+        { layerNumber: 1, material: 'Vegetable Parchment / Alu-foil laminate', thicknessMicrons: 45, purpose: 'Grease resistance, moisture barrier, and light blocking' },
+        { layerNumber: 2, material: 'Food Grade Solid Bleached Sulfate (SBS) Carton', thicknessMicrons: 320, purpose: 'Structural rigidity and retail UV shield' },
+        { layerNumber: 3, material: '5-Ply Heavy Duty Corrugated Master Shipper', thicknessMicrons: 4000, purpose: 'Cold store stacking and reefer transit protection' }
+      ]
+    },
+    transportation: {
+      preferredMode: 'Dedicated Refrigerated Reefer Container (-18°C or 2°C - 4°C)',
+      targetTemp: '2°C - 4°C (Domestic Retail) or -18°C (Bulk Inter-state)',
+      maxTransitDays: 14,
+      humidityControl: '65% - 75% RH',
+      temperatureControlled: true,
+      stackingLimit: 'Maximum 6 carton tiers',
+      vibrationTolerance: 'High; ensure temperature is maintained',
+      transitChecklist: ['Verify reefer datalogger setpoint at -18°C / 4°C', 'Ensure pallet shrink-wrap is secure', 'Inspect container for zero cross-odors']
+    },
+    market: {
+      basePricePerKg: 560,
+      priceFluctuationRange: [520, 620],
+      marketDemand: 'Massive consistent domestic FMCG demand (Horeca, bakeries, households)',
+      exportPotential: 'High to Southeast Asia, Middle East, and USA',
+      majorMarkets: ['National Retail & Horeca Networks (Amul, Mother Dairy, Nandini, Britannia)'],
+      priceFactors: ['Milk fat percentage (>80%)', 'Fresh clean lactic flavor without acid bite', 'Uniform yellow/white hue without oxidation streaks']
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 717,
+        vitaminC_mg: 0,
+        vitaminA_IU: 2499,
+        dietaryFiber_g: 0,
+        potassium_mg: 24,
+        antioxidantIndex: 45,
+        glycemicIndex: 0,
+        highlights: ['Rich source of Fat-Soluble Vitamin A, D, E, and K2', 'Conjugated Linoleic Acid (CLA)', 'Rapid energy source via Short & Medium-Chain Fatty Acids']
+      },
+      recipes: [
+        {
+          name: 'Classic Dal Makhani with Butter Tempering',
+          prepTimeMinutes: 20,
+          cookTimeMinutes: 60,
+          servings: 6,
+          ingredients: ['1 cup Whole Black Urad Dal', '1/4 cup Rajma', '4 tbsp Pasteurized Butter', '1 cup Tomato Puree', '2 tbsp Fresh Cream', 'Kasuri Methi'],
+          steps: [
+            'Slow simmer boiled black urad and rajma with tomato puree and Kashmiri chilli for 45 minutes.',
+            'Whisk in generous cold butter and fresh cream on low heat until velvety and rich.',
+            'Finish with a final dollop of butter and crushed kasuri methi.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Condensation on cold butter causes mold growth (Geotrichum/Penicillium).',
+      highTempRisk: 'Temperatures above 15°C cause oil separation (melt down) and accelerate oxidative rancidity.',
+      frostRisk: 'Tolerant to deep freezing (-18°C); freezing actually preserves butter quality for 12 months.',
+      excessRainRisk: 'N/A (Strict enclosed indoor cold storage).',
+      transitShockRisk: 'Low mechanical risk; absolute critical risk is temperature abuse in transit.',
+      mitigationStrategy: 'Maintain uninterrupted reefer transport (2-4°C or -18°C) with continuous IoT dataloggers and light-barrier laminate wrappers.'
+    }
   }
 ];
 
