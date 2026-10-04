@@ -3394,6 +3394,157 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       transitShockRisk: 'Low mechanical risk; absolute critical risk is temperature abuse in transit.',
       mitigationStrategy: 'Maintain uninterrupted reefer transport (2-4°C or -18°C) with continuous IoT dataloggers and light-barrier laminate wrappers.'
     }
+  },
+
+  // 19. GREEN CARDAMOM (HIGH-VALUE DRIED SPICE COMMODITY)
+  {
+    id: 'cardamom',
+    name: 'Green Cardamom (Choti Elaichi / Alleppey Green)',
+    category: 'Spice',
+    subcategory: 'Whole Dried Spice Capsule',
+    scientificName: 'Elettaria cardamomum',
+    variety: 'Alleppey Green Extra Bold (AGEB / 8mm+)',
+    description: 'Known as the "Queen of Spices", green cardamom is a high-value plantation spice commodity with intensely aromatic volatile terpenes (1,8-cineole and α-terpinyl acetate). Highly susceptible to essential oil volatilization, moisture re-absorption, and chlorophyll bleaching requiring hermetic aroma-barrier metallized pouches.',
+    icon: '🌿',
+    color: '#15803d',
+    aliases: ['cardamom', 'elaichi', 'elakki', 'elachi', 'choti elaichi', 'green cardamom', 'elettaria cardamomum', 'cardamoms', 'hari elaichi'],
+    images: {
+      productImage: 'cardamom',
+      productImageAlt: 'Premium Alleppey Green Cardamom Pods'
+    },
+    growing: {
+      climate: 'Humid tropical evergreen rainforest canopy (Cardamom Hills / Western Ghats) with 1500-4000 mm annual rainfall and 10°C - 35°C temperature.',
+      soil: 'Rich forest loamy soil with high humus content and good drainage.',
+      idealSoilPh: '5.5 - 6.5',
+      temperatureRange: [10, 32],
+      rainfallRequirement: '1500 - 3500 mm well-distributed',
+      sowingMethod: 'Clonal sucker propagation or shade nursery seedling transplantation',
+      sowingSeason: 'Monsoon onset (June - July)',
+      seedRequirement: 'Sucker planting ~2000-2500 suckers / hectare',
+      spacing: '2.0 m between rows x 2.0 m between plants',
+      growthDuration: 'Perennial plantation crop; economic yielding starts from 3rd year',
+      growthDays: 120,
+      currentMaturityStage: 90,
+      irrigation: 'Drip or micro-sprinkler irrigation during summer drought months (Jan-May) every 10-12 days.',
+      fertilizerGuidance: [
+        { stage: 'Pre-Monsoon (May-June)', recommendation: 'NPK 75:75:150 kg/ha in split doses + Neem cake 1 t/ha', impact: 'Stimulates tiller emergence and panicle branching', urgency: 'Immediate' },
+        { stage: 'Post-Monsoon (Sept-Oct)', recommendation: 'Foliar spray Zinc Sulfate 0.25% + Borax 0.1%', impact: 'Capsule setting, uniform size fill, and essential oil synthesis', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Cardamom Thrips (Sciothrips cardamomi)', 'Shoot and Capsule Borer (Conogethes punctiferalis)', 'Root Grubs'],
+      diseaseRisks: ['Azhukal / Capsule Rot (Phytophthora meadii)', 'Katte / Mosaic Virus', 'Rhizome Rot'],
+      criticalCareTips: [
+        'Maintain 50-60% overhead shade canopy to protect tender foliage from solar scorch.',
+        'Install bee colonies in plantation; honeybees account for >90% pollination and capsule set.',
+        'Harvest only physiologically mature capsules (when seeds turn dark brown/black inside).'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 30,
+      recommendedWindow: 'Selective hand picking every 20-25 days from August through February',
+      maturityIndicators: [
+        'Capsules turn mature light green with plump firm pericarp.',
+        'Seeds inside the capsule turn from white to dark brown/black.',
+        'Capsules separate easily from the pedicel without tearing.'
+      ],
+      harvestingMethod: 'Manual hand picking of individual mature capsules using special harvest trays.',
+      bestHarvestTime: 'Dry clear morning hours',
+      firmnessTarget: 'Plump turgid capsule (8.0 mm+ sieve retention for AGEB grade)',
+      postHarvestHandling: [
+        'Washing in clean water and dipping in 2% sodium carbonate solution for 10 min to retain green chlorophyll during curing.',
+        'Flue pipe curing at 45°C - 50°C for 24-28 hours until moisture drops from 80% to <10.5%.',
+        'Grading into AGEB (8mm+), AGB (7-8mm), and Open/Split grades.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '12 to 18 Months (in hermetic aroma-barrier foil packaging)',
+      shelfLifeCold: '24 Months in controlled temperature dry spice store',
+      ambientDays: 365,
+      coldDays: 730,
+      storageTemperature: '10°C - 15°C (Cool Dry Warehouse)',
+      humidity: '55% - 65% RH (Must prevent moisture absorption >11% to avoid mold and aroma loss)',
+      coldStorageRequired: false,
+      storageMethod: 'Hermetically sealed multi-layer metallized poly pouches inside corrugated master cartons stored on wooden pallets away from sunlight',
+      preservationSteps: [
+        'Keep relative humidity strictly below 65% to avoid fungal mycotoxins and bleaching.',
+        'Store in opaque light-blocking barrier pouches; UV light degrades green chlorophyll into pale grey.',
+        'Never store in open jute bags as volatile cineole oil evaporates quickly.'
+      ],
+      spoilageIndicators: ['Bleaching of green pericarp to straw-yellow', 'Loss of sharp pungent eucalyptus aroma', 'Mold growth or insect infestation'],
+      curingRequired: true,
+      curingInstructions: 'Controlled hot-air flue curing chamber at 45-50°C for 24-28h until moisture reaches 10-10.5%.'
+    },
+    packaging: {
+      primaryPackaging: 'Multi-layer Metallized Polyester / Polyethylene (PET / Met-PET / PE) Hermetic Pouches (500g / 1kg / 5kg)',
+      secondaryPackaging: 'Heavy Duty 5-Ply Corrugated Master Cartons (25kg bulk shipper)',
+      recommendedMaterials: ['PET / Met-PET / Polyethylene (100 µm)', 'Aluminium Foil Barrier Laminate', 'High-Barrier EVOH Pouches with Nitrogen Flushing'],
+      ventilationRequired: false,
+      ventilationSpec: '100% Hermetic seal; zero perforations (volatile terpene & moisture barrier mandatory)',
+      moistureProtection: 'Ultra-high water vapor and oxygen barrier (WVTR < 0.5 g/m²/day, OTR < 1.0 cc/m²/day)',
+      ethyleneSensitivity: 'None (Dry non-climacteric spice)',
+      ethyleneControl: 'Zero chemical contamination; keep isolated from harsh external aromas',
+      cushioningSpecs: 'Pouch sealing prevents capsule crushing and seed detachment',
+      shockRating: 4.2,
+      estimatedPackagingCostPerKg: 12.50,
+      packagingCapacity: '1 kg retail pouches or 25 kg master export cartons',
+      ecoCertification: 'Spices Board of India Certified Export Grade',
+      layers: [
+        { layerNumber: 1, material: 'Reverse Printed 12µm Polyethylene Terephthalate (PET)', thicknessMicrons: 12, purpose: 'Printability, mechanical strength, and UV protection' },
+        { layerNumber: 2, material: 'Vacuum Metallized PET (Met-PET) Barrier Film', thicknessMicrons: 12, purpose: 'High oxygen, light, and aroma barrier (prevents terpene loss)' },
+        { layerNumber: 3, material: 'Food Grade Linear Low-Density Polyethylene (LLDPE)', thicknessMicrons: 76, purpose: 'Hermetic heat seal layer and moisture vapor barrier' }
+      ]
+    },
+    transportation: {
+      preferredMode: 'Dry Clean Weatherproof Container Truck / Air Cargo for Export',
+      targetTemp: '15°C - 22°C (Dry ambient enclosed container)',
+      maxTransitDays: 21,
+      humidityControl: '<60% RH',
+      temperatureControlled: false,
+      stackingLimit: 'Maximum 8 carton tiers',
+      vibrationTolerance: 'High; capsules protected inside sealed barrier packs',
+      transitChecklist: ['Verify pouches are hermetically vacuum/nitrogen sealed', 'Ensure transit container is clean, dry, and odor-free', 'Inspect moisture silica desiccant pouches inside master carton']
+    },
+    market: {
+      basePricePerKg: 1950,
+      priceFluctuationRange: [1650, 2400],
+      marketDemand: 'Ultra-high national & global export demand (Middle East, Europe, North America, Ayurvedic pharma, FMCG confectionery)',
+      exportPotential: 'Very High (India is one of the world top exporters via Spices Board E-Auctions)',
+      majorMarkets: ['Bodinayakanur E-Auction (Tamil Nadu)', 'Vandanmettu Auction Centre (Kerala)', 'Spices Board Kochi', 'Khari Baoli (Delhi)'],
+      priceFactors: ['Capsule size grade (AGEB 8mm+ fetches highest premium)', 'Green color retention (chlorophyll index)', 'Volatile oil content (>3.5% v/w)', 'Moisture percentage (<10.5%)']
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 311,
+        vitaminC_mg: 21,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 28,
+        potassium_mg: 1119,
+        antioxidantIndex: 94,
+        glycemicIndex: 0,
+        highlights: ['Rich in 1,8-Cineole, Terpinyl Acetate, and Linalool', 'Powerful digestive and carminative properties', 'High manganese and potassium bio-availability']
+      },
+      recipes: [
+        {
+          name: 'Royal Shahi Biryani Spice Blend (Garam Masala Infusion)',
+          prepTimeMinutes: 10,
+          cookTimeMinutes: 5,
+          servings: 12,
+          ingredients: ['15g Green Cardamom Pods', '10g Black Pepper', '10g Cloves', '20g Cinnamon sticks', '5g Mace'],
+          steps: [
+            'Lightly warm whole green cardamom and spices on low heat for 90 seconds to release aromatic essential oils.',
+            'Coarsely grind in a dry spice mill and store in an airtight glass jar.',
+            'Use 1 tsp in dum biryani, curries, or masala chai.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Humidity >70% causes moisture absorption, rapid mold formation, and loss of green coloration.',
+      highTempRisk: 'Storage above 30°C causes accelerated evaporation of volatile cineole oils, diminishing culinary aroma.',
+      frostRisk: 'Tolerant in cured dry form; plantation bushes vulnerable to severe sub-zero frost.',
+      excessRainRisk: 'Continuous heavy monsoon rain causes Azhukal capsule rot in plantations.',
+      transitShockRisk: 'Low; protect outer cartons from water ingress and high humidity.',
+      mitigationStrategy: 'Cure immediately post-harvest to 10% moisture and pack in hermetic Met-PET/PE aroma-barrier pouches with desiccant.'
+    }
   }
 ];
 
@@ -3435,7 +3586,16 @@ export function resolveProductAlias(query: string): string {
   if (clean.includes('nut') || clean.includes('cashew') || clean.includes('walnut') || clean.includes('pista') || clean.includes('kaju')) {
     return 'almond';
   }
-  if (clean.includes('spice') || clean.includes('pepper') || clean.includes('cardamom') || clean.includes('chilli') || clean.includes('ginger')) {
+  if (clean.includes('cardamom') || clean.includes('elaichi') || clean.includes('elakki') || clean.includes('elachi')) {
+    return 'cardamom';
+  }
+  if (clean.includes('coffee') || clean.includes('arabica') || clean.includes('robusta')) {
+    return 'coffee';
+  }
+  if (clean.includes('tea') || clean.includes('chai')) {
+    return 'tea';
+  }
+  if (clean.includes('spice') || clean.includes('pepper') || clean.includes('chilli') || clean.includes('ginger')) {
     return 'turmeric';
   }
 

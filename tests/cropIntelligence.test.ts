@@ -234,11 +234,17 @@ const coffeePrice = await fetchLiveProductPrice('coffee', 'Coffee');
 assert(coffeePrice.currentPrice === 208, `Coffee live price today is exactly ₹208/kg (Got: ₹${coffeePrice.currentPrice}/${coffeePrice.unit})`);
 assert(coffeePrice.source.includes('Coffee Board of India'), `Coffee price source is authentic: "${coffeePrice.source}"`);
 
-// 10. TEST TOP-LEVEL COMMODITY EXPANSION (Radish, Watermelon, Butter)
+const cardamomPrice = await fetchLiveProductPrice('cardamom', 'Cardamom');
+assert(cardamomPrice.commodityType === 'SPICES', `Cardamom commodityType is "SPICES" (Got: ${cardamomPrice.commodityType})`);
+assert(cardamomPrice.currentPrice >= 1650 && cardamomPrice.currentPrice <= 2400, `Cardamom live price is Spices Board auction rate ₹${cardamomPrice.currentPrice}/${cardamomPrice.unit} (NEVER ₹36/kg)`);
+assert(cardamomPrice.source.includes('Spices Board of India'), `Cardamom price source is authentic: "${cardamomPrice.source}"`);
+
+// 10. TEST TOP-LEVEL COMMODITY EXPANSION (Radish, Watermelon, Butter, Cardamom)
 console.log('\n10. Testing Top-Level Product Database Records:');
 const radishProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'radish');
 const watermelonProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'watermelon');
 const butterProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'butter');
+const cardamomProduct = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === 'cardamom');
 
 assert(radishProduct !== undefined, 'Radish is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
 assert(radishProduct?.scientificName === 'Raphanus sativus', 'Radish has correct scientific name');
@@ -250,6 +256,11 @@ assert(watermelonProduct?.storage.storageTemperature.includes('10°C'), 'Waterme
 assert(butterProduct !== undefined, 'Butter is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
 assert(butterProduct?.packaging.layers.length >= 2, 'Butter has multi-layer greaseproof & light barrier packaging');
 
+assert(cardamomProduct !== undefined, 'Cardamom is present as top-level product in COMPREHENSIVE_PRODUCT_DATABASE');
+assert(cardamomProduct?.scientificName === 'Elettaria cardamomum', 'Cardamom has correct scientific name (Elettaria cardamomum)');
+assert(cardamomProduct?.market.basePricePerKg === 1950, 'Cardamom base price is benchmark ₹1950/kg');
+assert(cardamomProduct?.packaging.layers.length >= 3, 'Cardamom has 3-layer Met-PET/PE aroma-barrier packaging');
+
 // 11. TEST REAL CLIENT-SIDE PIXEL COMPUTER VISION CLASSIFIER (No API / Offline)
 console.log('\n11. Testing Autonomous Pixel Computer-Vision & Morphology Classifier:');
 const { classifyFromColorMetrics } = await import('../src/services/crop/pixelVisionClassifier');
@@ -259,12 +270,15 @@ const radishMetrics = {
   whiteRatio: 0.35,
   greenRatio: 0.12,
   darkGreenRatio: 0.02,
+  cardamomPodRatio: 0.01,
   redRatio: 0.02,
   purpleRatio: 0.01,
   orangeRatio: 0.02,
   yellowPaleRatio: 0.03,
   goldenYellowRatio: 0.01,
   brownEarthRatio: 0.02,
+  darkBrownCoffeeRatio: 0.01,
+  darkTeaRatio: 0.01,
   aspectRatio: 1.6, // Elongated cylindrical root
   totalPixels: 250000,
   isUniformOrBlank: false
@@ -273,17 +287,42 @@ const radishCV = classifyFromColorMetrics(radishMetrics, 'IMG_20241004_123456.jp
 assert(radishCV.canonicalId === 'radish', `White taproot metrics strictly classify as "radish" (Got: ${radishCV.canonicalId})`);
 assert(radishCV.scientificName === 'Raphanus sativus', 'Radish botanical classification is correct');
 
+// Test Cardamom Pods (Pale olive green / pistachio spice capsules) without filename hint
+const cardamomMetrics = {
+  whiteRatio: 0.08,
+  greenRatio: 0.12,
+  darkGreenRatio: 0.02,
+  cardamomPodRatio: 0.38, // High pale olive-green / pistachio capsule profile
+  redRatio: 0.02,
+  purpleRatio: 0.01,
+  orangeRatio: 0.02,
+  yellowPaleRatio: 0.04,
+  goldenYellowRatio: 0.02,
+  brownEarthRatio: 0.03,
+  darkBrownCoffeeRatio: 0.01,
+  darkTeaRatio: 0.01,
+  aspectRatio: 1.4, // Spindle ovoid capsule
+  totalPixels: 250000,
+  isUniformOrBlank: false
+};
+const cardamomCV = classifyFromColorMetrics(cardamomMetrics, 'DSC_00491.jpg');
+assert(cardamomCV.canonicalId === 'cardamom', `Pale olive-green spice pod metrics strictly classify as "cardamom" (Got: ${cardamomCV.canonicalId}, NEVER Radish)`);
+assert(cardamomCV.scientificName === 'Elettaria cardamomum', 'Cardamom botanical classification is Elettaria cardamomum');
+
 // Test Watermelon without filename hint
 const watermelonMetrics = {
   whiteRatio: 0.04,
   greenRatio: 0.10,
   darkGreenRatio: 0.35,
+  cardamomPodRatio: 0.01,
   redRatio: 0.22,
   purpleRatio: 0.01,
   orangeRatio: 0.02,
   yellowPaleRatio: 0.02,
   goldenYellowRatio: 0.01,
   brownEarthRatio: 0.03,
+  darkBrownCoffeeRatio: 0.01,
+  darkTeaRatio: 0.01,
   aspectRatio: 0.95,
   totalPixels: 250000,
   isUniformOrBlank: false
@@ -296,12 +335,15 @@ const brinjalMetrics = {
   whiteRatio: 0.03,
   greenRatio: 0.05,
   darkGreenRatio: 0.02,
+  cardamomPodRatio: 0.01,
   redRatio: 0.04,
   purpleRatio: 0.32,
   orangeRatio: 0.01,
   yellowPaleRatio: 0.02,
   goldenYellowRatio: 0.01,
   brownEarthRatio: 0.02,
+  darkBrownCoffeeRatio: 0.01,
+  darkTeaRatio: 0.01,
   aspectRatio: 1.2,
   totalPixels: 250000,
   isUniformOrBlank: false
@@ -314,6 +356,7 @@ const coffeeMetrics = {
   whiteRatio: 0.02,
   greenRatio: 0.03,
   darkGreenRatio: 0.02,
+  cardamomPodRatio: 0.01,
   redRatio: 0.06, // Low red
   purpleRatio: 0.01,
   orangeRatio: 0.04,

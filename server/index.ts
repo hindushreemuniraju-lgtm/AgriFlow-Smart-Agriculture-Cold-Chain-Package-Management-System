@@ -133,7 +133,9 @@ const SERVER_PRICE_BENCHMARKS: Record<string, {
   // Tea, Coffee & Spices
   'tea': { name: 'Assam CTC Black Tea', category: 'TEA_COFFEE', modal: 480, min: 360, max: 650, unit: 'kg', source: 'Tea Board of India Auction Index', sourceUrl: 'https://teaboard.gov.in', priceType: 'commodity' },
   'coffee': { name: 'Arabica / Robusta Coffee Beans', category: 'TEA_COFFEE', modal: 208, min: 190, max: 235, unit: 'kg', source: 'Coffee Board of India / Farmgate Auction Terminal', sourceUrl: 'https://indiacoffee.org', priceType: 'commodity' },
+  'cardamom': { name: 'Small Green Cardamom (Elaichi / Chhoti Elaichi)', category: 'SPICES', modal: 1950, min: 1650, max: 2400, unit: 'kg', source: 'Spices Board of India / Bodinayakanur & Vandanmettu E-Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'turmeric': { name: 'Salem Cured Turmeric Finger', category: 'SPICES', modal: 165, min: 140, max: 195, unit: 'kg', source: 'Spices Board of India / Salem APMC', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
+  'black-pepper': { name: 'Malabar Black Pepper', category: 'SPICES', modal: 640, min: 580, max: 720, unit: 'kg', source: 'Spices Board / Kochi Terminal', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'almond': { name: 'California / Mamra Almonds', category: 'DRY_FRUITS', modal: 820, min: 740, max: 920, unit: 'kg', source: 'Dry Fruits Wholesale Traders Association', sourceUrl: 'https://agmarknet.gov.in', priceType: 'wholesale' }
 };
 
