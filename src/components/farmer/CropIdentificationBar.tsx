@@ -353,7 +353,7 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
                           <span className="text-xs font-normal text-slate-400 ml-1">/{imageModalResult.result.price.unit}</span>
                         </div>
                         <div className="text-[11px] text-slate-400">
-                          Modal Mandi Band: ₹{imageModalResult.result.price.modalRange.min} – ₹{imageModalResult.result.price.modalRange.max}
+                          Modal Mandi Band: ₹{imageModalResult.result.price?.priceRange?.min ?? imageModalResult.result.price?.modalRange?.min ?? Math.round(imageModalResult.result.price.currentPrice * 0.85)} – ₹{imageModalResult.result.price?.priceRange?.max ?? imageModalResult.result.price?.modalRange?.max ?? Math.round(imageModalResult.result.price.currentPrice * 1.15)}
                         </div>
                       </div>
 

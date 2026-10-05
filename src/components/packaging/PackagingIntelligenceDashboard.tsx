@@ -110,9 +110,10 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
     fetchRedditDairyPackagingIntelligence(currentProduct.id).then(setRedditDairyData);
 
     // 2. Perseuss Cold Cartonization
-    const tempProfile = currentProduct.category === 'Dairy' ? 'CHILLED_2_8C' 
-      : currentProduct.storage.temperatureRange.min < 4 ? 'CHILLED_2_8C'
-      : currentProduct.storage.temperatureRange.min < 12 ? 'COOL_8_15C'
+    const minTemp = currentProduct?.growing?.temperatureRange?.[0] ?? (currentProduct?.storage?.coldStorageRequired ? 4 : 15);
+    const tempProfile = currentProduct?.category === 'Dairy' ? 'CHILLED_2_8C' 
+      : minTemp < 4 ? 'CHILLED_2_8C'
+      : minTemp < 12 ? 'COOL_8_15C'
       : 'AMBIENT_CONTROLLED_15_25C';
 
     const cartonRes = calculatePerseussColdCartonization({
