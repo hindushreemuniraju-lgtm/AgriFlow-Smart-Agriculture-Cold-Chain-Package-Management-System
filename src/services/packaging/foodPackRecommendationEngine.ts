@@ -31,23 +31,72 @@ export const DEFAULT_PRIORITY_WEIGHTS: UserPriorityWeights = {
 export function calculateFoodSafetyScore(material: FoodPackagingMaterial, req: FoodPackRequirements): number {
   let score = material.foodSafetyScore;
   const commodityKey = (req.normalizedCommodity || req.commodity || req.customCommodity || '').toLowerCase();
+  const category = (req.category || '').toLowerCase();
 
   // Check explicit unsuitability
   if (material.unsuitableCommodities.some(u => commodityKey.includes(u) || u.includes(commodityKey))) {
-    score -= 40;
+    return Math.max(10, score - 60);
   }
 
-  // Storage temperature compliance
-  const tempLimits = material.temperatureRange;
-  if (req.storage === 'Frozen' && tempLimits.minTempC > -18) {
-    score -= 30;
-  } else if (req.storage === 'Cold Chain' && tempLimits.minTempC > 4) {
+  // 1. Dairy & Wet Commodities (Strict Barrier & Hermetic Seal Required)
+  const isDairy = category.includes('dairy') || commodityKey.includes('milk') || commodityKey.includes('paneer') || commodityKey.includes('curd') || commodityKey.includes('butter') || commodityKey.includes('ghee') || commodityKey.includes('cheese');
+  if (isDairy) {
+    if (material.moistureBarrier.tier === 'Porous' || material.oxygenBarrier.tier === 'Breathable' || material.id === 'mat-jute-sack' || material.id === 'mat-hdpe-crate') {
+      return 15; // Porous materials cannot hold dairy safely
+    }
+    if (material.id === 'mat-evoh-vacuum-pouch' || material.id === 'mat-map-barrier-tray') {
+      score = 98;
+    }
+  }
+
+  // 2. Dry Fruits, Nuts & Spices (Ultra-low OTR & WVTR required to stop rancidity & loss of aroma)
+  const isDryFruitOrSpice = category.includes('dry fruit') || category.includes('spice') || commodityKey.includes('almond') || commodityKey.includes('cashew') || commodityKey.includes('walnut') || commodityKey.includes('cardamom') || commodityKey.includes('turmeric') || commodityKey.includes('coffee') || commodityKey.includes('tea');
+  if (isDryFruitOrSpice) {
+    if (material.moistureBarrier.tier === 'Porous' || material.oxygenBarrier.tier === 'Breathable' || material.id === 'mat-hdpe-crate') {
+      score -= 50; // Breathable crates cause fat oxidation and moisture uptake
+    }
+    if (material.id === 'mat-metalized-barrier-pouch' || material.id === 'mat-evoh-vacuum-pouch' || material.id === 'mat-kraft-paper-sack') {
+      score += 10;
+    }
+  }
+
+  // 3. Flour & Powders (Fine particles require non-porous woven bag / kraft paper with barrier)
+  const isFlourOrPowder = category.includes('flour') || commodityKey.includes('atta') || commodityKey.includes('flour') || commodityKey.includes('maida') || commodityKey.includes('besan');
+  if (isFlourOrPowder) {
+    if (material.id === 'mat-hdpe-crate') return 10; // Powders leak straight through perforated crates
+    if (material.id === 'mat-kraft-paper-sack') score = 96;
+  }
+
+  // 4. Fresh Living Produce (Vegetables & Fruits need breathable ventilation)
+  const isFreshProduce = category.includes('vegetable') || category.includes('fruit') || (!isDairy && !isDryFruitOrSpice && !isFlourOrPowder);
+  if (isFreshProduce) {
+    // Hermetic gas lockout causes anaerobic rotting in living produce
+    if (material.oxygenBarrier.tier === 'Ultra-High' || material.id === 'mat-metalized-barrier-pouch') {
+      score -= 45;
+    }
+    // Perforated crates & ventilated boxes are ideal
+    if (material.id === 'mat-hdpe-crate' || material.id === 'mat-corrugated-cfb-box' || material.id === 'mat-water-resistant-cfb' || material.id === 'mat-ldpe-liner' || material.id === 'mat-compostable-pla-film') {
+      score += 8;
+    }
+    // Jute sacks in Cold Chain absorb condensation and rot produce
+    if (material.id === 'mat-jute-sack' && (req.storage === 'Cold Chain' || req.storage === 'Refrigerated' || req.storage === 'Frozen')) {
+      score -= 45;
+    }
+  }
+
+  // Storage environment compatibility
+  if (!material.storageSuitability.includes(req.storage)) {
+    score -= 25;
+  }
+
+  // Transport method compatibility
+  if (!material.transportSuitability.includes(req.transport)) {
     score -= 15;
   }
 
-  // Liquid / High moisture protection
-  if ((req.category === 'Dairy' || (req.commodity && (req.commodity.toLowerCase().includes('milk') || req.commodity.toLowerCase().includes('ghee')))) && material.moistureBarrier.tier === 'Porous') {
-    score -= 45;
+  // Bonus for explicit suitability
+  if (material.suitableCommodities.some(s => commodityKey.includes(s) || s.includes(commodityKey))) {
+    score += 10;
   }
 
   return Math.max(10, Math.min(100, Math.round(score)));
@@ -65,20 +114,40 @@ export function calculateShelfLifeScore(material: FoodPackagingMaterial, req: Fo
   );
   const maxDays = material.shelfLifeSuitabilityDays.max;
   const minDays = material.shelfLifeSuitabilityDays.min;
+  const commodityKey = (req.normalizedCommodity || req.commodity || req.customCommodity || '').toLowerCase();
+  const category = (req.category || '').toLowerCase();
+
+  let baseScore = 70;
 
   if (desiredDays <= maxDays && desiredDays >= minDays) {
-    // Fits perfectly inside ideal range
     const ratio = (maxDays - desiredDays) / (maxDays - minDays || 1);
-    return Math.round(85 + ratio * 15);
+    baseScore = Math.round(85 + ratio * 15);
   } else if (desiredDays < minDays) {
-    // Over-engineered but safe
-    return 80;
+    baseScore = 80;
   } else {
-    // Exceeds material capabilities
     const deficit = desiredDays - maxDays;
     const penalty = Math.min(50, deficit * 4);
-    return Math.max(20, Math.round(75 - penalty));
+    baseScore = Math.max(20, Math.round(75 - penalty));
   }
+
+  // Incompatible storage drastically reduces actual shelf life
+  if (!material.storageSuitability.includes(req.storage)) {
+    baseScore -= 30;
+  }
+
+  // Fresh produce in non-ventilated high barrier suffocates quickly
+  const isFreshProduce = category.includes('vegetable') || category.includes('fruit');
+  if (isFreshProduce && (material.id === 'mat-metalized-barrier-pouch' || (material.oxygenBarrier.tier === 'Ultra-High' && material.id !== 'mat-map-barrier-tray'))) {
+    baseScore = Math.min(baseScore, 25);
+  }
+
+  // Dairy in porous material spoils rapidly
+  const isDairy = category.includes('dairy') || commodityKey.includes('milk') || commodityKey.includes('paneer');
+  if (isDairy && (material.moistureBarrier.tier === 'Porous' || material.id === 'mat-jute-sack' || material.id === 'mat-hdpe-crate')) {
+    baseScore = 15;
+  }
+
+  return Math.max(10, Math.min(100, Math.round(baseScore)));
 }
 
 /**
@@ -115,6 +184,7 @@ export function calculateDurabilityScore(material: FoodPackagingMaterial, req: F
   // High vibration / rough long distance transport requires higher stacking & puncture resistance
   if (req.transport === 'Long Distance' || req.transport === 'Rail') {
     if (material.durability.stackingCompressionKg < 150) score -= 20;
+    if (material.durability.stackingCompressionKg >= 250) score += 10;
   } else if (req.transport === 'Air') {
     if (material.durability.punctureResistanceJoules < 3) score -= 15;
   }
@@ -146,7 +216,7 @@ export function evaluateMaterial(
   const w = req.userPriorities || (req as any).priorityWeights || DEFAULT_PRIORITY_WEIGHTS;
   const totalWeight = (w.safetyWeight + w.shelfLifeWeight + w.sustainabilityWeight + w.costWeight + w.durabilityWeight + w.wasteWeight) || 1;
 
-  const weightedSum = (
+  let weightedSum = (
     safety * w.safetyWeight +
     shelfLife * w.shelfLifeWeight +
     sustainability * w.sustainabilityWeight +
@@ -155,7 +225,7 @@ export function evaluateMaterial(
     waste * w.wasteWeight
   );
 
-  const overallScore = Math.round(weightedSum / totalWeight);
+  let overallScore = Math.round(weightedSum / totalWeight);
 
   const commodityKey = (req.normalizedCommodity || req.commodity || req.customCommodity || '').toLowerCase();
   const commodityMatched = !material.unsuitableCommodities.some(u => commodityKey.includes(u) || u.includes(commodityKey)) &&
@@ -166,6 +236,13 @@ export function evaluateMaterial(
   const targetDays = req.desiredShelfLifeDays || 14;
   const shelfLifeSufficient = material.shelfLifeSuitabilityDays.max >= targetDays;
   const temperatureSafe = req.storage === 'Frozen' ? material.temperatureRange.minTempC <= -15 : true;
+
+  // Hard safety overrides: If food safety or shelf life is unviable, cap overall score
+  if (safety <= 25 || shelfLife <= 25) {
+    overallScore = Math.min(overallScore, 30);
+  } else if (!storageMatched) {
+    overallScore = Math.min(overallScore, 48);
+  }
 
   // Compatibility agreement confidence
   const compatibilityPoints = (commodityMatched ? 25 : 0) + (storageMatched ? 25 : 0) + (transportMatched ? 25 : 0) + (shelfLifeSufficient ? 25 : 0);
