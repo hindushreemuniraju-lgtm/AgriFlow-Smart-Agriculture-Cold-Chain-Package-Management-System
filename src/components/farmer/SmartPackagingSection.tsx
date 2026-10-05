@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { CropInfo, PackagingRecommendation } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
@@ -619,8 +620,8 @@ export const SmartPackagingSection: React.FC<SmartPackagingSectionProps> = ({
       </div>
 
       {/* Blueprint PDF Modal */}
-      {showSpecModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      {showSpecModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="max-w-2xl w-full rounded-3xl bg-slate-900 border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-purple-500/20 pb-4">
               <div className="flex items-center gap-3">
@@ -677,7 +678,8 @@ export const SmartPackagingSection: React.FC<SmartPackagingSectionProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MoRD Rural Compliance & Precision Logistics Section */}

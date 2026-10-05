@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ProductPassport } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { Star, Heart, Sparkles, Send, Check } from 'lucide-react';
@@ -54,8 +55,8 @@ export const FarmerGratitudeModal: React.FC<FarmerGratitudeModalProps> = ({ pass
     }, 2200);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+  return typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div className="max-w-lg w-full rounded-3xl bg-slate-900 border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-2xl relative">
         
         {/* Header */}
@@ -172,6 +173,7 @@ export const FarmerGratitudeModal: React.FC<FarmerGratitudeModalProps> = ({ pass
         )}
 
       </div>
-    </div>
-  );
+    </div>,
+    document.body
+  ) : null;
 };

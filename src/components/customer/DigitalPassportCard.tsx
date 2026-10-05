@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ProductPassport } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { QRCodeSVG } from 'qrcode.react';
@@ -403,8 +404,8 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
       </div>
 
       {/* Certificate Modal */}
-      {showCertificateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      {showCertificateModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="max-w-2xl w-full rounded-3xl bg-slate-900 border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-purple-500/20 pb-4">
               <div className="flex items-center gap-3">
@@ -459,7 +460,8 @@ export const DigitalPassportCard: React.FC<DigitalPassportCardProps> = ({ passpo
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* AgriFlow Official PDF Download Modal */}

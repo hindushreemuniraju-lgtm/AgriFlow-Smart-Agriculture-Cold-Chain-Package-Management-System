@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
 import { ProductIntelligence } from '../../types/product';
@@ -445,8 +446,8 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
       )}
 
       {/* Live 9-Stage Customer Delivery Tracking Modal */}
-      {selectedTrackingOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      {selectedTrackingOrder && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-3xl rounded-3xl bg-slate-900 border border-sky-500/40 p-6 sm:p-8 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
             
             {/* Header */}
@@ -607,12 +608,13 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Product Traceability Modal */}
-      {selectedProductForModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      {selectedProductForModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-2xl rounded-3xl bg-slate-900 border border-purple-500/30 p-6 sm:p-8 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
             
             <div className="flex items-center justify-between pb-4 border-b border-purple-500/20 mb-5">
@@ -715,12 +717,13 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Order Success Modal */}
-      {orderSuccessModal.isOpen && orderSuccessModal.product && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      {orderSuccessModal.isOpen && orderSuccessModal.product && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md rounded-3xl bg-slate-900 border border-emerald-500/40 p-6 sm:p-8 shadow-2xl text-slate-100 text-center">
             
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)]">
@@ -776,7 +779,8 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Real PDF Documents Download Modal */}

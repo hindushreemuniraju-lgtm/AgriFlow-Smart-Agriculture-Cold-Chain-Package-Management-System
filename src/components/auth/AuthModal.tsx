@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ShieldCheck, Phone, Mail, Sparkles, CheckCircle2, Lock, User, MapPin } from 'lucide-react';
 
@@ -54,8 +55,8 @@ export const AuthModal: React.FC = () => {
     setIsAuthModalOpen(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+  return typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-md rounded-3xl bg-slate-900 border border-purple-500/30 p-6 sm:p-8 shadow-[0_0_50px_rgba(168,85,247,0.25)] text-slate-100 overflow-hidden">
         
         {/* Glow ambient background */}
@@ -277,6 +278,7 @@ export const AuthModal: React.FC = () => {
         )}
 
       </div>
-    </div>
-  );
+    </div>,
+    document.body
+  ) : null;
 };

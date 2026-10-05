@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { EnrichedProductIntelligence } from '../../services/crop/cropKnowledgeService';
 import { GeocodedAddress } from '../../services/location/geocodingService';
 import { UniversalSmartPlan, generateUniversalSmartPlan } from '../../services/ai/smartPlanService';
@@ -48,8 +49,8 @@ export const UniversalSmartPlanModal: React.FC<UniversalSmartPlanModalProps> = (
     setTimeout(() => setCopied(false), 2500);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fade-in">
+  return typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[9990] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-4xl my-6 rounded-3xl bg-slate-900 border border-purple-500/40 p-6 sm:p-8 shadow-[0_0_60px_rgba(168,85,247,0.35)] space-y-6">
         
         {/* Close Button */}
@@ -295,6 +296,7 @@ export const UniversalSmartPlanModal: React.FC<UniversalSmartPlanModalProps> = (
         )}
 
       </div>
-    </div>
-  );
+    </div>,
+    document.body
+  ) : null;
 };

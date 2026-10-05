@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   FoodPackRequirements, 
   FoodPackRecommendation, 
@@ -603,6 +604,45 @@ export const FoodPackAIDashboard: React.FC = () => {
                     <span>Camera</span>
                   </button>
                 </div>
+
+                {/* Uploaded Food Image Preview */}
+                {imagePreviewUrl && (
+                  <div className="p-3 rounded-2xl bg-slate-950/80 border border-purple-500/30 flex items-center gap-3 animate-fade-in">
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Uploaded food photo"
+                      className="w-14 h-14 object-cover rounded-xl border border-purple-500/40 bg-slate-900 shrink-0 shadow-md"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] text-purple-300 font-mono font-bold uppercase tracking-wider">
+                        Active Uploaded Photo
+                      </div>
+                      <div className="text-xs font-bold text-white truncate">
+                        {visionDetectionResult?.primaryItem?.name || selectedCommodity}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-[11px] text-purple-300 hover:text-white underline cursor-pointer"
+                        >
+                          Change Photo
+                        </button>
+                        <span className="text-slate-600">•</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreviewUrl(null);
+                            setVisionDetectionResult(null);
+                          }}
+                          className="text-[11px] text-rose-400 hover:text-rose-300 underline cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {isUploadingImage && (
                   <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs text-purple-300 flex items-center gap-2.5 animate-pulse">
@@ -1301,8 +1341,8 @@ export const FoodPackAIDashboard: React.FC = () => {
           </div>
 
           {/* Modal for detailed material inspection */}
-          {selectedMaterialForDetail && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          {selectedMaterialForDetail && typeof document !== 'undefined' && createPortal(
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
               <div className="max-w-2xl w-full bg-slate-900 border border-purple-500/40 rounded-3xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                   <div className="flex items-center gap-3">
@@ -1346,7 +1386,8 @@ export const FoodPackAIDashboard: React.FC = () => {
                   Source: {selectedMaterialForDetail.source} ({selectedMaterialForDetail.lastUpdated})
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       )}

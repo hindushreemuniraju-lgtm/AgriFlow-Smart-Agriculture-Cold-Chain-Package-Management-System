@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Camera, Sparkles, X, Check, AlertCircle, RefreshCw, Layers, CheckCircle2, ChevronRight, HelpCircle } from 'lucide-react';
 import { searchUniversalCrop, searchCropByImage } from '../../services/crop/cropSearchService';
 import { IdentificationResult } from '../../services/crop/cropIdentificationService';
@@ -159,8 +160,8 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
       )}
 
       {/* Image Analysis Progress Modal / Overlay */}
-      {isAnalyzingImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      {isAnalyzingImage && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-md rounded-3xl bg-slate-900 border border-purple-500/40 p-6 shadow-2xl space-y-4 text-center">
             <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
               <div className="absolute inset-0 rounded-full border-4 border-purple-500/20 animate-ping"></div>
@@ -193,12 +194,13 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Conversational AI Vision Review Card Modal */}
-      {imageModalResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      {imageModalResult && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-lg rounded-3xl bg-slate-900 border border-purple-500/40 p-6 shadow-2xl space-y-5 text-left max-h-[90vh] overflow-y-auto">
             
             <button
@@ -456,7 +458,8 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
             )}
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

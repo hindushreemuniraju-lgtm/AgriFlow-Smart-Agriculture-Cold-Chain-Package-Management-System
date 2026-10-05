@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FarmerOrder, DriverPartner } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatCurrency } from '../../utils/formatters';
@@ -311,8 +312,8 @@ export const MarketplaceBidding: React.FC<MarketplaceBiddingProps> = ({
       )}
 
       {/* Custom Bid Modal */}
-      {bidModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      {bidModalOrder && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <form onSubmit={handleSubmitCustomBid} className="max-w-md w-full rounded-3xl bg-slate-900 border border-purple-500/40 p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
               <div>
@@ -377,7 +378,8 @@ export const MarketplaceBidding: React.FC<MarketplaceBiddingProps> = ({
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

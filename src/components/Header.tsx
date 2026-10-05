@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-slate-950/90 border-b border-purple-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-950/90 border-b border-purple-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           

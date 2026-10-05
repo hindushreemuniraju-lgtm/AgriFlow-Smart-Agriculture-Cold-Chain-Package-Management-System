@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MapPin, Navigation, CloudSun, Droplets, Wind, AlertTriangle, Edit3, X, Check, RefreshCw } from 'lucide-react';
 import { getCurrentGpsPosition, GpsLocation } from '../../services/location/gpsService';
 import { reverseGeocodeLocation, resolveManualLocation, GeocodedAddress } from '../../services/location/geocodingService';
@@ -148,8 +149,8 @@ export const LocationWeatherBar: React.FC<LocationWeatherBarProps> = ({
       )}
 
       {/* Manual Location Dialog Modal */}
-      {isManualModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      {isManualModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md rounded-3xl bg-slate-900 border border-purple-500/40 p-6 shadow-2xl space-y-4">
             
             <button
@@ -213,7 +214,8 @@ export const LocationWeatherBar: React.FC<LocationWeatherBarProps> = ({
             </form>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

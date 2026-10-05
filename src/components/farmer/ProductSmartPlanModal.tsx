@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ProductIntelligence } from '../../types/product';
 import { getProductVisual } from '../../utils/productImages';
 import { X, Sparkles, MapPin, CheckCircle2, TrendingUp, Box, Truck, Calendar, ShieldCheck, Download, Share2 } from 'lucide-react';
@@ -61,8 +62,8 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
     setTimeout(() => setCopied(false), 2500);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-fade-in">
+  return typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-3xl my-8 rounded-3xl bg-slate-900 border border-purple-500/40 p-6 sm:p-8 shadow-[0_0_60px_rgba(168,85,247,0.3)] space-y-6">
         
         {/* Close Button */}
@@ -285,6 +286,7 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
         </div>
 
       </div>
-    </div>
-  );
+    </div>,
+    document.body
+  ) : null;
 };
