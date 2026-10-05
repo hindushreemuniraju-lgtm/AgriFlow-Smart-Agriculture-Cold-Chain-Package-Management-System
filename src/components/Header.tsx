@@ -19,8 +19,10 @@ import {
   LogOut, 
   PlusCircle, 
   Wallet,
-  Settings
+  Settings,
+  Mic
 } from 'lucide-react';
+import { SarvamVoiceAssistantModal } from './voice/SarvamVoiceAssistantModal';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -34,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
   
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState(false);
 
   const currentLangObj = availableLanguages.find(l => l.code === language) || availableLanguages[0];
 
@@ -272,6 +275,16 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
               )}
             </div>
 
+            {/* Sarvam AI Indic Voice Mitra Button */}
+            <button
+              onClick={() => setIsVoiceAssistantOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-purple-700/30 to-indigo-700/30 hover:from-purple-600/40 hover:to-indigo-600/40 border border-purple-500/40 text-purple-200 hover:text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] cursor-pointer"
+              title="Open Kisan Sarvam AI Voice Mitra"
+            >
+              <Mic className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span className="hidden sm:inline">Sarvam Voice</span>
+            </button>
+
             {/* Multilingual Switcher */}
             <div className="relative">
               <button
@@ -322,6 +335,12 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
 
         </div>
       </div>
+
+      {/* Sarvam AI Indic Voice Assistant Modal */}
+      <SarvamVoiceAssistantModal
+        isOpen={isVoiceAssistantOpen}
+        onClose={() => setIsVoiceAssistantOpen(false)}
+      />
     </header>
   );
 };

@@ -731,6 +731,26 @@ const wasteResult = calculatePackagingWaste(hdpeCrate!, 1000, 'kg');
 assert(wasteResult.totalWasteKg >= 0, `Waste calculated: ${wasteResult.totalWasteKg} kg`);
 assert(wasteResult.circularityRating.length > 0, `Circularity rating present: ${wasteResult.circularityRating}`);
 
+// 29. TEST SARVAM AI INDIC VOICE ASSISTANT PIPELINE
+console.log('\n29. Testing Sarvam AI Indic Voice Assistant Pipeline:');
+const { SARVAM_SUPPORTED_LANGUAGES, querySarvamVoiceAssistant } = await import('../src/services/voice/sarvamVoiceService');
+
+assert(SARVAM_SUPPORTED_LANGUAGES.length >= 10, `Sarvam supports 10+ Indic languages (Got: ${SARVAM_SUPPORTED_LANGUAGES.length})`);
+assert(SARVAM_SUPPORTED_LANGUAGES.some(l => l.code === 'hi-IN' && l.nativeName === 'हिन्दी'), 'Hindi (hi-IN) supported');
+assert(SARVAM_SUPPORTED_LANGUAGES.some(l => l.code === 'kn-IN' && l.nativeName === 'ಕನ್ನಡ'), 'Kannada (kn-IN) supported');
+assert(SARVAM_SUPPORTED_LANGUAGES.some(l => l.code === 'ta-IN' && l.nativeName === 'தமிழ்'), 'Tamil (ta-IN) supported');
+assert(SARVAM_SUPPORTED_LANGUAGES.some(l => l.code === 'te-IN' && l.nativeName === 'తెలుగు'), 'Telugu (te-IN) supported');
+
+const hindiQuery = await querySarvamVoiceAssistant('टमाटर के लिए सबसे अच्छा पैकेजिंग क्या है?', 'hi-IN');
+assert(hindiQuery.cropDetected === 'Tomato', `Voice assistant recognized crop from Hindi query: ${hindiQuery.cropDetected}`);
+assert(hindiQuery.mandiPrice != null && hindiQuery.mandiPrice > 0, `Voice assistant attached live Mandi price (₹${hindiQuery.mandiPrice}/kg)`);
+assert(hindiQuery.packagingRecommendation != null && hindiQuery.packagingRecommendation.length > 0, 'Voice assistant attached packaging recommendation');
+assert(hindiQuery.answer.includes('टमाटर') || hindiQuery.answer.includes('Tomato'), 'Voice assistant generated localized answer');
+
+const kannadaQuery = await querySarvamVoiceAssistant('ಬೆಂಡೆಕಾಯಿ ಶೀತಲ ಶೇಖರಣಾ ತಾಪಮಾನ', 'kn-IN');
+assert(kannadaQuery.cropDetected === 'Okra', `Voice assistant mapped Kannada query to Okra (Got: ${kannadaQuery.cropDetected})`);
+assert(kannadaQuery.storageTemp != null, 'Voice assistant attached storage microclimate specs');
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');

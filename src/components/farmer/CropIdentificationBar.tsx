@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Camera, Sparkles, X, Check, AlertCircle, RefreshCw, Layers, CheckCircle2, ChevronRight, HelpCircle } from 'lucide-react';
+import { Search, Camera, Sparkles, X, Check, AlertCircle, RefreshCw, Layers, CheckCircle2, ChevronRight, HelpCircle, Mic } from 'lucide-react';
+import { SarvamVoiceAssistantModal } from '../voice/SarvamVoiceAssistantModal';
 import { searchUniversalCrop, searchCropByImage } from '../../services/crop/cropSearchService';
 import { IdentificationResult } from '../../services/crop/cropIdentificationService';
 import { EnrichedProductIntelligence } from '../../services/crop/cropKnowledgeService';
@@ -23,6 +24,7 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
   const [imageModalResult, setImageModalResult] = useState<{ result: IdentificationResult; product: EnrichedProductIntelligence } | null>(null);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState<boolean>(false);
   const [manualSelectionOpen, setManualSelectionOpen] = useState<boolean>(false);
+  const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = async (searchTerm: string) => {
@@ -117,6 +119,17 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
             accept="image/png, image/jpeg, image/jpg, image/webp"
             className="hidden"
           />
+
+          {/* Sarvam AI Voice Search Button */}
+          <button
+            type="button"
+            onClick={() => setIsVoiceAssistantOpen(true)}
+            title="Search crop or ask question via Sarvam Voice AI (Hindi, Kannada, Tamil, etc.)"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600/30 to-teal-600/30 hover:from-emerald-600/50 hover:to-teal-600/50 border border-emerald-400/40 text-emerald-200 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+          >
+            <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            <span className="hidden sm:inline">Sarvam Voice</span>
+          </button>
 
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -461,6 +474,16 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
         </div>,
         document.body
       )}
+
+      {/* Sarvam AI Indic Voice Assistant Modal */}
+      <SarvamVoiceAssistantModal
+        isOpen={isVoiceAssistantOpen}
+        onClose={() => setIsVoiceAssistantOpen(false)}
+        onSelectCropFromVoice={(cropName) => {
+          setQuery(cropName);
+          handleSearch(cropName);
+        }}
+      />
 
     </div>
   );

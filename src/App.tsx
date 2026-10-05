@@ -13,7 +13,8 @@ import { AuthModal } from './components/auth/AuthModal';
 import { RoleOnboardingModal } from './components/auth/RoleOnboardingModal';
 import { CROPS_DATA } from './data/cropsFallback';
 import { INITIAL_ORDERS, INITIAL_DRIVERS } from './data/mockFallback';
-import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart, QrCode, ShoppingCart } from 'lucide-react';
+import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart, QrCode, ShoppingCart, Mic } from 'lucide-react';
+import { SarvamVoiceAssistantModal } from './components/voice/SarvamVoiceAssistantModal';
 
 import { AgriFlowPipelineVisualizer } from './components/common/AgriFlowPipelineVisualizer';
 import { formatCurrency } from './utils/formatters';
@@ -29,6 +30,7 @@ const AgriFlowMain: React.FC = () => {
   const [notification, setNotification] = useState<{ title: string; desc: string; type: 'success' | 'info' } | null>(null);
   const [activeCustomerSubView, setActiveCustomerSubView] = useState<'marketplace' | 'passport'>('marketplace');
   const [currentPassportBatchId, setCurrentPassportBatchId] = useState<string>('AGF-8921');
+  const [isGlobalVoiceModalOpen, setIsGlobalVoiceModalOpen] = useState<boolean>(false);
 
   // Sync with API on mount
   useEffect(() => {
@@ -309,6 +311,33 @@ const AgriFlowMain: React.FC = () => {
 
         </div>
       </footer>
+
+      {/* Floating Sarvam AI Voice Assistant Mitra Widget */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          onClick={() => setIsGlobalVoiceModalOpen(true)}
+          className="group flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] transition-all hover:scale-105 cursor-pointer border border-purple-400/50"
+          title="Click to talk with Kisan Sarvam AI Voice Mitra"
+        >
+          <div className="relative flex items-center justify-center">
+            <Mic className="w-4 h-4 text-emerald-300 animate-pulse" />
+          </div>
+          <span className="tracking-wide">Sarvam Voice Mitra</span>
+        </button>
+      </div>
+
+      {/* Global Sarvam AI Indic Voice Assistant Modal */}
+      <SarvamVoiceAssistantModal
+        isOpen={isGlobalVoiceModalOpen}
+        onClose={() => setIsGlobalVoiceModalOpen(false)}
+        onSelectCropFromVoice={(cropName) => {
+          const found = crops.find(c => c.name.toLowerCase().includes(cropName.toLowerCase()));
+          if (found) {
+            setSelectedCrop(found);
+            switchRole('farmer');
+          }
+        }}
+      />
 
     </div>
   );
