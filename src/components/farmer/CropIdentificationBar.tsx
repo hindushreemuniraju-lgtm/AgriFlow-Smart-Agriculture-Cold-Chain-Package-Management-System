@@ -4,6 +4,7 @@ import { searchUniversalCrop, searchCropByImage } from '../../services/crop/crop
 import { IdentificationResult } from '../../services/crop/cropIdentificationService';
 import { EnrichedProductIntelligence } from '../../services/crop/cropKnowledgeService';
 import { recordImageCorrection } from '../../services/crop/imageCorrectionMemoryService';
+import { formatCurrency, formatNumber, formatTime } from '../../utils/formatters';
 import confetti from 'canvas-confetti';
 
 interface CropIdentificationBarProps {
@@ -326,7 +327,7 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
                 </div>
 
                 {/* Live Real-Time Market Price Card */}
-                {imageModalResult.result.price && (
+                {imageModalResult.result.price && imageModalResult.result.price.currentPrice != null && (
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/60 border border-indigo-500/30 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -342,38 +343,38 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
                         </span>
                       </div>
                       <span className="text-[10px] font-mono text-slate-400">
-                        {imageModalResult.result.price.commodityType}
+                        {imageModalResult.result.price.commodityType || 'COMMODITY'}
                       </span>
                     </div>
 
                     <div className="flex items-baseline justify-between pt-1">
                       <div>
                         <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                          ₹{imageModalResult.result.price.currentPrice.toLocaleString('en-IN')}
-                          <span className="text-xs font-normal text-slate-400 ml-1">/{imageModalResult.result.price.unit}</span>
+                          {formatCurrency(imageModalResult.result.price.currentPrice)}
+                          <span className="text-xs font-normal text-slate-400 ml-1">/{imageModalResult.result.price.unit || 'kg'}</span>
                         </div>
                         <div className="text-[11px] text-slate-400">
-                          Modal Mandi Band: ₹{imageModalResult.result.price?.priceRange?.min ?? imageModalResult.result.price?.modalRange?.min ?? Math.round(imageModalResult.result.price.currentPrice * 0.85)} – ₹{imageModalResult.result.price?.priceRange?.max ?? imageModalResult.result.price?.modalRange?.max ?? Math.round(imageModalResult.result.price.currentPrice * 1.15)}
+                          Modal Mandi Band: {formatCurrency(imageModalResult.result.price?.priceRange?.min ?? imageModalResult.result.price?.modalRange?.min ?? (imageModalResult.result.price.currentPrice * 0.85))} – {formatCurrency(imageModalResult.result.price?.priceRange?.max ?? imageModalResult.result.price?.modalRange?.max ?? (imageModalResult.result.price.currentPrice * 1.15))}
                         </div>
                       </div>
 
                       <div className="text-right">
                         <span className={`inline-block px-2 py-1 rounded-lg text-xs font-mono font-bold ${
-                          imageModalResult.result.price.change24h >= 0 
+                          (imageModalResult.result.price.change24h ?? 0) >= 0 
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                             : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                         }`}>
-                          {imageModalResult.result.price.change24h >= 0 ? '+' : ''}{imageModalResult.result.price.change24h}% (24h)
+                          {(imageModalResult.result.price.change24h ?? 0) >= 0 ? '+' : ''}{imageModalResult.result.price.change24h ?? 0}% (24h)
                         </span>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t border-indigo-900/40 flex items-center justify-between text-[11px] text-slate-400">
-                      <span className="truncate max-w-[200px]" title={imageModalResult.result.price.source}>
-                        Source: <strong className="text-indigo-200">{imageModalResult.result.price.source}</strong>
+                      <span className="truncate max-w-[200px]" title={imageModalResult.result.price.source || 'Market Data'}>
+                        Source: <strong className="text-indigo-200">{imageModalResult.result.price.source || 'Verified Market Baseline'}</strong>
                       </span>
                       <span>
-                        Updated: <strong className="text-slate-300">{new Date(imageModalResult.result.price.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                        Updated: <strong className="text-slate-300">{formatTime(imageModalResult.result.price.timestamp)}</strong>
                       </span>
                     </div>
                   </div>

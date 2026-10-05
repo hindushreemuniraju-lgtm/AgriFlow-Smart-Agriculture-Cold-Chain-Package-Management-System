@@ -606,6 +606,131 @@ assert(parsedGs1.digital_link.includes('(10)BAT-2026-NRLM-891'), 'Digital link c
 assert(parsedGs1.shg_origin.nrlm_id === 'NRLM-MH-NSK-2026-8921', 'Encoded NRLM Registration ID');
 assert(parsedGs1.tamper_seal_hash === 'SEAL-NRLM-98421-HM', 'Tamper seal hash embedded in payload');
 
+// 24. TEST SAFE FORMATTERS (CRASH IMMUNITY)
+console.log('\n24. Testing Safe Formatters (Zero Crash Immunity against undefined/null/NaN):');
+const { formatCurrency, formatNumber, formatDate, formatPercent } = await import('../src/utils/formatters');
+
+assert(formatCurrency(undefined) === '₹0', 'formatCurrency(undefined) returns fallback ₹0 without throwing');
+assert(formatCurrency(null) === '₹0', 'formatCurrency(null) returns fallback ₹0 without throwing');
+assert(formatCurrency(NaN) === '₹0', 'formatCurrency(NaN) returns fallback ₹0 without throwing');
+assert(formatCurrency(12500) === '₹12,500', `formatCurrency(12500) formats accurately (Got: ${formatCurrency(12500)})`);
+assert(formatNumber(undefined, 0, 'N/A') === 'N/A', 'formatNumber(undefined) returns custom fallback');
+assert(formatNumber(5432.1, 1) === '5,432.1', 'formatNumber(5432.1, 1) formats with decimals');
+assert(formatDate(undefined) === 'N/A', 'formatDate(undefined) safely handles missing date');
+assert(formatPercent(88.5) === '89%', `formatPercent(88.5) formats as percentage (Got: ${formatPercent(88.5)})`);
+
+// 25. TEST FOODPACK AI PACKAGING MATERIALS DATABASE
+console.log('\n25. Testing FoodPack AI Packaging Materials Database:');
+const { PACKAGING_MATERIALS_DB, getMaterialById } = await import('../src/data/packagingMaterialsDatabase');
+
+assert(PACKAGING_MATERIALS_DB.length >= 10, `Materials database contains at least 10 comprehensive packaging materials (Got: ${PACKAGING_MATERIALS_DB.length})`);
+
+PACKAGING_MATERIALS_DB.forEach(mat => {
+  assert(typeof mat.id === 'string' && mat.id.length > 0, `Material ${mat.name} has valid id: ${mat.id}`);
+  assert(typeof mat.name === 'string', `Material ${mat.id} has name: ${mat.name}`);
+  assert(typeof mat.foodContactSafety === 'string' && mat.foodContactSafety.length > 5, `Material ${mat.name} has detailed food contact safety spec`);
+  assert(mat.sustainabilityScore >= 0 && mat.sustainabilityScore <= 100, `Material ${mat.name} sustainabilityScore in 0-100 (Got: ${mat.sustainabilityScore})`);
+  assert(mat.foodSafetyScore >= 0 && mat.foodSafetyScore <= 100, `Material ${mat.name} foodSafetyScore in 0-100 (Got: ${mat.foodSafetyScore})`);
+  assert(mat.wasteScore >= 0 && mat.wasteScore <= 100, `Material ${mat.name} wasteScore in 0-100 (Got: ${mat.wasteScore})`);
+  assert(mat.estimatedCostPerUnit > 0, `Material ${mat.name} has positive unit cost (Got: ${mat.estimatedCostPerUnit})`);
+  assert(mat.source.length > 0, `Material ${mat.name} has citation source: ${mat.source}`);
+  assert(['VERIFIED_OFFICIAL_STANDARD', 'VERIFIED_INDUSTRY_STANDARD', 'ESTIMATED_LAB_DATA'].includes(mat.verificationStatus), `Material ${mat.name} verification status verified (${mat.verificationStatus})`);
+});
+
+const hdpeCrate = getMaterialById('mat-hdpe-crate');
+assert(hdpeCrate !== undefined && hdpeCrate.reusability.isReusable === true, 'HDPE Crate retrieved by ID and marked reusable');
+
+// 26. TEST FSSAI 2018 PACKAGING REGULATIONS KNOWLEDGE BASE
+console.log('\n26. Testing FSSAI Packaging Regulations Knowledge Base:');
+const { FSSAI_REGULATION_DATABASE, queryFssaiRegulations, getFssaiComplianceForCategory } = await import('../src/data/fssaiComplianceDatabase');
+
+assert(FSSAI_REGULATION_DATABASE.length >= 6, `FSSAI knowledge base has comprehensive regulation records (Got: ${FSSAI_REGULATION_DATABASE.length})`);
+
+const freshVegRules = getFssaiComplianceForCategory('Fresh Vegetables');
+assert(freshVegRules.length > 0, `Fresh Vegetables mapped to FSSAI rules (Found: ${freshVegRules.length})`);
+assert(freshVegRules.some(r => r.regulationReference.includes('IS 10146') || r.regulationReference.includes('10146') || r.id.includes('10146')), 'Fresh Veg rules reference IS 10146 standard');
+
+const searchInkResults = queryFssaiRegulations('newspaper');
+assert(searchInkResults.some(r => r.id === 'fssai-is-15495-ink' || r.restriction.toLowerCase().includes('newspaper') || r.requirement.toLowerCase().includes('ink')), 'Searching "newspaper" retrieves printing ink / newspaper prohibition regulation');
+
+// 27. TEST DETERMINISTIC RECOMMENDATION ENGINE & MULTI-FACTOR SCORING
+console.log('\n27. Testing FoodPack AI Recommendation Engine & Explainability:');
+const { generateFoodPackRecommendation, calculatePackagingCost, calculatePackagingWaste } = await import('../src/services/packaging/foodPackRecommendationEngine');
+
+// Case A: Fresh Beetroot in Cold Chain
+const beetrootReq = {
+  commodity: 'Beetroot',
+  customCommodity: '',
+  category: 'Fresh Vegetables' as any,
+  quantity: 500,
+  unit: 'kg' as any,
+  storage: 'Cold Chain' as any,
+  transport: 'Refrigerated Truck' as any,
+  shelfLife: '2-4 weeks' as any,
+  priorityWeights: {
+    costWeight: 0.15,
+    safetyWeight: 0.25,
+    shelfLifeWeight: 0.25,
+    sustainabilityWeight: 0.15,
+    durabilityWeight: 0.1,
+    wasteWeight: 0.1
+  }
+};
+
+const beetrootRec = generateFoodPackRecommendation(beetrootReq);
+assert(beetrootRec !== null, 'Recommendation generated for Beetroot Cold Chain');
+assert(beetrootRec.topRecommendation !== undefined, `Top recommendation selected: ${beetrootRec.topRecommendation.material.name}`);
+assert(beetrootRec.topRecommendation.overallScore >= 70, `Top overall score is high (Got: ${beetrootRec.topRecommendation.overallScore})`);
+assert(typeof beetrootRec.whyExplanation === 'object' && beetrootRec.whyExplanation.bulletPoints?.length > 0, 'Deterministic why-explanation is populated with bullet points and technical rationale');
+assert(beetrootRec.rankedMaterials !== undefined && beetrootRec.rankedMaterials.length > 1, `Ranked materials list contains alternatives (Got: ${beetrootRec.rankedMaterials?.length})`);
+assert(beetrootRec.fssaiCompliance !== undefined && (beetrootRec.fssaiCompliance.regulationReference !== undefined || (Array.isArray(beetrootRec.fssaiCompliance) && beetrootRec.fssaiCompliance.length > 0)), 'FSSAI compliance rules attached to recommendation');
+assert(beetrootRec.aiConfidence !== undefined && beetrootRec.aiConfidence.score >= 70, `AI confidence score is robust (${beetrootRec.aiConfidence?.score}%)`);
+
+// Case B: User Priorities Shift - 100% Sustainability Priority
+const ecoPriorities = {
+  costWeight: 0.05,
+  safetyWeight: 0.15,
+  shelfLifeWeight: 0.1,
+  sustainabilityWeight: 0.45,
+  durabilityWeight: 0.05,
+  wasteWeight: 0.2
+};
+const ecoRec = generateFoodPackRecommendation({ ...beetrootReq, priorityWeights: ecoPriorities });
+assert(ecoRec.topRecommendation.scoreBreakdown.sustainabilityScore >= 75, `High sustainability material prioritized under eco weights (Got: ${ecoRec.topRecommendation.material.name} - Sustainability: ${ecoRec.topRecommendation.scoreBreakdown.sustainabilityScore})`);
+
+// Case C: Dairy Fresh Milk
+const milkReq = {
+  commodity: 'Raw Cow Milk',
+  customCommodity: '',
+  category: 'Dairy' as any,
+  quantity: 100,
+  unit: 'pieces' as any,
+  storage: 'Refrigerated' as any,
+  transport: 'Refrigerated Truck' as any,
+  shelfLife: '4-7 days' as any,
+  priorityWeights: {
+    costWeight: 0.15,
+    safetyWeight: 0.35,
+    shelfLifeWeight: 0.25,
+    sustainabilityWeight: 0.1,
+    durabilityWeight: 0.1,
+    wasteWeight: 0.05
+  }
+};
+const milkRec = generateFoodPackRecommendation(milkReq);
+assert(milkRec.topRecommendation.scoreBreakdown.safetyScore >= 80, `High food safety score for Dairy (Got: ${milkRec.topRecommendation.scoreBreakdown.safetyScore})`);
+
+// 28. TEST COST & WASTE ESTIMATION SERVICES
+console.log('\n28. Testing Cost & Waste Estimation Calculations:');
+const costResult = calculatePackagingCost(hdpeCrate!, 1000, 'kg');
+assert(costResult.totalCostInr > 0, `Total cost calculated: ₹${costResult.totalCostInr}`);
+assert(costResult.unitsRequired > 0, `Units required calculated: ${costResult.unitsRequired}`);
+assert(costResult.costPerKgProduct > 0, `Cost per kg calculated: ₹${costResult.costPerKgProduct}`);
+
+const wasteResult = calculatePackagingWaste(hdpeCrate!, 1000, 'kg');
+assert(wasteResult.totalWasteKg >= 0, `Waste calculated: ${wasteResult.totalWasteKg} kg`);
+assert(wasteResult.circularityRating.length > 0, `Circularity rating present: ${wasteResult.circularityRating}`);
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');

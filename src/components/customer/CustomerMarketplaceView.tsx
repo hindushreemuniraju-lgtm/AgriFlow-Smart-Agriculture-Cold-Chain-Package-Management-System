@@ -4,6 +4,7 @@ import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
 import { ProductIntelligence } from '../../types/product';
 import { getVerifiedCropVisual } from '../../services/crop/cropImageService';
 import { AgriFlowPDFDownloadModal } from '../documents/AgriFlowPDFDownloadModal';
+import { formatCurrency } from '../../utils/formatters';
 import { 
   ShoppingCart, 
   Search, 
@@ -172,7 +173,7 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
         <div className="flex items-center gap-4 bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
           <div className="text-right">
             <span className="text-[10px] text-slate-400 block uppercase font-bold">Wallet Balance</span>
-            <span className="text-base font-black text-emerald-400 font-mono">₹{user.walletBalance.toLocaleString()}</span>
+            <span className="text-base font-black text-emerald-400 font-mono">{formatCurrency(user.walletBalance)}</span>
           </div>
           <div className="h-8 w-[1px] bg-slate-800" />
           <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FarmerOrder, DriverPartner } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { formatCurrency } from '../../utils/formatters';
 import { 
   Truck, 
   MapPin, 
@@ -193,7 +194,7 @@ export const MarketplaceBidding: React.FC<MarketplaceBiddingProps> = ({
                   <div className="text-right">
                     <span className="text-[10px] uppercase font-mono text-slate-400">Fair Price</span>
                     <div className="text-xl font-black text-emerald-400 font-mono">
-                      ₹{order.fairPriceEstimated.toLocaleString('en-IN')}
+                      {formatCurrency(order.fairPriceEstimated)}
                     </div>
                     <span className="text-[10px] text-slate-400 font-mono">Benchmark</span>
                   </div>

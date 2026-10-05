@@ -8,6 +8,7 @@ import { LogisticsDashboard } from './components/logistics/LogisticsDashboard';
 import { CustomerMarketplaceView } from './components/customer/CustomerMarketplaceView';
 import { CustomerPassportView } from './components/customer/CustomerPassportView';
 import { PackagingIntelligenceDashboard } from './components/packaging/PackagingIntelligenceDashboard';
+import { FoodPackAIDashboard } from './components/packaging/FoodPackAIDashboard';
 import { AuthModal } from './components/auth/AuthModal';
 import { RoleOnboardingModal } from './components/auth/RoleOnboardingModal';
 import { CROPS_DATA } from './data/cropsFallback';
@@ -15,6 +16,7 @@ import { INITIAL_ORDERS, INITIAL_DRIVERS } from './data/mockFallback';
 import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart, QrCode, ShoppingCart } from 'lucide-react';
 
 import { AgriFlowPipelineVisualizer } from './components/common/AgriFlowPipelineVisualizer';
+import { formatCurrency } from './utils/formatters';
 
 const AgriFlowMain: React.FC = () => {
   const { t } = useLanguage();
@@ -112,7 +114,7 @@ const AgriFlowMain: React.FC = () => {
 
     showToast(
       'Load Dispatched with Cold-Chain Lock!',
-      `Driver assigned at benchmark ₹${price.toLocaleString('en-IN')}. Live IoT telemetry active.`
+      `Driver assigned at benchmark ${formatCurrency(price)}. Live IoT telemetry active.`
     );
   };
 
@@ -195,9 +197,9 @@ const AgriFlowMain: React.FC = () => {
           />
         )}
 
-        {/* 2. SIH26236 Food Packaging Intelligence Interface */}
+        {/* 2. SIH26236 Food Packaging Intelligence & FoodPack AI Interface */}
         {activeRole === 'packaging' && (
-          <PackagingIntelligenceDashboard />
+          <FoodPackAIDashboard />
         )}
 
         {/* 3. Customer Marketplace & Product Passport Interface */}

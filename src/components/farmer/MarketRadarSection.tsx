@@ -6,6 +6,7 @@ import { calculateMarketRealizations, MarketNetRealizationBreakdown } from '../.
 import { getPriceHistoryAnalytics, PriceTrendAnalytics } from '../../services/market/priceHistoryService';
 import { generateSmartMarketRecommendation, SmartSellingRecommendation } from '../../services/market/marketRecommendationService';
 import { BarChart3, TrendingUp, TrendingDown, MapPin, Sparkles, AlertCircle, ShieldCheck, Scale, Truck, Box, ArrowRight, CheckCircle2, DollarSign } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatters';
 
 interface MarketRadarSectionProps {
   product: EnrichedProductIntelligence;
@@ -137,7 +138,7 @@ export const MarketRadarSection: React.FC<MarketRadarSectionProps> = ({
               <div className="bg-slate-950/80 px-3.5 py-1.5 rounded-xl border border-emerald-500/30 text-right">
                 <div className="text-[10px] text-slate-400 font-mono">Net In Pocket</div>
                 <div className="text-base sm:text-lg font-extrabold text-emerald-400 font-mono">
-                  ₹{smartRecommendation.bestMarket.netRealization.toLocaleString('en-IN')}
+                  {formatCurrency(smartRecommendation.bestMarket.netRealization)}
                 </div>
               </div>
               <div className="bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800 text-right">
@@ -248,7 +249,7 @@ export const MarketRadarSection: React.FC<MarketRadarSectionProps> = ({
                     
                     <div className="flex items-center justify-between text-slate-300">
                       <span>Gross Crop Realization:</span>
-                      <span className="font-mono text-white">₹{item.grossRevenue.toLocaleString('en-IN')}</span>
+                      <span className="font-mono text-white">{formatCurrency(item.grossRevenue)}</span>
                     </div>
 
                     <div className="flex items-center justify-between text-slate-400 text-[11px]">
@@ -256,7 +257,7 @@ export const MarketRadarSection: React.FC<MarketRadarSectionProps> = ({
                         <Truck className="w-3 h-3 text-amber-400" />
                         Freight Transport ({item.mandi.distanceKm}km):
                       </span>
-                      <span className="font-mono text-amber-300">- ₹{item.transportCost.toLocaleString('en-IN')}</span>
+                      <span className="font-mono text-amber-300">- {formatCurrency(item.transportCost)}</span>
                     </div>
 
                     <div className="flex items-center justify-between text-slate-400 text-[11px]">
@@ -264,17 +265,17 @@ export const MarketRadarSection: React.FC<MarketRadarSectionProps> = ({
                         <Box className="w-3 h-3 text-purple-400" />
                         Packaging & Labelling:
                       </span>
-                      <span className="font-mono text-purple-300">- ₹{item.packagingCost.toLocaleString('en-IN')}</span>
+                      <span className="font-mono text-purple-300">- {formatCurrency(item.packagingCost)}</span>
                     </div>
 
                     <div className="flex items-center justify-between text-slate-400 text-[11px]">
                       <span>Handling & Transit Loss ({item.expectedLossPercent}%):</span>
-                      <span className="font-mono text-rose-400">- ₹{(item.handlingCost + item.expectedLossValue).toLocaleString('en-IN')}</span>
+                      <span className="font-mono text-rose-400">- {formatCurrency(item.handlingCost + item.expectedLossValue)}</span>
                     </div>
 
                     <div className="pt-2 border-t border-slate-800 flex items-center justify-between font-bold">
                       <span className="text-emerald-400">Net Take-Home Cash:</span>
-                      <span className="text-base font-mono text-emerald-400">₹{item.netRealization.toLocaleString('en-IN')}</span>
+                      <span className="text-base font-mono text-emerald-400">{formatCurrency(item.netRealization)}</span>
                     </div>
                   </div>
 

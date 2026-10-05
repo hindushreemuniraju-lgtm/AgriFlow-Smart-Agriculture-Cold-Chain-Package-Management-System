@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CropInfo, PackagingRecommendation, FarmerOrder } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { QRCodeSVG } from 'qrcode.react';
+import { formatCurrency } from '../../utils/formatters';
 import confetti from 'canvas-confetti';
 import { 
   Truck, 
@@ -166,7 +167,7 @@ export const TransportOrderForm: React.FC<TransportOrderFormProps> = ({
           </div>
           <div>
             <div className="text-[10px] uppercase font-mono text-slate-400">{t.farmer.fairPriceEstimate}</div>
-            <div className="text-lg font-black text-emerald-400 font-mono">₹{estimatedFairPrice.toLocaleString('en-IN')}</div>
+            <div className="text-lg font-black text-emerald-400 font-mono">{formatCurrency(estimatedFairPrice)}</div>
           </div>
         </div>
       </div>

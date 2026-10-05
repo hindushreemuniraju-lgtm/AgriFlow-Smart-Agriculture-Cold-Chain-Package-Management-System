@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FarmerOrder } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { formatCurrency } from '../../utils/formatters';
 import { 
   GitMerge, 
   Check, 
@@ -345,7 +346,7 @@ export const RouteBatchOptimizer: React.FC<RouteBatchOptimizerProps> = ({ orders
                 <span>{t.logistics.bundleDriverPayout}</span>
               </div>
               <div className="text-xl font-black text-purple-300 font-mono">
-                ₹{optimizationResult.bundledDriverPayout.toLocaleString('en-IN')}
+                {formatCurrency(optimizationResult.bundledDriverPayout)}
               </div>
               <div className="text-[10px] text-emerald-400 font-mono">
                 +₹{optimizationResult.farmerDiscountTotal} passed to farmers

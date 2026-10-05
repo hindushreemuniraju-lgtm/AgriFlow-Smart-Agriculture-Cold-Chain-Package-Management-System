@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { UserRole, LanguageCode } from '../types';
+import { formatCurrency } from '../utils/formatters';
 import { 
   Sprout, 
   PackageCheck, 
@@ -182,7 +183,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
                       <span className="flex items-center gap-1.5 text-slate-300">
                         <Wallet className="w-3.5 h-3.5 text-purple-400" /> Wallet Balance
                       </span>
-                      <span className="font-bold text-emerald-400 font-mono">₹{user.walletBalance.toLocaleString()}</span>
+                      <span className="font-bold text-emerald-400 font-mono">{formatCurrency(user.walletBalance)}</span>
                     </div>
 
                     {/* Fast Role Switcher */}

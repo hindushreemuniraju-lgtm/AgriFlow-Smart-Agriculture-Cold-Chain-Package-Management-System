@@ -5,6 +5,7 @@
 
 import { MarketNetRealizationBreakdown } from './marketComparisonService';
 import { PriceTrendAnalytics } from './priceHistoryService';
+import { formatCurrency } from '../../utils/formatters';
 
 export interface SmartSellingRecommendation {
   cropName: string;
@@ -45,19 +46,19 @@ export function generateSmartMarketRecommendation(
 
   const isCloseMarketBetter = !!distantHigherRawMarket;
 
-  let reasoning = `Based on available market auction data for ${best.quantityKg} kg of ${cropName}, ${best.mandi.market} offers the highest estimated net realization of ₹${best.netRealization.toLocaleString('en-IN')} (₹${best.netRatePerKg}/kg net in pocket).`;
+  let reasoning = `Based on available market auction data for ${best.quantityKg} kg of ${cropName}, ${best.mandi.market} offers the highest estimated net realization of ${formatCurrency(best.netRealization)} (₹${best.netRatePerKg}/kg net in pocket).`;
   
   if (isCloseMarketBetter && distantHigherRawMarket) {
     const rawDiff = Math.round((distantHigherRawMarket.mandi.modalPricePerKg - best.mandi.modalPricePerKg) * 100);
     const transportSaving = distantHigherRawMarket.transportCost - best.transportCost;
-    reasoning = `Although ${distantHigherRawMarket.mandi.market} posts a higher raw auction price (+₹${rawDiff}/qtl), ${best.mandi.market} provides ₹${(best.netRealization - distantHigherRawMarket.netRealization).toLocaleString('en-IN')} higher net earnings because it is ${distantHigherRawMarket.mandi.distanceKm - best.mandi.distanceKm} km closer, saving ₹${transportSaving.toLocaleString('en-IN')} in freight and ${((distantHigherRawMarket.expectedLossPercent - best.expectedLossPercent)).toFixed(1)}% in transit handling loss.`;
+    reasoning = `Although ${distantHigherRawMarket.mandi.market} posts a higher raw auction price (+₹${rawDiff}/qtl), ${best.mandi.market} provides ${formatCurrency(best.netRealization - distantHigherRawMarket.netRealization)} higher net earnings because it is ${distantHigherRawMarket.mandi.distanceKm - best.mandi.distanceKm} km closer, saving ${formatCurrency(transportSaving)} in freight and ${((distantHigherRawMarket.expectedLossPercent - best.expectedLossPercent)).toFixed(1)}% in transit handling loss.`;
   }
 
   const actionSummary = [
     `Target ${best.mandi.market} (${best.mandi.distanceKm} km) for maximum net realization.`,
     `Expected modal raw rate: ₹${best.mandi.modalPrice}/qtl (₹${best.mandi.modalPricePerKg}/kg).`,
-    `Budgeted transit logistics outlay: ₹${best.transportCost.toLocaleString('en-IN')}.`,
-    `Estimated net profit in hand: ₹${best.netRealization.toLocaleString('en-IN')} (${best.profitMarginPercent}% realization efficiency).`
+    `Budgeted transit logistics outlay: ${formatCurrency(best.transportCost)}.`,
+    `Estimated net profit in hand: ${formatCurrency(best.netRealization)} (${best.profitMarginPercent}% realization efficiency).`
   ];
 
   return {

@@ -8,6 +8,7 @@ import { DiscoveredMandi } from '../market/mandiDiscoveryService';
 import { MarketNetRealizationBreakdown } from '../market/marketComparisonService';
 import { PriceTrendAnalytics } from '../market/priceHistoryService';
 import { WeatherTelemetry } from '../weather/weatherService';
+import { formatCurrency } from '../../utils/formatters';
 
 export interface MarketAnalysisOutput {
   summary: string;
@@ -32,10 +33,10 @@ export function generateMarketAnalysis(
   const best = realizations[0];
   const second = realizations.length > 1 ? realizations[1] : undefined;
 
-  let netExplanation = `Based on current available market data, ${best.mandi.market} yields the optimal net realization of ₹${best.netRealization.toLocaleString('en-IN')}.`;
+  let netExplanation = `Based on current available market data, ${best.mandi.market} yields the optimal net realization of ${formatCurrency(best.netRealization)}.`;
   if (second) {
     const diff = best.netRealization - second.netRealization;
-    netExplanation += ` This delivers ₹${diff.toLocaleString('en-IN')} higher net profit compared to ${second.mandi.market} after accounting for distance (${best.mandi.distanceKm} km vs ${second.mandi.distanceKm} km) and freight outlays.`;
+    netExplanation += ` This delivers ${formatCurrency(diff)} higher net profit compared to ${second.mandi.market} after accounting for distance (${best.mandi.distanceKm} km vs ${second.mandi.distanceKm} km) and freight outlays.`;
   }
 
   let trendInterpretation = `Current 7-day trend shows price is ${trend.trendDirection.toLowerCase()} (${trend.percentageChange7d > 0 ? '+' : ''}${trend.percentageChange7d}%). ${trend.advisoryNote}`;

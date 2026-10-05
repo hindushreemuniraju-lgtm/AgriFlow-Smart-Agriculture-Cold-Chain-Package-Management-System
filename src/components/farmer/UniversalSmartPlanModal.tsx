@@ -4,6 +4,7 @@ import { GeocodedAddress } from '../../services/location/geocodingService';
 import { UniversalSmartPlan, generateUniversalSmartPlan } from '../../services/ai/smartPlanService';
 import { getVerifiedCropVisual } from '../../services/crop/cropImageService';
 import { X, Sparkles, MapPin, CheckCircle2, TrendingUp, Box, Truck, Calendar, ShieldCheck, Share2, Printer, CloudSun, AlertTriangle, Scale, DollarSign } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatters';
 import confetti from 'canvas-confetti';
 
 interface UniversalSmartPlanModalProps {
@@ -132,7 +133,7 @@ export const UniversalSmartPlanModal: React.FC<UniversalSmartPlanModalProps> = (
 
               <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-center space-y-0.5">
                 <div className="text-[10px] text-emerald-300 uppercase font-mono">Net Realization</div>
-                <div className="text-xl font-extrabold text-emerald-400 font-mono">₹{plan.sellingRecommendation.bestMarket.netRealization.toLocaleString('en-IN')}</div>
+                <div className="text-xl font-extrabold text-emerald-400 font-mono">{formatCurrency(plan.sellingRecommendation.bestMarket.netRealization)}</div>
                 <div className="text-[10px] text-emerald-300 font-mono">₹{plan.sellingRecommendation.bestMarket.netRatePerKg}/kg net</div>
               </div>
             </div>
@@ -190,27 +191,27 @@ export const UniversalSmartPlanModal: React.FC<UniversalSmartPlanModalProps> = (
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
                 <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                   <div className="text-[10px] text-slate-400">Gross Revenue</div>
-                  <div className="font-bold text-white font-mono mt-0.5">₹{plan.sellingRecommendation.bestMarket.grossRevenue.toLocaleString('en-IN')}</div>
+                  <div className="font-bold text-white font-mono mt-0.5">{formatCurrency(plan.sellingRecommendation.bestMarket.grossRevenue)}</div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                   <div className="text-[10px] text-amber-400">Transport Freight</div>
-                  <div className="font-bold text-amber-300 font-mono mt-0.5">- ₹{plan.sellingRecommendation.bestMarket.transportCost.toLocaleString('en-IN')}</div>
+                  <div className="font-bold text-amber-300 font-mono mt-0.5">- {formatCurrency(plan.sellingRecommendation.bestMarket.transportCost)}</div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                   <div className="text-[10px] text-purple-400">Packaging Outlay</div>
-                  <div className="font-bold text-purple-300 font-mono mt-0.5">- ₹{plan.sellingRecommendation.bestMarket.packagingCost.toLocaleString('en-IN')}</div>
+                  <div className="font-bold text-purple-300 font-mono mt-0.5">- {formatCurrency(plan.sellingRecommendation.bestMarket.packagingCost)}</div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                   <div className="text-[10px] text-rose-400">Handling & Loss</div>
-                  <div className="font-bold text-rose-300 font-mono mt-0.5">- ₹{(plan.sellingRecommendation.bestMarket.handlingCost + plan.sellingRecommendation.bestMarket.expectedLossValue).toLocaleString('en-IN')}</div>
+                  <div className="font-bold text-rose-300 font-mono mt-0.5">- {formatCurrency(plan.sellingRecommendation.bestMarket.handlingCost + plan.sellingRecommendation.bestMarket.expectedLossValue)}</div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 col-span-2 sm:col-span-1">
                   <div className="text-[10px] text-emerald-300 font-bold">Net In Hand</div>
-                  <div className="font-extrabold text-emerald-400 font-mono mt-0.5">₹{plan.sellingRecommendation.bestMarket.netRealization.toLocaleString('en-IN')}</div>
+                  <div className="font-extrabold text-emerald-400 font-mono mt-0.5">{formatCurrency(plan.sellingRecommendation.bestMarket.netRealization)}</div>
                 </div>
               </div>
             </div>

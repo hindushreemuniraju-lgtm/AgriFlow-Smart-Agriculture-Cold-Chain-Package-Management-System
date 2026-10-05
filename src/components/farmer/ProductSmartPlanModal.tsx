@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ProductIntelligence } from '../../types/product';
 import { getProductVisual } from '../../utils/productImages';
 import { X, Sparkles, MapPin, CheckCircle2, TrendingUp, Box, Truck, Calendar, ShieldCheck, Download, Share2 } from 'lucide-react';
+import { formatCurrency, formatNumber } from '../../utils/formatters';
 import confetti from 'canvas-confetti';
 
 interface ProductSmartPlanModalProps {
@@ -163,7 +164,7 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
             <div className="text-lg sm:text-xl font-extrabold text-sky-400 font-mono">
               {(totalYieldKg / 1000).toFixed(1)} Tons
             </div>
-            <div className="text-[10px] text-slate-500 font-mono">{totalYieldKg.toLocaleString()} kg total</div>
+            <div className="text-[10px] text-slate-500 font-mono">{formatNumber(totalYieldKg)} kg total</div>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-purple-500/20 text-center space-y-1">
@@ -179,7 +180,7 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
             <div className="text-lg sm:text-xl font-extrabold text-amber-300 font-mono">
               ₹{(grossRevenue / 100000).toFixed(2)} L
             </div>
-            <div className="text-[10px] text-slate-500 font-mono">₹{grossRevenue.toLocaleString()}</div>
+            <div className="text-[10px] text-slate-500 font-mono">{formatCurrency(grossRevenue)}</div>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-center space-y-1">
@@ -229,7 +230,7 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
                 <span>3. Packaging Bill of Materials</span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Pack into <strong className="text-white">{unitsCount} units</strong> of <strong className="text-white">{product.packaging.primaryPackaging}</strong>. Total estimated packaging outlay: <strong className="text-sky-300">₹{packagingCostTotal.toLocaleString()}</strong>.
+                Pack into <strong className="text-white">{unitsCount} units</strong> of <strong className="text-white">{product.packaging.primaryPackaging}</strong>. Total estimated packaging outlay: <strong className="text-sky-300">{formatCurrency(packagingCostTotal)}</strong>.
               </p>
             </div>
 
