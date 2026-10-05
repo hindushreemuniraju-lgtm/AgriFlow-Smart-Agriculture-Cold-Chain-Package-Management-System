@@ -542,6 +542,70 @@ assert(cashewSpec.inertGasFlush.oxygenScavengerSizingCc >= 30, `Cashew oxygen sc
 const raisinSpec = await calculatePackageSmartDryFruitIntelligence('raisin');
 assert(raisinSpec.lcaAssessment.plasticReductionPercent >= 50, `Raisin compostable / bio-laminate achieves ${raisinSpec.lcaAssessment.plasticReductionPercent}% plastic reduction`);
 
+// 20. TEST INDIA POST PINCODE API AUTO-RESOLUTION
+console.log('\n20. Testing India Post Pincode API (API Setu / data.gov.in Auto-Locking):');
+const { fetchIndiaPostPincode } = await import('../src/services/compliance/mordComplianceService');
+
+const pimpalgaonPin = await fetchIndiaPostPincode('422209');
+assert(pimpalgaonPin.isValid === true, 'India Post Pincode 422209 is valid');
+assert(pimpalgaonPin.district === 'Nashik', `Auto-populated district is Nashik (Got: ${pimpalgaonPin.district})`);
+assert(pimpalgaonPin.block === 'Niphad' || pimpalgaonPin.block === 'Nashik', `Auto-populated block/taluk is Niphad (Got: ${pimpalgaonPin.block})`);
+assert(pimpalgaonPin.state === 'Maharashtra', 'Auto-populated state is Maharashtra');
+assert(pimpalgaonPin.postOfficeName.includes('Pimpalgaon') || pimpalgaonPin.postOfficeName.includes('Nashik'), 'Auto-populated Post Office Name');
+
+const blrPin = await fetchIndiaPostPincode('560001');
+assert(blrPin.state === 'Karnataka', 'Pincode 560001 resolved to Karnataka');
+assert(blrPin.district.includes('Bengaluru'), 'Pincode 560001 resolved to Bengaluru');
+
+// 21. TEST FSSAI 14-DIGIT GOVERNMENT VERIFICATION GATE
+console.log('\n21. Testing Government FSSAI License Verification Gate:');
+const { verifyFssaiLicense } = await import('../src/services/compliance/mordComplianceService');
+
+const validFssai = await verifyFssaiLicense('11524027000189', 'Jay Kisan Mahila SHG');
+assert(validFssai.isValid === true, 'FSSAI License 11524027000189 is format verified');
+assert(validFssai.status === 'VERIFIED_ACTIVE', 'FSSAI License status is Active & Verified');
+assert(validFssai.state === 'Maharashtra', `FSSAI state jurisdiction resolved to Maharashtra (Got: ${validFssai.state})`);
+assert(validFssai.licenseType === 'State Food Safety License', 'FSSAI License classified as State Food Safety License');
+assert(validFssai.foodCategoriesPermitted.length > 0, 'Extracted permitted food categories from government registry');
+
+const invalidFssai = await verifyFssaiLicense('123'); // Invalid short length
+assert(invalidFssai.isValid === false, 'Invalid length FSSAI license correctly rejected');
+assert(invalidFssai.status === 'INVALID_FORMAT', 'Flagged as INVALID_FORMAT');
+
+// 22. TEST HIGH-ACCURACY RURAL SHG GEOCODING & PICKUP ADDRESS
+console.log('\n22. Testing High-Accuracy Rural SHG Geocoding & GPS Pickup:');
+const { geocodeShgRuralUnit } = await import('../src/services/compliance/mordComplianceService');
+
+const shgGeo = geocodeShgRuralUnit('Jay Kisan Mahila SHG', 'Niphad', 'Nashik', 'Maharashtra', '422209');
+assert(shgGeo.isGpsVerified === true, 'SHG Rural Unit is GPS Verified');
+assert(shgGeo.latitude >= 18.0 && shgGeo.latitude <= 21.0, `Latitude is realistic for Nashik cluster (${shgGeo.latitude}° N)`);
+assert(shgGeo.longitude >= 72.0 && shgGeo.longitude <= 76.0, `Longitude is realistic (${shgGeo.longitude}° E)`);
+assert(shgGeo.accuracyMeters <= 5.0, `GPS Accuracy radius is ±${shgGeo.accuracyMeters} meters`);
+assert(shgGeo.formattedAddress.includes('Gram Panchayat Center'), 'Physical address formatted for rural pickup logistics');
+
+// 23. TEST GS1 2D DATAMATRIX TRACEABILITY & TAMPER SEAL
+console.log('\n23. Testing GS1 2D DataMatrix Traceability & Tamper Seal Generator:');
+const { generateGs1DigitalLink } = await import('../src/services/compliance/mordComplianceService');
+
+const gs1Json = generateGs1DigitalLink({
+  shgName: 'Jay Kisan Mahila SHG',
+  mordRegistrationId: 'NRLM-MH-NSK-2026-8921',
+  fssaiNumber: '11524027000189',
+  batchId: 'BAT-2026-NRLM-891',
+  commodityName: 'Beetroot & Organic Jaggery',
+  mfgDate: '2026-10-05',
+  expiryDate: '2027-04-05',
+  tamperSealCode: 'SEAL-NRLM-98421-HM',
+  pincode: '422209'
+});
+
+const parsedGs1 = JSON.parse(gs1Json);
+assert(parsedGs1.gs1_format === 'GS1_2D_DATAMATRIX', 'GS1 Format declared as GS1_2D_DATAMATRIX');
+assert(parsedGs1.digital_link.includes('(01)'), 'Digital link contains GTIN application identifier (01)');
+assert(parsedGs1.digital_link.includes('(10)BAT-2026-NRLM-891'), 'Digital link contains Batch identification (10)');
+assert(parsedGs1.shg_origin.nrlm_id === 'NRLM-MH-NSK-2026-8921', 'Encoded NRLM Registration ID');
+assert(parsedGs1.tamper_seal_hash === 'SEAL-NRLM-98421-HM', 'Tamper seal hash embedded in payload');
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');

@@ -8,10 +8,12 @@ import { fetchRedditDairyPackagingIntelligence, RedditDairyPackagingReport } fro
 import { calculatePerseussColdCartonization, PerseussCartonizationResult } from '../../services/coldchain/perseussColdCartonizationService';
 import { fetchUsdaFoodDataProfile, UsdaApiResponse } from '../../services/crop/usdaFoodDataCentralService';
 import { calculatePackageSmartDryFruitIntelligence, PackageSmartDryFruitSpec } from '../../services/packaging/packageSmartDryFruitService';
+import { MordComplianceSection } from '../compliance/MordComplianceSection';
 import { 
   PackageCheck, 
   ShieldCheck, 
   Sparkles, 
+  Building2, 
   Wind, 
   Droplets, 
   Thermometer, 
@@ -48,7 +50,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
   const [vehicleType, setVehicleType] = useState<string>('Refrigerated Reefer Container (2°C - 8°C)');
   const [budgetPreference, setBudgetPreference] = useState<'economy' | 'balanced' | 'premium'>('balanced');
   const [sustainabilityPreference, setSustainabilityPreference] = useState<'standard' | 'high_eco' | 'zero_plastic'>('standard');
-  const [activeTab, setActiveTab] = useState<'recommendation' | 'barrier_matrix' | 'respiration' | 'usda_fooddata' | 'perseuss_cartonization' | 'reddit_dairy' | 'packagesmart_ai' | 'distance_logistics'>('recommendation');
+  const [activeTab, setActiveTab] = useState<'recommendation' | 'barrier_matrix' | 'respiration' | 'usda_fooddata' | 'perseuss_cartonization' | 'reddit_dairy' | 'packagesmart_ai' | 'mord_compliance' | 'distance_logistics'>('recommendation');
   
   // Dynamic API state
   const [redditDairyData, setRedditDairyData] = useState<RedditDairyPackagingReport | null>(null);
@@ -515,6 +517,18 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                 >
                   <Wind className="w-3.5 h-3.5" />
                   <span>Respiration Kinetics</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('mord_compliance')}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === 'mord_compliance'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>MoRD Rural Compliance</span>
                 </button>
 
                 <button
@@ -1115,12 +1129,34 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                 </div>
               )}
 
+              {/* TAB: MoRD Rural Compliance & Precision Logistics Specs */}
+              {activeTab === 'mord_compliance' && (
+                <MordComplianceSection 
+                  commodityName={currentProduct.name}
+                  defaultBatchId={`BAT-${currentProduct.id.toUpperCase()}-2026`}
+                  isCollapsible={false}
+                  defaultOpen={true}
+                />
+              )}
+
             </>
           )}
 
         </div>
 
       </div>
+
+      {/* MoRD Rural Compliance & Precision Logistics Specs (Bottom Full-Width Section) */}
+      {activeTab !== 'mord_compliance' && (
+        <div className="pt-2">
+          <MordComplianceSection 
+            commodityName={currentProduct.name}
+            defaultBatchId={`BAT-${currentProduct.id.toUpperCase()}-2026`}
+            isCollapsible={true}
+            defaultOpen={false}
+          />
+        </div>
+      )}
 
       {/* Real Technical PDF Dossier Export Modal */}
       <AgriFlowPDFDownloadModal

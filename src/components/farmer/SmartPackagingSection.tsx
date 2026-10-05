@@ -17,9 +17,11 @@ import {
   AlertCircle,
   Truck,
   ArrowRight,
-  Info
+  Info,
+  Building2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { MordComplianceSection } from '../compliance/MordComplianceSection';
 
 interface SmartPackagingSectionProps {
   selectedCrop: CropInfo;
@@ -677,6 +679,16 @@ export const SmartPackagingSection: React.FC<SmartPackagingSectionProps> = ({
           </div>
         </div>
       )}
+
+      {/* MoRD Rural Compliance & Precision Logistics Section */}
+      <div className="pt-6">
+        <MordComplianceSection 
+          commodityName={selectedCrop.name}
+          defaultBatchId={`BAT-${selectedCrop.id.toUpperCase()}-2026`}
+          isCollapsible={true}
+          defaultOpen={false}
+        />
+      </div>
     </div>
   );
 };

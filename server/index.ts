@@ -8,6 +8,7 @@ import { fetchRedditDairyPackagingIntelligence } from '../src/services/packaging
 import { calculatePerseussColdCartonization } from '../src/services/coldchain/perseussColdCartonizationService.js';
 import { fetchUsdaFoodDataProfile } from '../src/services/crop/usdaFoodDataCentralService.js';
 import { calculatePackageSmartDryFruitIntelligence } from '../src/services/packaging/packageSmartDryFruitService.js';
+import { fetchIndiaPostPincode, verifyFssaiLicense, geocodeShgRuralUnit } from '../src/services/compliance/mordComplianceService.js';
 
 dotenv.config();
 
@@ -1626,6 +1627,39 @@ app.get('/api/packaging/packagesmart-ai', async (req, res) => {
     res.json({ success: true, source: 'PackageSmart AI Life Cycle & Barrier Engine', spec });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message || 'Failed to compute PackageSmart AI Dry Fruit Intelligence' });
+  }
+});
+
+// 8.5 India Post Pincode Auto-Resolution API (API Setu / data.gov.in)
+app.get('/api/compliance/pincode/:pincode', async (req, res) => {
+  try {
+    const { pincode } = req.params;
+    const record = await fetchIndiaPostPincode(pincode);
+    res.json({ success: true, source: 'India Post Pincode API (API Setu)', data: record });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to resolve India Post Pincode' });
+  }
+});
+
+// 8.6 Government FSSAI License Verification Gate
+app.post('/api/compliance/verify-fssai', async (req, res) => {
+  try {
+    const { licenseNumber, enterpriseName } = req.body;
+    const verification = await verifyFssaiLicense(licenseNumber, enterpriseName);
+    res.json({ success: true, source: 'FSSAI National Food Safety Verification Gate', verification });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to verify FSSAI License' });
+  }
+});
+
+// 8.7 High-Accuracy Rural SHG Geocoding & Pickup Resolver
+app.post('/api/compliance/geocode-shg', (req, res) => {
+  try {
+    const { shgName = 'Adarsh Mahila SHG', block = 'Niphad', district = 'Nashik', state = 'Maharashtra', pincode = '422209' } = req.body;
+    const geocode = geocodeShgRuralUnit(shgName, block, district, state, pincode);
+    res.json({ success: true, source: 'High-Accuracy Rural GPS & Geocoding Engine', geocode });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to geocode Rural SHG Unit' });
   }
 });
 
