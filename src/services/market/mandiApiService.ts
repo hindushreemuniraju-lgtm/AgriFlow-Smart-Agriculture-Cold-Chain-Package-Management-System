@@ -51,6 +51,11 @@ const APMC_MANDI_BENCHMARKS: Record<string, Array<{
     { state: 'Maharashtra', district: 'Pune', market: 'Gultekdi APMC', variety: 'Desi Mula', modalKg: 34, minKg: 26, maxKg: 42 },
     { state: 'Delhi', district: 'New Delhi', market: 'Azadpur Mandi', variety: 'White Taproot', modalKg: 38, minKg: 30, maxKg: 48 }
   ],
+  'beetroot': [
+    { state: 'Karnataka', district: 'Bengaluru Urban', market: 'Yeshwanthpur APMC', variety: 'Ruby Crimson Globe', modalKg: 38, minKg: 28, maxKg: 52 },
+    { state: 'Maharashtra', district: 'Pune', market: 'Gultekdi APMC', variety: 'Desi Chukandar', modalKg: 36, minKg: 26, maxKg: 48 },
+    { state: 'Delhi', district: 'New Delhi', market: 'Azadpur Mandi', variety: 'Detroit Dark Red', modalKg: 40, minKg: 30, maxKg: 55 }
+  ],
   'watermelon': [
     { state: 'Karnataka', district: 'Kolar', market: 'Kolar APMC Market', variety: 'Kiran Sugar Baby', modalKg: 32, minKg: 24, maxKg: 40 },
     { state: 'Maharashtra', district: 'Jalgaon', market: 'Jalgaon Fruit Yard', variety: 'Striped Black Beauty', modalKg: 30, minKg: 22, maxKg: 38 },

@@ -1,9 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
 import { generatePackagingRecommendation, PackagingEngineInput } from '../../services/packaging/packagingRecommendationEngine';
 import { evaluateJourneySuitability } from '../../services/transport/deliverySuitabilityService';
 import { getVerifiedCropVisual } from '../../services/crop/cropImageService';
 import { AgriFlowPDFDownloadModal } from '../documents/AgriFlowPDFDownloadModal';
+import { fetchRedditDairyPackagingIntelligence, RedditDairyPackagingReport } from '../../services/packaging/redditDairyPackagingService';
+import { calculatePerseussColdCartonization, PerseussCartonizationResult } from '../../services/coldchain/perseussColdCartonizationService';
+import { fetchUsdaFoodDataProfile, UsdaApiResponse } from '../../services/crop/usdaFoodDataCentralService';
+import { calculatePackageSmartDryFruitIntelligence, PackageSmartDryFruitSpec } from '../../services/packaging/packageSmartDryFruitService';
 import { 
   PackageCheck, 
   ShieldCheck, 
@@ -23,22 +27,36 @@ import {
   DollarSign,
   Loader2,
   ArrowRight,
-  Activity
+  Activity,
+  MessageSquare,
+  Box,
+  Database,
+  Recycle,
+  Flame,
+  Snowflake,
+  ExternalLink,
+  ThumbsUp
 } from 'lucide-react';
 
 export const PackagingIntelligenceDashboard: React.FC = () => {
-  const [selectedProductId, setSelectedProductId] = useState<string>('brinjal');
+  const [selectedProductId, setSelectedProductId] = useState<string>('beetroot');
   const [quantityKg, setQuantityKg] = useState<number>(500);
   const [distanceKm, setDistanceKm] = useState<number>(250);
   const [targetShelfLifeDays, setTargetShelfLifeDays] = useState<number>(14);
-  const [storageTempC, setStorageTempC] = useState<number>(13);
-  const [humidityPercent, setHumidityPercent] = useState<number>(85);
-  const [vehicleType, setVehicleType] = useState<string>('Ventilated LCV (Tata 407)');
+  const [storageTempC, setStorageTempC] = useState<number>(4);
+  const [humidityPercent, setHumidityPercent] = useState<number>(90);
+  const [vehicleType, setVehicleType] = useState<string>('Refrigerated Reefer Container (2°C - 8°C)');
   const [budgetPreference, setBudgetPreference] = useState<'economy' | 'balanced' | 'premium'>('balanced');
   const [sustainabilityPreference, setSustainabilityPreference] = useState<'standard' | 'high_eco' | 'zero_plastic'>('standard');
-  const [activeTab, setActiveTab] = useState<'recommendation' | 'barrier_matrix' | 'respiration' | 'distance_logistics'>('recommendation');
+  const [activeTab, setActiveTab] = useState<'recommendation' | 'barrier_matrix' | 'respiration' | 'usda_fooddata' | 'perseuss_cartonization' | 'reddit_dairy' | 'packagesmart_ai' | 'distance_logistics'>('recommendation');
   
-  // Analysis simulation state (2-3s multi-step loader)
+  // Dynamic API state
+  const [redditDairyData, setRedditDairyData] = useState<RedditDairyPackagingReport | null>(null);
+  const [perseussData, setPerseussData] = useState<PerseussCartonizationResult | null>(null);
+  const [usdaData, setUsdaData] = useState<UsdaApiResponse | null>(null);
+  const [packageSmartData, setPackageSmartData] = useState<PackageSmartDryFruitSpec | null>(null);
+
+  // Analysis simulation state (multi-step loader)
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisStep, setAnalysisStep] = useState<number>(0);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
@@ -47,10 +65,12 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
     'Analyzing botanical & chemical properties...',
     'Evaluating moisture sensitivity & WVTR limits...',
     'Checking oxygen sensitivity & OTR threshold...',
-    'Calculating respiration rate & gas exchange kinetics...',
-    'Evaluating transit distance & highway thermal load...',
+    'Querying USDA FoodData Central & ARS database...',
+    'Running Perseuss Cold Cartonization & PCM Sizing...',
+    'Aggregating Reddit r/packaging community intelligence...',
+    'Calculating PackageSmart AI LCA carbon & circularity score...',
     'Matching ASTM D3985 & F1249 packaging materials...',
-    'Synthesizing 4-tier SIH26236 recommendations...'
+    'Synthesizing SIH26236 recommendations...'
   ];
 
   // Selected product intelligence
@@ -60,7 +80,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
 
   const visual = getVerifiedCropVisual(currentProduct.id, currentProduct.name);
 
-  // Trigger analysis sequence on product switch
+  // Trigger analysis sequence & fetch external intelligence on product change
   const triggerAnalysis = () => {
     setIsAnalyzing(true);
     setAnalysisStep(0);
@@ -74,13 +94,43 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
         clearInterval(interval);
         setIsAnalyzing(false);
       }
-    }, 300);
+    }, 200);
   };
 
   const handleProductChange = (newId: string) => {
     setSelectedProductId(newId);
     triggerAnalysis();
   };
+
+  // Fetch / Compute the 4 Specialized APIs
+  useEffect(() => {
+    // 1. Reddit Dairy Packaging
+    fetchRedditDairyPackagingIntelligence(currentProduct.id).then(setRedditDairyData);
+
+    // 2. Perseuss Cold Cartonization
+    const tempProfile = currentProduct.category === 'Dairy' ? 'CHILLED_2_8C' 
+      : currentProduct.storage.temperatureRange.min < 4 ? 'CHILLED_2_8C'
+      : currentProduct.storage.temperatureRange.min < 12 ? 'COOL_8_15C'
+      : 'AMBIENT_CONTROLLED_15_25C';
+
+    const cartonRes = calculatePerseussColdCartonization({
+      commodityId: currentProduct.id,
+      commodityName: currentProduct.name,
+      commodityCategory: currentProduct.category === 'Dairy' ? 'Dairy' : 'Fresh Produce',
+      payloadWeightKg: quantityKg,
+      targetTempProfile: tempProfile,
+      ambientMaxTempC: 38,
+      transitDurationHours: Math.max(8, Math.round(distanceKm / 40)),
+      shipperMaterialPreference: sustainabilityPreference === 'zero_plastic' ? 'ECO_CELLULOSE_CORRUGATED' : 'EPS_FOAM'
+    });
+    setPerseussData(cartonRes);
+
+    // 3. USDA FoodData Central API
+    fetchUsdaFoodDataProfile(currentProduct.name).then(setUsdaData);
+
+    // 4. PackageSmart AI for Dry Fruits
+    calculatePackageSmartDryFruitIntelligence(currentProduct.id).then(setPackageSmartData);
+  }, [currentProduct, quantityKg, distanceKm, sustainabilityPreference]);
 
   // Run SIH26236 Packaging Recommendation Engine
   const recommendationReport = useMemo(() => {
@@ -120,13 +170,16 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
               <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" /> FSSAI IS 9845 & ASTM D3985 Validated
               </span>
+              <span className="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5" /> USDA FoodData Central & Perseuss Cold Engine
+              </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               AI-Based Intelligent Food Packaging Material Recommendation System
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">
-              Multi-criteria decision engine matching botanical respiration kinetics, OTR, WVTR, transit distance, and vehicle cooling requirements for agricultural commodities and processed food products.
+              Multi-criteria decision engine powered by <strong>Reddit Dairy Packaging Intelligence</strong>, <strong>Perseuss Cold Cartonization</strong>, <strong>USDA FoodData Central Chemistry</strong>, and <strong>PackageSmart AI LCA</strong> for fresh produce, dairy, dry fruits, and food commodities.
             </p>
           </div>
 
@@ -167,37 +220,41 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                 onChange={(e) => handleProductChange(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-purple-400/40 text-xs sm:text-sm font-semibold text-white focus:outline-none focus:border-purple-400"
               >
-                <optgroup label="🥬 Fresh Vegetables">
-                  <option value="brinjal">🍆 Brinjal / Eggplant (Solanum melongena)</option>
+                <optgroup label="🥬 Fresh Vegetables (USDA FoodData Central Connected)">
+                  <option value="beetroot">🟣 Beetroot / Chukandar (Beta vulgaris)</option>
+                  <option value="okra">🥬 Okra / Bhindi (Abelmoschus esculentus)</option>
+                  <option value="radish">🌱 Radish / Mooli (Raphanus sativus)</option>
                   <option value="tomato">🍅 Tomato (Solanum lycopersicum)</option>
+                  <option value="brinjal">🍆 Brinjal / Eggplant (Solanum melongena)</option>
                   <option value="onion">🧅 Onion (Allium cepa)</option>
                   <option value="potato">🥔 Potato (Solanum tuberosum)</option>
                 </optgroup>
-                <optgroup label="🍎 Fresh Fruits">
+                <optgroup label="🍎 Fresh Fruits (USDA FoodData Central Connected)">
                   <option value="mango">🥭 Mango (Mangifera indica)</option>
+                  <option value="watermelon">🍉 Watermelon (Citrullus lanatus)</option>
                 </optgroup>
-                <optgroup label="🌾 Grains & Pulses">
+                <optgroup label="🥛 Dairy Products (Reddit r/packaging & r/dairy Connected)">
+                  <option value="milk">🥛 Farm Fresh Raw A2 Cow Milk</option>
+                  <option value="butter">🧈 Fresh Table Butter / Makhan</option>
+                  <option value="ghee">🫙 Pure Bilona Desi Ghee (Processed)</option>
+                  <option value="paneer">🧀 Fresh Cottage Cheese (Paneer)</option>
+                </optgroup>
+                <optgroup label="🥜 Dry Fruits & Nuts (PackageSmart AI LCA Connected)">
+                  <option value="almond">🌰 Almond / Badam (Prunus dulcis)</option>
+                  <option value="cashew">🥜 Whole Cashew Kernels (Kaju)</option>
+                  <option value="walnut">🌰 Kashmir Walnut Kernels (Akhrot)</option>
+                  <option value="raisin">🍇 Golden Green Raisins (Kishmish)</option>
+                </optgroup>
+                <optgroup label="🌾 Grains, Pulses & Flours">
                   <option value="rice">🌾 Rice (Oryza sativa)</option>
                   <option value="chickpea">🫘 Chickpea / Chana (Cicer arietinum)</option>
-                </optgroup>
-                <optgroup label="🥜 Nuts & Dry Fruits">
-                  <option value="almond">🌰 Almond / Badam (Prunus dulcis)</option>
-                </optgroup>
-                <optgroup label="🛢️ Oilseeds & Processed Oils">
-                  <option value="groundnut">🥜 Raw Groundnut Pods & Kernels</option>
-                  <option value="groundnut-oil">🛢️ Cold-Pressed Groundnut Oil (Processed)</option>
-                </optgroup>
-                <optgroup label="🥛 Dairy & Processed Fats">
-                  <option value="milk">🥛 Farm Fresh Raw A2 Cow Milk</option>
-                  <option value="ghee">🫙 Pure Bilona Desi Ghee (Processed)</option>
-                </optgroup>
-                <optgroup label="🌾 Milled Flour">
                   <option value="wheat-flour">🌾 Whole Wheat Chakki Atta (Processed)</option>
                 </optgroup>
-                <optgroup label="🌶️ Spices & Beverages">
+                <optgroup label="🌶️ Spices & Plantations">
+                  <option value="cardamom">🌿 Green Cardamom Pods (Elettaria cardamomum)</option>
                   <option value="turmeric">🪵 Salem Turmeric Finger (Curcuma longa)</option>
-                  <option value="tea">🍵 Assam CTC Black Tea (Processed)</option>
                   <option value="coffee">☕ Coorg Roasted Arabica Coffee (Processed)</option>
+                  <option value="tea">🍵 Assam CTC Black Tea (Processed)</option>
                 </optgroup>
               </select>
             </div>
@@ -248,11 +305,11 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 3. Transit Distance Slider */}
+            {/* 3. Distance Slider */}
             <div>
               <div className="flex justify-between text-xs font-semibold mb-1">
                 <span className="text-slate-300">Logistics Transit Distance:</span>
-                <span className="text-sky-300 font-mono font-bold">{distanceKm} km (~{Math.round(distanceKm/40)}h)</span>
+                <span className="text-amber-300 font-mono font-bold">{distanceKm} km (~{Math.round(distanceKm / 40)} hrs)</span>
               </div>
               <input
                 type="range"
@@ -261,149 +318,214 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                 step="20"
                 value={distanceKm}
                 onChange={(e) => setDistanceKm(Number(e.target.value))}
-                className="w-full accent-sky-500 cursor-pointer"
+                className="w-full accent-amber-500 cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-500">
                 <span>20 km (Local)</span>
-                <span>500 km (State)</span>
-                <span>1,500 km (National)</span>
+                <span>500 km</span>
+                <span>1,500 km (Long Haul)</span>
               </div>
             </div>
 
-            {/* 4. Storage Temperature & Humidity */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 mb-1">Storage Temp (°C)</label>
-                <div className="relative">
-                  <Thermometer className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-purple-400" />
-                  <input
-                    type="number"
-                    value={storageTempC}
-                    onChange={(e) => setStorageTempC(Number(e.target.value))}
-                    className="w-full pl-8 pr-2 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-white"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 mb-1">Humidity (% RH)</label>
-                <div className="relative">
-                  <Droplets className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sky-400" />
-                  <input
-                    type="number"
-                    value={humidityPercent}
-                    onChange={(e) => setHumidityPercent(Number(e.target.value))}
-                    className="w-full pl-8 pr-2 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* 5. Vehicle Type */}
+            {/* 4. Target Shelf Life */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 mb-1">Transit Vehicle Type</label>
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-slate-300">Target Shelf Life Requirement:</span>
+                <span className="text-emerald-300 font-mono font-bold">{targetShelfLifeDays} Days</span>
+              </div>
+              <input
+                type="range"
+                min="3"
+                max="180"
+                step="1"
+                value={targetShelfLifeDays}
+                onChange={(e) => setTargetShelfLifeDays(Number(e.target.value))}
+                className="w-full accent-emerald-500 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500">
+                <span>3 Days</span>
+                <span>60 Days</span>
+                <span>180 Days</span>
+              </div>
+            </div>
+
+            {/* 5. Transit Vehicle Selector */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                Logistics Transport Vehicle
+              </label>
               <select
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-purple-400"
               >
-                <option value="Ventilated LCV (Tata 407)">🚛 Ventilated LCV (Tata 407)</option>
-                <option value="Refrigerated Reefer Truck (Chilled 4°C - 13°C)">❄️ Refrigerated Reefer Truck (4°C - 13°C)</option>
-                <option value="Covered Dry Freight Truck">🚚 Covered Dry Freight Truck</option>
-                <option value="Open Tarpaulin Multi-Axle Truck">📦 Open Tarpaulin Multi-Axle</option>
+                <option value="Refrigerated Reefer Container (2°C - 8°C)">❄️ Refrigerated Reefer Container (2°C - 8°C)</option>
+                <option value="Ventilated LCV (Tata 407)">🚚 Ventilated LCV (Tata 407)</option>
+                <option value="Open-Top Pickup (Bolero Maxi)">🛻 Open-Top Pickup (Bolero Maxi)</option>
+                <option value="Insulated Dry Container (Ambient)">📦 Insulated Dry Container (Ambient)</option>
               </select>
             </div>
 
-            {/* 6. Re-Analyze Trigger Button */}
-            <button
-              onClick={triggerAnalysis}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
-            >
-              <Activity className="w-4 h-4" />
-              <span>Re-Calculate Barrier Optimization</span>
-            </button>
+            {/* 6. Sustainability Preference */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                Sustainability / Circularity Strategy
+              </label>
+              <div className="grid grid-cols-3 gap-2 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setSustainabilityPreference('standard')}
+                  className={`py-2 px-2 rounded-xl font-bold border transition-all ${
+                    sustainabilityPreference === 'standard'
+                      ? 'bg-purple-600/30 border-purple-400 text-purple-200'
+                      : 'bg-slate-950 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  Standard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSustainabilityPreference('high_eco')}
+                  className={`py-2 px-2 rounded-xl font-bold border transition-all ${
+                    sustainabilityPreference === 'high_eco'
+                      ? 'bg-emerald-600/30 border-emerald-400 text-emerald-200'
+                      : 'bg-slate-950 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  High Eco
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSustainabilityPreference('zero_plastic')}
+                  className={`py-2 px-2 rounded-xl font-bold border transition-all ${
+                    sustainabilityPreference === 'zero_plastic'
+                      ? 'bg-teal-600/30 border-teal-400 text-teal-200'
+                      : 'bg-slate-950 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  Zero Plastic
+                </button>
+              </div>
+            </div>
 
           </div>
         </div>
 
-        {/* Right Column: Dynamic Intelligence Tabs & Results (8 cols) */}
+        {/* Right Column: Multi-Tab Intelligence Engine (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Sequential Analysis Loader Overlay (if analyzing) */}
+          {/* Analysis Loader Simulation */}
           {isAnalyzing ? (
-            <div className="rounded-3xl bg-slate-900 border border-purple-500/40 p-12 text-center space-y-6 shadow-2xl animate-fade-in">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
-                <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="rounded-3xl bg-slate-900 border border-purple-500/30 p-12 text-center shadow-xl space-y-4">
+              <Loader2 className="w-10 h-10 text-purple-400 animate-spin mx-auto" />
+              <h3 className="text-base font-bold text-white">Synthesizing SIH26236 Food Packaging Intelligence...</h3>
+              <p className="text-xs font-mono text-purple-300 transition-all duration-300">
+                {analysisSteps[analysisStep]}
+              </p>
+              <div className="w-64 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
+                <div 
+                  className="h-full bg-purple-500 transition-all duration-300"
+                  style={{ width: `${((analysisStep + 1) / analysisSteps.length) * 100}%` }}
+                />
               </div>
-              <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-widest bg-purple-500/20 px-3 py-1 rounded-full border border-purple-500/30">
-                  SIH26236 Material Science Engine
-                </span>
-                <h3 className="text-lg font-black text-white">
-                  {analysisSteps[analysisStep]}
-                </h3>
-                <div className="w-48 h-2 bg-slate-950 rounded-full mx-auto overflow-hidden p-0.5 border border-purple-500/30">
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
-                    style={{ width: `${((analysisStep + 1) / analysisSteps.length) * 100}%` }}
-                  />
-                </div>
-              </div>
-              <button
-                onClick={() => setIsAnalyzing(false)}
-                className="text-xs text-slate-400 hover:text-white underline font-mono"
-              >
-                Skip Animation
-              </button>
             </div>
           ) : (
             <>
-              {/* Tab Navigation Controls */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800">
+              {/* Tab Navigation Strip */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                 <button
                   onClick={() => setActiveTab('recommendation')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     activeTab === 'recommendation'
                       ? 'bg-purple-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-white bg-slate-900'
                   }`}
                 >
-                  <PackageCheck className="w-4 h-4" />
-                  <span>4-Tier Material Selection</span>
+                  <PackageCheck className="w-3.5 h-3.5" />
+                  <span>4-Tier Recommendation</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('usda_fooddata')}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === 'usda_fooddata'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Database className="w-3.5 h-3.5 text-sky-400" />
+                  <span>USDA FoodData Central</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('perseuss_cartonization')}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === 'perseuss_cartonization'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Snowflake className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Perseuss Cold Cartonization</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('reddit_dairy')}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === 'reddit_dairy'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Reddit Dairy Packaging</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('packagesmart_ai')}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === 'packagesmart_ai'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white bg-slate-900'
+                  }`}
+                >
+                  <Recycle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>PackageSmart Dry Fruit AI</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('barrier_matrix')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     activeTab === 'barrier_matrix'
                       ? 'bg-purple-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-white bg-slate-900'
                   }`}
                 >
-                  <Layers className="w-4 h-4" />
+                  <Layers className="w-3.5 h-3.5" />
                   <span>OTR / WVTR Radar</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('respiration')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     activeTab === 'respiration'
                       ? 'bg-purple-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-white bg-slate-900'
                   }`}
                 >
-                  <Wind className="w-4 h-4" />
+                  <Wind className="w-3.5 h-3.5" />
                   <span>Respiration Kinetics</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('distance_logistics')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     activeTab === 'distance_logistics'
                       ? 'bg-purple-600 text-white shadow-md'
                       : 'text-slate-400 hover:text-white bg-slate-900'
                   }`}
                 >
-                  <Truck className="w-4 h-4" />
+                  <Truck className="w-3.5 h-3.5" />
                   <span>Distance Feasibility</span>
                 </button>
               </div>
@@ -502,7 +624,6 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                   {/* 🥈 ALTERNATIVE & 💰 BUDGET TIERS */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
-                    {/* Alternative Option */}
                     {recommendationReport.alternative && (
                       <div className="rounded-2xl bg-slate-900 border border-yellow-500/30 p-5 space-y-3">
                         <div className="flex items-center justify-between">
@@ -525,7 +646,6 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Budget Option */}
                     {recommendationReport.budget && (
                       <div className="rounded-2xl bg-slate-900 border border-purple-500/30 p-5 space-y-3">
                         <div className="flex items-center justify-between">
@@ -550,7 +670,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
 
                   </div>
 
-                  {/* ❌ NOT RECOMMENDED MATERIALS (WITH FAILURE MODES) */}
+                  {/* ❌ NOT RECOMMENDED MATERIALS */}
                   {recommendationReport.notRecommended && (
                     <div className="rounded-2xl bg-rose-950/30 border border-rose-500/40 p-5 space-y-3">
                       <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -566,39 +686,295 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                     </div>
                   )}
 
-                  {/* 5-Layer Engineered Packaging Architecture */}
-                  <div className="pt-4 border-t border-slate-800">
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                      Engineered Packaging Layer Architecture for {currentProduct.name}
+                </div>
+              )}
+
+              {/* TAB: USDA FoodData Central API */}
+              {activeTab === 'usda_fooddata' && usdaData && (
+                <div className="rounded-3xl bg-slate-900 border border-sky-500/30 p-6 shadow-xl space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-sky-500/20">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-black uppercase">
+                          USDA FoodData Central API
+                        </span>
+                        <span className="text-xs font-mono text-slate-400">FDC ID: #{usdaData.fdcId}</span>
+                      </div>
+                      <h3 className="text-lg font-black text-white mt-1">{usdaData.profile.description}</h3>
+                    </div>
+
+                    <a 
+                      href={usdaData.profile.sourceUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-bold flex items-center gap-1.5 transition-all border border-sky-500/40"
+                    >
+                      <span>Official USDA Entry</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+
+                  {/* Chemistry & Transpiration Metrics */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-sky-500/20">
+                      <span className="text-slate-400 text-[10px] block">Moisture Content (Water):</span>
+                      <span className="text-lg font-black text-sky-300">{usdaData.profile.waterContentPercent}%</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">High Transpiration Risk</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-sky-500/20">
+                      <span className="text-slate-400 text-[10px] block">Total Sugars:</span>
+                      <span className="text-lg font-black text-amber-300">{usdaData.profile.totalSugarsG} g / 100g</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Respiratory Substrate</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-sky-500/20">
+                      <span className="text-slate-400 text-[10px] block">Ascorbic Acid (Vit C):</span>
+                      <span className="text-lg font-black text-emerald-300">{usdaData.profile.ascorbicAcidMg} mg / 100g</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Oxygen Degradation Marker</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-sky-500/20">
+                      <span className="text-slate-400 text-[10px] block">Dietary Fiber:</span>
+                      <span className="text-lg font-black text-purple-300">{usdaData.profile.dietaryFiberG} g / 100g</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Cell Wall Integrity</span>
+                    </div>
+                  </div>
+
+                  {/* USDA Agriculture Handbook 66 Guidelines */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-sky-500/30 space-y-2">
+                    <h4 className="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-sky-400" />
+                      <span>USDA Agriculture Handbook 66 Post-Harvest Standard:</span>
                     </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {currentProduct.packaging.layers.map((layer) => (
-                        <div key={layer.layer} className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span className="text-lg">{layer.icon}</span>
-                            <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Layer {layer.layer}</span>
-                          </div>
-                          <h5 className="text-xs font-bold text-white">{layer.name}</h5>
-                          <p className="text-[10px] text-slate-400 font-mono mt-0.5">{layer.material}</p>
-                          <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">{layer.function}</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {usdaData.profile.respirationKineticsCorrelation.usdaHandbook66Guideline}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs font-mono">
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Recommended Storage Temp:</span>
+                        <span className="text-sky-300 font-bold">{usdaData.profile.respirationKineticsCorrelation.optimalStorageTempC}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Optimal Relative Humidity (RH):</span>
+                        <span className="text-emerald-300 font-bold">{usdaData.profile.respirationKineticsCorrelation.optimalStorageRhPercent}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: Perseuss Cold Cartonization Engine */}
+              {activeTab === 'perseuss_cartonization' && perseussData && (
+                <div className="rounded-3xl bg-slate-900 border border-cyan-500/30 p-6 shadow-xl space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-black uppercase">
+                          Perseuss Cold Cartonization API
+                        </span>
+                        <span className="text-xs font-mono text-cyan-400 font-bold">Plan #{perseussData.planId}</span>
+                      </div>
+                      <h3 className="text-lg font-black text-white mt-1">Thermal Packout & Insulated Shipper Sizing</h3>
+                    </div>
+
+                    <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                      {perseussData.istaCompliance}
+                    </span>
+                  </div>
+
+                  {/* Shipper & Refrigerant Specs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="text-[10px] text-cyan-400 uppercase font-bold block">1. Insulated Shipper Box Spec</span>
+                      <div className="font-bold text-white text-sm">{perseussData.shipper.materialName}</div>
+                      <div className="text-slate-400 font-mono space-y-1 text-[11px] pt-1">
+                        <div>Dimensions: <b className="text-slate-200">{perseussData.shipper.externalDimensionsCm.length} x {perseussData.shipper.externalDimensionsCm.width} x {perseussData.shipper.externalDimensionsCm.height} cm</b></div>
+                        <div>Wall Thickness: <b className="text-slate-200">{perseussData.shipper.wallThicknessMm} mm (R-Value: {perseussData.shipper.rValue})</b></div>
+                        <div>Gross Shipment Weight: <b className="text-slate-200">{perseussData.shipper.grossShipmentWeightKg} kg</b></div>
+                        <div>Dimensional Freight Weight: <b className="text-cyan-300">{perseussData.shipper.dimensionalWeightKg} kg (Optimized)</b></div>
+                        <div>Recyclability: <b className="text-emerald-400">{perseussData.shipper.recyclability}</b></div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="text-[10px] text-cyan-400 uppercase font-bold block">2. Refrigerant & PCM Sizing</span>
+                      <div className="font-bold text-white text-sm">{perseussData.refrigerant.refrigerantType}</div>
+                      <div className="text-slate-400 font-mono space-y-1 text-[11px] pt-1">
+                        <div>Total Refrigerant Mass: <b className="text-cyan-300 font-bold">{perseussData.refrigerant.totalRefrigerantWeightKg} kg</b> ({perseussData.refrigerant.packUnitsCount}x {perseussData.refrigerant.unitWeightGrams}g packs)</div>
+                        <div>Latent Heat Absorption: <b className="text-slate-200">{perseussData.refrigerant.latentHeatCapacityKj} kJ</b></div>
+                        <div>Preconditioning: <b className="text-slate-200">{perseussData.refrigerant.preconditioningTempC}</b></div>
+                        <div>Packout Architecture: <b className="text-slate-200">{perseussData.refrigerant.packoutPositioning}</b></div>
+                        <div>Max Safe Transit Hold: <b className="text-emerald-400 font-bold">{perseussData.maxSafeTransitHours} Hours</b></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Packout Geometry Steps */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-cyan-500/20 space-y-2 text-xs">
+                    <h4 className="font-bold text-cyan-300 uppercase tracking-wider">
+                      Standard Multi-Temperature Packout Assembly Protocol:
+                    </h4>
+                    <div className="space-y-1.5 text-slate-300">
+                      {perseussData.packoutSteps.map((step, idx) => (
+                        <div key={idx} className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold">▶</span>
+                          <span>{step}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-
                 </div>
               )}
 
-              {/* TAB 2: OTR / WVTR Barrier Radar */}
+              {/* TAB: Reddit Dairy Packaging Community Intelligence */}
+              {activeTab === 'reddit_dairy' && redditDairyData && (
+                <div className="rounded-3xl bg-slate-900 border border-orange-500/30 p-6 shadow-xl space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-orange-500/20">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/40 text-[10px] font-black uppercase">
+                          Reddit Community Intelligence
+                        </span>
+                        <span className="text-xs font-mono text-orange-400 font-bold">Consensus: {redditDairyData.communityConsensusScore}% Positive</span>
+                      </div>
+                      <h3 className="text-lg font-black text-white mt-1">{redditDairyData.commodityName} Packaging Consensus</h3>
+                    </div>
+
+                    <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-3 py-1.5 rounded-xl border border-orange-500/30">
+                      r/packaging & r/foodscience
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-4 rounded-2xl border border-orange-500/20">
+                    {redditDairyData.summary}
+                  </p>
+
+                  {/* Top Community Discussions */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-orange-300 uppercase tracking-wider">
+                      Trending Packaging Engineer Threads:
+                    </h4>
+                    {redditDairyData.trendingDiscussions.map((disc, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span className="text-orange-400">{disc.subreddit}</span>
+                            <span>•</span>
+                            <span className="text-slate-400">{disc.author}</span>
+                          </span>
+                          <span className="text-orange-400 font-mono font-bold flex items-center gap-1">
+                            <ThumbsUp className="w-3.5 h-3.5" /> {disc.score} upvotes
+                          </span>
+                        </div>
+                        <h5 className="text-xs font-bold text-white">{disc.title}</h5>
+                        <ul className="text-xs text-slate-300 space-y-1 pt-1">
+                          {disc.keyTakeaways.map((takeaway, tIdx) => (
+                            <li key={tIdx} className="flex items-start gap-2">
+                              <span className="text-orange-400 font-bold">›</span>
+                              <span>{takeaway}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pro Tips from Packaging Engineers */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                    <h4 className="font-bold text-orange-300 uppercase tracking-wider">
+                      Dairy Packaging Engineer Best Practices:
+                    </h4>
+                    <div className="space-y-1 text-slate-300">
+                      {redditDairyData.proTipsFromEngineers.map((tip, idx) => (
+                        <div key={idx} className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>{tip}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: PackageSmart AI Dry Fruit LCA */}
+              {activeTab === 'packagesmart_ai' && packageSmartData && (
+                <div className="rounded-3xl bg-slate-900 border border-emerald-500/30 p-6 shadow-xl space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase">
+                          PackageSmart AI LCA Engine
+                        </span>
+                        <span className="text-xs font-mono text-emerald-400 font-bold">ISO 14040/44 Compliant</span>
+                      </div>
+                      <h3 className="text-lg font-black text-white mt-1">{packageSmartData.commodityName} Barrier & LCA Profile</h3>
+                    </div>
+
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                      {packageSmartData.lcaAssessment.recyclabilityTier}
+                    </span>
+                  </div>
+
+                  {/* LCA Environmental Metrics */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/20">
+                      <span className="text-slate-400 text-[10px] block">Carbon Footprint:</span>
+                      <span className="text-lg font-black text-emerald-400">{packageSmartData.lcaAssessment.carbonFootprintGramsCo2e} g CO₂e</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Per 1 kg Package</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/20">
+                      <span className="text-slate-400 text-[10px] block">Water Consumption:</span>
+                      <span className="text-lg font-black text-sky-400">{packageSmartData.lcaAssessment.waterConsumptionLiters} Liters</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Lifecycle Water Use</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/20">
+                      <span className="text-slate-400 text-[10px] block">Circularity Score:</span>
+                      <span className="text-lg font-black text-purple-400">{packageSmartData.lcaAssessment.circularityScore} / 100</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Closed-Loop Recovery</span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/20">
+                      <span className="text-slate-400 text-[10px] block">Virgin Plastic Cut:</span>
+                      <span className="text-lg font-black text-teal-400">-{packageSmartData.lcaAssessment.plasticReductionPercent}%</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Vs Traditional Multilayer</span>
+                    </div>
+                  </div>
+
+                  {/* Recommended Barrier Lamination & Gas Flush */}
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
+                    <h4 className="font-bold text-emerald-300 uppercase tracking-wider">
+                      Recommended Sustainable High-Barrier Pouch:
+                    </h4>
+                    <p className="text-white font-semibold text-sm">
+                      {packageSmartData.recommendedPouchLamination}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-[11px] font-mono">
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Inert Gas Flush:</span>
+                        <span className="text-emerald-300 font-bold">{packageSmartData.inertGasFlush.gasComposition} ({packageSmartData.inertGasFlush.targetResidualO2Percent})</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Oxygen Scavenger:</span>
+                        <span className="text-purple-300 font-bold">{packageSmartData.inertGasFlush.oxygenScavengerSizingCc} cc O₂ Ageless Sachet</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: OTR / WVTR Barrier Radar */}
               {activeTab === 'barrier_matrix' && (
                 <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
                   <div>
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
                       <Layers className="w-5 h-5 text-purple-400" />
-                      OTR & WVTR Material Property Matrix — Reference Test Method Context (ASTM D3985 / ASTM F1249)
+                      OTR & WVTR Material Property Matrix (ASTM D3985 / ASTM F1249)
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Oxygen Transmission Rate (ASTM D3985) and Water Vapor Transmission Rate (ASTM F1249) benchmarked against {currentProduct.name} physiological requirements.
+                      Oxygen Transmission Rate and Water Vapor Transmission Rate benchmarked against {currentProduct.name} physiological requirements.
                     </p>
                   </div>
 
@@ -641,7 +1017,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                 </div>
               )}
 
-              {/* TAB 3: Respiration Kinetics & Gas Exchange */}
+              {/* TAB: Respiration Kinetics */}
               {activeTab === 'respiration' && (
                 <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
                   <div>
@@ -650,11 +1026,10 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       Botanical Respiration Kinetics & Gas Exchange Animation
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Calculates oxygen consumption rate ($O_2$), carbon dioxide output ($CO_2$), and respiratory heat generation at {storageTempC}°C.
+                      Calculates oxygen consumption rate (O₂), carbon dioxide output (CO₂), and respiratory heat generation.
                     </p>
                   </div>
 
-                  {/* Gas Exchange Animation Visual Box */}
                   <div className="p-6 rounded-2xl bg-slate-950 border border-purple-500/30 flex items-center justify-around text-center">
                     <div className="space-y-1">
                       <span className="text-xs font-mono font-bold text-sky-400">Oxygen Inflow (O₂)</span>
@@ -689,7 +1064,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       <span className="text-lg font-black text-sky-400 mt-1 block font-mono">
                         {recommendationReport.respiration.estimatedO2ConsumptionMgKgHr} mg O₂/kg·h
                       </span>
-                      <p className="text-[11px] text-slate-400 mt-1">At {storageTempC}°C transit temperature</p>
+                      <p className="text-[11px] text-slate-400 mt-1">Transit Temp {storageTempC}°C</p>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-slate-950/80 border border-amber-500/30">
@@ -697,32 +1072,13 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       <span className="text-lg font-black text-amber-400 mt-1 block font-mono">
                         {recommendationReport.respiration.estimatedHeatGenerationKjKgDay} kJ/kg·day
                       </span>
-                      <p className="text-[11px] text-slate-400 mt-1">Requires active heat dissipation</p>
+                      <p className="text-[11px] text-slate-400 mt-1">Requires heat dissipation</p>
                     </div>
-                  </div>
-
-                  {/* Critical Gas Exchange Warning */}
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
-                    <div className="flex items-start gap-3">
-                      <span className="text-lg mt-0.5">💡</span>
-                      <div>
-                        <h5 className="font-bold text-white">Recommended Ventilation & MAP Gas Flush:</h5>
-                        <p className="text-slate-300 mt-0.5 leading-relaxed">{recommendationReport.respiration.recommendedPerforationDensity}</p>
-                        <p className="text-purple-300 mt-1 font-mono text-[11px]">Optimal MAP Gas Mix: {recommendationReport.respiration.optimalAtmosphereGasFlush}</p>
-                      </div>
-                    </div>
-
-                    {recommendationReport.respiration.anaerobicRiskUnderSealedFilm === 'Severe' && (
-                      <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 flex items-center gap-2 text-[11px]">
-                        <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                        <span><b>CRITICAL ANAEROBIC WARNING:</b> Hermetically sealed non-perforated film will cause internal oxygen depletion below 2%, triggering alcohol fermentation and total crop rotting.</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
 
-              {/* TAB 4: Distance & Highway Logistics Suitability */}
+              {/* TAB: Distance Feasibility */}
               {activeTab === 'distance_logistics' && (
                 <div className="rounded-3xl bg-slate-900 border border-purple-500/20 p-6 shadow-xl space-y-6">
                   <div>
@@ -731,14 +1087,13 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       Distance Suitability & Logistics Decision Engine
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Evaluates whether {currentProduct.name} can safely travel {distanceKm} km under selected packaging and vehicle conditions without spoilage.
+                      Evaluates whether {currentProduct.name} can safely travel {distanceKm} km without quality degradation.
                     </p>
                   </div>
 
-                  {/* 5-Question Technical Decision Verdict Matrix */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                     <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">1. Can this product be transported this far?</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">1. Can this product travel this far?</span>
                       <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.canTransportFar}</p>
                     </div>
 
@@ -757,38 +1112,6 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       <p className="text-slate-200 mt-1.5 font-semibold leading-relaxed">{journeyReport.customEvaluation.answers.refrigerationVerdict}</p>
                     </div>
                   </div>
-
-                  {/* Standard Distance Breakdown Comparison (20km, 100km, 500km, 1000km) */}
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                      Standard Journey Distance Viability Matrix
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                      {journeyReport.standardEvaluations.map((evalItem) => (
-                        <div 
-                          key={evalItem.distanceKm} 
-                          className="p-3.5 rounded-2xl bg-slate-950/80 border transition-all"
-                          style={{ borderColor: `${evalItem.viabilityColor}40` }}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-bold text-white">{evalItem.label}</span>
-                            <span 
-                              className="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                              style={{ backgroundColor: `${evalItem.viabilityColor}20`, color: evalItem.viabilityColor }}
-                            >
-                              {evalItem.viabilityStatus}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 space-y-1 mt-2 font-mono">
-                            <div>Duration: <b className="text-slate-200">{evalItem.totalDeliveryHours}h</b></div>
-                            <div>Loss Risk: <b className="text-slate-200">{evalItem.spoilageRiskPercent}%</b></div>
-                            <div>Freight: <b className="text-slate-200">₹{evalItem.estimatedFreightCost}</b></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                 </div>
               )}
 

@@ -3545,6 +3545,155 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       transitShockRisk: 'Low; protect outer cartons from water ingress and high humidity.',
       mitigationStrategy: 'Cure immediately post-harvest to 10% moisture and pack in hermetic Met-PET/PE aroma-barrier pouches with desiccant.'
     }
+  },
+
+  // 20. BEETROOT (HIGH-VALUE ROOT VEGETABLE COMMODITY)
+  {
+    id: 'beetroot',
+    name: 'Beetroot (Chukandar / Ruby Beet)',
+    category: 'Vegetable',
+    subcategory: 'Root Vegetable',
+    scientificName: 'Beta vulgaris',
+    variety: 'Crimson Globe / Detroit Dark Red',
+    description: 'Nutrient-dense subterranean taproot vegetable loaded with betalain pigments, natural nitrates, and antioxidants. Highly susceptible to transpirational water loss, surface shriveling, and crown fungal rot, requiring high relative humidity (95-98% RH) and cold-chain protection (0°C - 2°C).',
+    icon: '🍠',
+    color: '#991b1b',
+    aliases: ['beetroot', 'beet', 'chukandar', 'beet root', 'beta vulgaris', 'red beet', 'chukander', 'table beet', 'garden beet', 'beetroots', 'beet greens', 'beet taproot', 'ruby beet'],
+    images: {
+      productImage: 'beetroot',
+      productImageAlt: 'Fresh Ruby Crimson Beetroot'
+    },
+    growing: {
+      climate: 'Cool-season biennial crop preferring moderate temperatures (15°C - 22°C) for optimal betacyanin synthesis.',
+      soil: 'Deep, loose, well-drained sandy loam or silt loam free of stones to prevent root bifurcation/forking.',
+      idealSoilPh: '6.0 - 7.5 (sensitive to acidic soils below pH 5.8)',
+      temperatureRange: [12, 25],
+      rainfallRequirement: '400 - 600 mm evenly distributed',
+      sowingMethod: 'Direct seed sowing on ridges or flat beds with subsequent thinning',
+      sowingSeason: 'Rabi (Oct-Nov) in plains; March-July in hill regions',
+      seedRequirement: '7.5 - 9.0 kg / hectare multigerm seed clusters',
+      spacing: '30 cm between rows x 10 cm between plants',
+      growthDuration: '60 - 80 days from seedling emergence',
+      growthDays: 75,
+      currentMaturityStage: 85,
+      irrigation: 'Light and frequent furrow or drip irrigation every 6-8 days; avoid water stress during root swelling to prevent cracking.',
+      fertilizerGuidance: [
+        { stage: 'Basal Field Prep', recommendation: 'FYM 20 t/ha + 60 kg N + 80 kg P2O5 + 80 kg K2O', impact: 'Stimulates early taproot expansion and robust crown development', urgency: 'Immediate' },
+        { stage: '30 Days Post-Sowing', recommendation: 'Top dressing 40 kg N + Borax spray (0.2%)', impact: 'Prevents internal black spot/heart rot (boron deficiency)', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Beet Leafminer (Pegomya hyoscyami)', 'Flea Beetles', 'Root Aphids'],
+      diseaseRisks: ['Cercospora Leaf Spot (Cercospora beticola)', 'Heart Rot (Boron deficiency)', 'Rhizoctonia Crown Rot'],
+      criticalCareTips: [
+        'Apply boron (Borax 10 kg/ha) during soil preparation to prevent internal black heart cavity defects.',
+        'Thin seedlings promptly to 10 cm spacing when 5 cm tall to avoid overcrowded stunted roots.',
+        'Maintain continuous soil moisture during rapid bulking to avoid internal white ring zoning.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 14,
+      recommendedWindow: 'Morning hours when roots reach 4.0 - 6.5 cm diameter',
+      maturityIndicators: [
+        'Roots attain prime table size (4.0 cm - 6.5 cm diameter) with tender, non-fibrous texture.',
+        'Crown foliage exhibits dark green leaves with deep ruby-red veins.',
+        'Roots feel firm, heavy, and spherical-to-globose with smooth ringed skin.'
+      ],
+      harvestingMethod: 'Manual hand pulling or mechanical undercutting; avoid bruising the tender taproot skin.',
+      bestHarvestTime: 'Early morning under cool temperatures',
+      firmnessTarget: 'Firm solid turgid root (Penetrometer 5.0 - 5.5 kg/cm²)',
+      postHarvestHandling: [
+        'Trim foliage tops leaving 2.0 cm petiole stalk to prevent bleeding and moisture loss.',
+        'Gentle washing in chlorinated water (50 ppm) to remove field soil without skin abrasion.',
+        'Grading into Grade A (50-65 mm diameter), Grade B (35-50 mm), and oversized processing grade.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '5 to 8 Days (Rapid transpirational shriveling and sponginess above 25°C)',
+      shelfLifeCold: '90 to 120 Days at 0°C - 2°C with 95% - 98% RH',
+      ambientDays: 7,
+      coldDays: 110,
+      storageTemperature: '0°C - 2°C (Cold Storage)',
+      humidity: '95% - 98% RH (Ultra-high humidity essential to prevent water loss)',
+      coldStorageRequired: true,
+      storageMethod: 'Micro-perforated food-grade LDPE liner bags inside ventilated 5-ply corrugated telescopic cartons stacked on pallets in high-humidity cold rooms',
+      preservationSteps: [
+        'Maintain continuous 95-98% relative humidity; relative humidity below 90% causes rapid loss of turgor and wilting.',
+        'Never trim root tip apex; breaking the subterranean tail accelerates internal moisture bleeding.',
+        'Ensure proper cold room ventilation to prevent CO2 accumulation above 3%.'
+      ],
+      spoilageIndicators: ['Spongy/rubbery texture (dehydration)', 'Internal black heart cavity', 'Rhizoctonia fungal crown mold'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Micro-Perforated LDPE Liner Bags (25µm, 0.5% open area) or Polyethylene Mesh Sacks (10kg / 25kg)',
+      secondaryPackaging: '5-Ply Heavy Duty Ventilated Corrugated Master Cartons (20kg net)',
+      recommendedMaterials: ['Micro-perforated Polyethylene (25 µm)', 'Ventilated Corrugated Craft B-Flute Cartons', 'Breathable Leno Mesh Bags for local markets'],
+      ventilationRequired: true,
+      ventilationSpec: 'Micro-perforations (4-6 holes of 6mm diameter per kg) to balance high humidity retention with aerobic respiration',
+      moistureProtection: 'High moisture retention liner (maintains local microclimate >95% RH while allowing CO2 release)',
+      ethyleneSensitivity: 'Low to Moderate',
+      ethyleneControl: 'Store away from high-ethylene emitters like ripening apples and bananas to prevent early sprouting',
+      cushioningSpecs: 'Smooth carton lining prevents skin scuffing and abrasion damage',
+      shockRating: 3.6,
+      estimatedPackagingCostPerKg: 1.80,
+      packagingCapacity: '20 kg master export corrugated cartons or 10 kg mesh bags',
+      ecoCertification: '100% Recyclable FSC Certified Outer Corrugated Shippers',
+      layers: [
+        { layerNumber: 1, material: 'Food Grade Micro-Perforated LDPE Liner Film (25µm)', thicknessMicrons: 25, purpose: 'High relative humidity microclimate (>95% RH) and anti-transpirational shrivel protection' },
+        { layerNumber: 2, material: '5-Ply High-Stiffness Kraft Corrugated Master Shipper', thicknessMicrons: 4200, purpose: 'Stacking strength, compression resistance, and cold store ventilation' }
+      ]
+    },
+    transportation: {
+      preferredMode: 'Refrigerated Reefer Container (0°C - 2°C) or Ventilated Insulated Truck',
+      targetTemp: '0°C - 2°C (Reefer) or <12°C (Short Distance)',
+      maxTransitDays: 14,
+      humidityControl: '90% - 95% RH',
+      temperatureControlled: true,
+      stackingLimit: 'Maximum 6 carton tiers',
+      vibrationTolerance: 'Moderate; protected inside padded corrugated master cartons',
+      transitChecklist: ['Verify reefer setpoint at 0°C - 2°C', 'Inspect micro-perforated liners are intact', 'Ensure zero skin scuffing or water soaking in cartons']
+    },
+    market: {
+      basePricePerKg: 38,
+      priceFluctuationRange: [28, 52],
+      marketDemand: 'Steady national year-round culinary & health juice demand; growing export potential to GCC and Europe',
+      exportPotential: 'Moderate to High (Fresh washed trimmed beetroot in 10kg cartons)',
+      majorMarkets: ['Azadpur Mandi (Delhi)', 'Kolar APMC (Karnataka)', 'Gultekdi APMC (Pune)', 'Koyambedu F&V Terminal (Chennai)'],
+      priceFactors: ['Root diameter uniformity (50-65mm Grade A premium)', 'Intense dark ruby-red internal betacyanin ring density', 'Clean smooth skin without surface scars', 'Zero internal pithiness or black heart']
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 43,
+        vitaminC_mg: 4.9,
+        vitaminA_IU: 33,
+        dietaryFiber_g: 2.8,
+        potassium_mg: 325,
+        antioxidantIndex: 88,
+        glycemicIndex: 61,
+        highlights: ['Rich in Betalains (Betanin & Vulgaxanthin)', 'High Dietary Inorganic Nitrates (supports cardiovascular health and athletic stamina)', 'Excellent source of Folate (Vitamin B9) and Manganese']
+      },
+      recipes: [
+        {
+          name: 'South Indian Chukandar Poriyal (Spiced Beetroot Stir-Fry)',
+          prepTimeMinutes: 10,
+          cookTimeMinutes: 15,
+          servings: 4,
+          ingredients: ['500g Fresh Beetroot (diced/grated)', '1 tsp Mustard seeds', '1 tbsp Urad dal', '2 Green chillies', '1 sprig Curry leaves', '3 tbsp Fresh grated coconut'],
+          steps: [
+            'Heat coconut oil in a pan, add mustard seeds, urad dal, green chillies, and curry leaves until fragrant.',
+            'Add diced beetroot, salt, and splash of water; cover and steam cook on medium heat for 10-12 minutes until tender.',
+            'Stir in fresh grated coconut and serve hot with steamed rice and rasam.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Condensation without adequate micro-ventilation promotes Rhizoctonia and Botrytis neck mold.',
+      highTempRisk: 'Temperatures above 20°C accelerate respiration and cause rapid rubbery shriveling within 3 days.',
+      frostRisk: 'Tolerant to near 0°C; severe freeze below -1°C causes water soaking and cellular breakdown.',
+      excessRainRisk: 'Waterlogged soil prior to harvest causes root bursting and bacterial soft rot.',
+      transitShockRisk: 'Moderate; protect roots from skin abrasion which causes dark oxidized blemishes.',
+      mitigationStrategy: 'Trim tops to 2cm, wash in sanitized water, pack in micro-perforated LDPE liners, and store at 0-2°C with 95% RH.'
+    }
   }
 ];
 
@@ -3574,6 +3723,9 @@ export function resolveProductAlias(query: string): string {
   }
 
   // Dynamic fallback mapping
+  if (clean.includes('beetroot') || clean.includes('chukandar') || clean.includes('beet') || clean.includes('beta vulgaris')) {
+    return 'beetroot';
+  }
   if (clean.includes('fruit') || clean.includes('apple') || clean.includes('banana') || clean.includes('orange') || clean.includes('grape') || clean.includes('berry')) {
     return 'mango';
   }

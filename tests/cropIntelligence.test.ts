@@ -454,6 +454,94 @@ const cardamomQuote = await fetchFinnworldsCommodityPrice('cardamom');
 assert(cardamomQuote.quote.priceInrKg >= 1650 && cardamomQuote.quote.priceInrKg <= 2400, `Cardamom commodity quote is ₹${cardamomQuote.quote.priceInrKg}/kg (NEVER ₹36/kg)`);
 assert(cardamomQuote.quote.exchange.includes('Spices Board'), `Cardamom exchange is Spices Board of India: "${cardamomQuote.quote.exchange}"`);
 
+// 16. TEST REDDIT DAIRY PACKAGING COMMUNITY INTELLIGENCE
+console.log('\n16. Testing Reddit Dairy Packaging Intelligence (r/packaging & r/foodscience):');
+const { fetchRedditDairyPackagingIntelligence } = await import('../src/services/packaging/redditDairyPackagingService');
+
+const milkReddit = await fetchRedditDairyPackagingIntelligence('milk');
+assert(milkReddit.category === 'Milk', 'Reddit dairy recognized Milk category');
+assert(milkReddit.criticalBarrierNeeds.lightBarrier.includes('100% Light Blockout') || milkReddit.criticalBarrierNeeds.lightBarrier.includes('Riboflavin'), 'Milk flagged with critical Riboflavin light-oxidation protection');
+assert(milkReddit.trendingDiscussions.length >= 2, 'Milk has vetted Reddit community engineering threads');
+assert(milkReddit.communityConsensusScore >= 90, 'Milk community consensus score is high');
+
+const butterReddit = await fetchRedditDairyPackagingIntelligence('butter');
+assert(butterReddit.category === 'Butter', 'Reddit dairy recognized Butter category');
+assert(butterReddit.primaryPackagingRecommendation.includes('Aluminum Foil') || butterReddit.primaryPackagingRecommendation.includes('Parchment'), 'Butter specifies Aluminum Foil / Parchment barrier laminate');
+assert(butterReddit.criticalBarrierNeeds.moistureGreaseBarrier.includes('Kit rating'), 'Butter specifies ASTM F119 / TAPPI Kit grease barrier standard');
+
+const gheeReddit = await fetchRedditDairyPackagingIntelligence('ghee');
+assert(gheeReddit.category === 'Ghee', 'Reddit dairy recognized Ghee category');
+assert(gheeReddit.primaryPackagingRecommendation.includes('Tinplate') || gheeReddit.primaryPackagingRecommendation.includes('Nitrogen'), 'Ghee specifies nitrogen-flushed tinplate / amber glass to preserve danedar texture');
+
+const paneerReddit = await fetchRedditDairyPackagingIntelligence('paneer');
+assert(paneerReddit.category === 'Paneer / Cottage Cheese', 'Reddit dairy recognized Paneer category');
+assert(paneerReddit.primaryPackagingRecommendation.includes('Vacuum') || paneerReddit.primaryPackagingRecommendation.includes('MAP'), 'Paneer specifies Vacuum / MAP barrier pouches against mold');
+
+// 17. TEST PERSEUSS COLD CHAIN CARTONIZATION API
+console.log('\n17. Testing Perseuss Cold-Chain Cartonization & Packout Engine:');
+const { calculatePerseussColdCartonization } = await import('../src/services/coldchain/perseussColdCartonizationService');
+
+const coldPlan = calculatePerseussColdCartonization({
+  commodityId: 'milk',
+  commodityName: 'Fresh Cow Milk',
+  commodityCategory: 'Dairy',
+  payloadWeightKg: 20,
+  targetTempProfile: 'CHILLED_2_8C',
+  ambientMaxTempC: 38,
+  transitDurationHours: 24,
+  shipperMaterialPreference: 'EPS_FOAM'
+});
+
+assert(coldPlan.planId.startsWith('PERSEUSS-'), 'Perseuss Cartonization generated unique plan ID');
+assert(coldPlan.refrigerant.totalRefrigerantWeightKg > 0, `Perseuss computed valid refrigerant mass (${coldPlan.refrigerant.totalRefrigerantWeightKg} kg)`);
+assert(coldPlan.refrigerant.packUnitsCount >= 2, 'Refrigerant requires minimum 2 pack units for sandwich packout');
+assert(coldPlan.shipper.externalDimensionsCm.length > 0, 'Computed 3D external dimensions for insulated shipper');
+assert(coldPlan.thermalHoldoverTimeline.length >= 4, 'Generated multi-stage thermal holdover timeline');
+assert(coldPlan.maxSafeTransitHours >= 24, `Max safe transit hold exceeds target 24h (${coldPlan.maxSafeTransitHours}h)`);
+assert(coldPlan.shipper.dimensionalWeightKg > 0, 'Calculated dimensional freight optimization weight');
+
+// 18. TEST USDA FOODDATA CENTRAL API FOR FRESH VEGGIES & FRUITS
+console.log('\n18. Testing USDA FoodData Central API (Fresh Veggies & Fruits Chemistry):');
+const { fetchUsdaFoodDataProfile } = await import('../src/services/crop/usdaFoodDataCentralService');
+
+const beetrootUsda = await fetchUsdaFoodDataProfile('beetroot');
+assert(beetrootUsda.success === true, 'USDA FoodData Central API returned profile for Beetroot');
+assert(beetrootUsda.fdcId === 170457, `Beetroot USDA FDC ID is 170457 (Got: ${beetrootUsda.fdcId})`);
+assert(beetrootUsda.profile.waterContentPercent >= 85 && beetrootUsda.profile.waterContentPercent <= 90, `Beetroot moisture content is ${beetrootUsda.profile.waterContentPercent}%`);
+assert(beetrootUsda.profile.respirationKineticsCorrelation.optimalStorageRhPercent.includes('95% to 98%'), 'Beetroot USDA Handbook 66 storage specifies 95-98% RH');
+
+const okraUsda = await fetchUsdaFoodDataProfile('okra');
+assert(okraUsda.profile.waterContentPercent >= 88, `Okra moisture is ${okraUsda.profile.waterContentPercent}%`);
+assert(okraUsda.profile.respirationKineticsCorrelation.respirationRateCategory === 'Very High', 'Okra respiration category is Very High');
+
+const tomatoUsda = await fetchUsdaFoodDataProfile('tomato');
+assert(tomatoUsda.profile.waterContentPercent >= 93, `Tomato high moisture is ${tomatoUsda.profile.waterContentPercent}%`);
+
+const radishUsda = await fetchUsdaFoodDataProfile('radish');
+assert(radishUsda.profile.waterContentPercent >= 94, `Radish water content is ${radishUsda.profile.waterContentPercent}%`);
+
+// 19. TEST PACKAGESMART AI API FOR DRY FRUITS & NUTS
+console.log('\n19. Testing PackageSmart AI API (Dry Fruits & Tree Nuts LCA & Barrier):');
+const { calculatePackageSmartDryFruitIntelligence } = await import('../src/services/packaging/packageSmartDryFruitService');
+
+const almondSpec = await calculatePackageSmartDryFruitIntelligence('almond');
+assert(almondSpec.commodityId === 'almond', 'PackageSmart recognized Almond commodity');
+assert(almondSpec.fatContentPercent > 45, `Almond fat content is ${almondSpec.fatContentPercent}%`);
+assert(almondSpec.criticalWaterActivityAw <= 0.60, `Almond critical water activity aw is ${almondSpec.criticalWaterActivityAw}`);
+assert(almondSpec.inertGasFlush.gasComposition.includes('Nitrogen'), 'Almond specifies Nitrogen gas flush');
+assert(almondSpec.lcaAssessment.carbonFootprintGramsCo2e > 0, `PackageSmart LCA carbon footprint is ${almondSpec.lcaAssessment.carbonFootprintGramsCo2e} g CO2e`);
+assert(almondSpec.lcaAssessment.circularityScore >= 80, `Almond circularity score is ${almondSpec.lcaAssessment.circularityScore}/100`);
+
+const walnutSpec = await calculatePackageSmartDryFruitIntelligence('walnut');
+assert(walnutSpec.fatContentPercent >= 60, `Walnut fat content is ${walnutSpec.fatContentPercent}% (high oxidation risk)`);
+assert(walnutSpec.recommendedPouchLamination.includes('Aluminum Foil') || walnutSpec.recommendedPouchLamination.includes('Barrier'), 'Walnut requires ultra-high barrier against rancidity');
+
+const cashewSpec = await calculatePackageSmartDryFruitIntelligence('cashew');
+assert(cashewSpec.inertGasFlush.oxygenScavengerSizingCc >= 30, `Cashew oxygen scavenger is ${cashewSpec.inertGasFlush.oxygenScavengerSizingCc} cc`);
+
+const raisinSpec = await calculatePackageSmartDryFruitIntelligence('raisin');
+assert(raisinSpec.lcaAssessment.plasticReductionPercent >= 50, `Raisin compostable / bio-laminate achieves ${raisinSpec.lcaAssessment.plasticReductionPercent}% plastic reduction`);
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('====================================================');

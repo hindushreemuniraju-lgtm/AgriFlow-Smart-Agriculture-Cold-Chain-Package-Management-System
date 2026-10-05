@@ -94,6 +94,7 @@ const BENCHMARK_PRICES: Record<string, {
   // Fresh Vegetables & Fruits
   'okra': { name: 'Okra (Lady\'s Finger)', category: 'FRESH_PRODUCE', modal: 56, min: 46, max: 68, unit: 'kg', source: 'Agmarknet / e-NAM Mandi Terminal', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'radish': { name: 'Radish (Mooli)', category: 'FRESH_PRODUCE', modal: 36, min: 28, max: 45, unit: 'kg', source: 'Agmarknet APMC Auction', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
+  'beetroot': { name: 'Beetroot (Chukandar / Ruby Beet)', category: 'FRESH_PRODUCE', modal: 38, min: 28, max: 52, unit: 'kg', source: 'Agmarknet / APMC Market Yard', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'watermelon': { name: 'Watermelon (Tarbooj)', category: 'FRESH_PRODUCE', modal: 32, min: 24, max: 40, unit: 'kg', source: 'Agmarknet / Fruit Terminal Yard', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'brinjal': { name: 'Brinjal (Eggplant)', category: 'FRESH_PRODUCE', modal: 42, min: 34, max: 52, unit: 'kg', source: 'Agmarknet APMC Market', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'tomato': { name: 'Tomato', category: 'FRESH_PRODUCE', modal: 45, min: 36, max: 55, unit: 'kg', source: 'Agmarknet / Kolar & Azadpur Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
@@ -325,8 +326,8 @@ export async function fetchLiveProductPrice(
     priceType: 'mandi' as const
   };
 
-  // Calendar day number relative to anchor date (Oct 4, 2026)
-  const anchorDate = new Date('2026-10-04T00:00:00Z').getTime();
+  // Calendar day number relative to anchor date (Oct 5, 2026)
+  const anchorDate = new Date('2026-10-05T00:00:00Z').getTime();
   const dayOffset = Math.floor((now.getTime() - anchorDate) / (1000 * 60 * 60 * 24));
   
   const hash = cleanId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);

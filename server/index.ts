@@ -4,6 +4,10 @@ import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { CROPS_DATA, generateDynamicCrop } from './data/crops.js';
 import { INITIAL_ORDERS, INITIAL_DRIVERS, FarmerOrder, DriverPartner } from './data/mockData.js';
+import { fetchRedditDairyPackagingIntelligence } from '../src/services/packaging/redditDairyPackagingService.js';
+import { calculatePerseussColdCartonization } from '../src/services/coldchain/perseussColdCartonizationService.js';
+import { fetchUsdaFoodDataProfile } from '../src/services/crop/usdaFoodDataCentralService.js';
+import { calculatePackageSmartDryFruitIntelligence } from '../src/services/packaging/packageSmartDryFruitService.js';
 
 dotenv.config();
 
@@ -145,6 +149,7 @@ const SERVER_PRICE_BENCHMARKS: Record<string, {
   // Fresh Produce (Mandi / APMC / e-NAM Live)
   'okra': { name: 'Okra (Lady\'s Finger / Bhindi)', category: 'FRESH_PRODUCE', modal: 56, min: 46, max: 68, unit: 'kg', source: 'Agmarknet / e-NAM Mandi Terminal', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'radish': { name: 'Radish (Mooli)', category: 'FRESH_PRODUCE', modal: 36, min: 28, max: 45, unit: 'kg', source: 'Agmarknet APMC Auction', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
+  'beetroot': { name: 'Beetroot (Chukandar / Ruby Beet)', category: 'FRESH_PRODUCE', modal: 38, min: 28, max: 52, unit: 'kg', source: 'Agmarknet APMC Market Yard', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'watermelon': { name: 'Watermelon (Tarbooj)', category: 'FRESH_PRODUCE', modal: 32, min: 24, max: 40, unit: 'kg', source: 'Agmarknet / Fruit Terminal Yard', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'brinjal': { name: 'Brinjal (Eggplant / Baingan)', category: 'FRESH_PRODUCE', modal: 42, min: 34, max: 52, unit: 'kg', source: 'Agmarknet APMC Market', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'tomato': { name: 'Tomato (Tamatar)', category: 'FRESH_PRODUCE', modal: 45, min: 36, max: 55, unit: 'kg', source: 'Agmarknet / Kolar & Azadpur Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
@@ -446,6 +451,7 @@ CRITICAL BOTANICAL & MORPHOLOGICAL DISCRIMINATION GUIDELINES:
 21. COFFEE BEANS / COFFEE (Coffea arabica): Dark roasted brown/black ellipsoidal beans with central split/crease line. DO NOT mistake for Tomato, Red Fruits, or Dark Berries!
 22. TEA LEAVES / CTC TEA (Camellia sinensis): Fine granular black/copper oxidized tea pellets or dried tea leaves.
 23. CARDAMOM / ELAICHI (Elettaria cardamomum): Pale olive-green spindle-shaped 3-locular pods containing dark aromatic seeds. DO NOT mistake for Radish, Beans, or Green Chilli!
+24. BEETROOT / CHUKANDAR (Beta vulgaris): Deep ruby-red/magenta/crimson spherical or globose taproot with rough ringed skin and dark green/red-veined foliage petiole crown. DO NOT mistake for Radish, Turnip, Tomato, or Onion!
 
 REJECTION RULES:
 - If the image shows a non-food object (e.g. laptop, car, phone, building, human portrait, furniture), set "identified": false, "isNonFoodOrBlurry": true, "rejectionReason": "This image does not appear to contain a supported food/agricultural product."
@@ -545,6 +551,7 @@ Return ONLY a strict JSON object with this exact structure:
   // Inspect base64 data to detect dominant visual color spectrum if filename is generic
   let isCoffeeDominant = false;
   let isTeaDominant = false;
+  let isBeetrootDominant = false;
   let isWhiteDominant = false;
   let isPurpleDominant = false;
   let isRedDominant = false;
@@ -557,6 +564,7 @@ Return ONLY a strict JSON object with this exact structure:
       const buffer = Buffer.from(rawData.substring(0, Math.min(rawData.length, 12000)), 'base64');
       let highLumaCount = 0;
       let coffeeCount = 0;
+      let beetrootCount = 0;
       let totalSampled = 0;
       for (let i = 0; i < buffer.length - 2; i += 3) {
         const r = buffer[i];
@@ -568,6 +576,10 @@ Return ONLY a strict JSON object with this exact structure:
         // Roasted Coffee beans (dark sepia brown, r > g > b, low luma)
         if (r > 25 && r < 140 && g < r * 0.88 && b < g * 0.95 && luma < 115) {
           coffeeCount++;
+        }
+        // Beetroot (deep ruby-crimson / magenta betalain, r > b > g)
+        else if (r > 60 && r < 185 && b > 25 && b < 135 && g < r * 0.65 && r > b * 1.08 && luma >= 25 && luma <= 130) {
+          beetrootCount++;
         }
         else if (luma < 50 && Math.abs(r - g) < 20) {
           isTeaDominant = true;
@@ -587,6 +599,9 @@ Return ONLY a strict JSON object with this exact structure:
       }
       if (coffeeCount / Math.max(1, totalSampled) > 0.15) {
         isCoffeeDominant = true;
+      }
+      if (beetrootCount / Math.max(1, totalSampled) > 0.12) {
+        isBeetrootDominant = true;
       }
       if (highLumaCount / Math.max(1, totalSampled) > 0.25) {
         isWhiteDominant = true;
@@ -630,6 +645,27 @@ Return ONLY a strict JSON object with this exact structure:
       ],
       condition: 'Aromatic roasted commodity',
       qualityObservations: ['Optimal roasting crack level', 'Rich surface aroma', 'Moisture <2.5%']
+    };
+  } else if (isBeetrootDominant || cleanName.includes('beetroot') || cleanName.includes('chukandar') || cleanName.includes('beet') || cleanName.includes('beta vulgaris')) {
+    identifiedCrop = {
+      canonicalId: 'beetroot',
+      name: 'Beetroot (Chukandar / Ruby Beet)',
+      scientificName: 'Beta vulgaris',
+      category: 'Vegetable',
+      form: 'Fresh',
+      confidence: 0.96,
+      confidenceLabel: 'HIGH',
+      visualEvidence: [
+        'Deep ruby-crimson/magenta spherical to ovoid globose taproot morphology',
+        'Concentrated Betalain (betacyanin) pigmentation with rough ringed periderm skin',
+        'Leaf scar crown and slender subterranean taproot tail'
+      ],
+      condition: 'Fresh and firm root',
+      qualityObservations: [
+        'Firm turgid cell structure without softness or shriveling',
+        'Smooth clean crown without internal black heart (boron deficiency free)',
+        'Rich natural betalain color retention'
+      ]
     };
   } else if (isTeaDominant || cleanName.includes('tea') || cleanName.includes('chai') || cleanName.includes('ctc')) {
     identifiedCrop = {
@@ -1521,6 +1557,76 @@ app.post('/api/passport/tip', (req, res) => {
     message: `₹${tipAmount} gratitude tip & 5-star rating sent directly to the farmer!`,
     details: { batchId, rating, tipAmount, note, timestamp: new Date().toISOString() }
   });
+});
+
+// ==========================================
+// 8. SPECIALIZED INTELLIGENCE & PACKAGING APIS
+// ==========================================
+
+// 8.1 Reddit Dairy Packaging Community Intelligence API
+app.get('/api/packaging/reddit-dairy', async (req, res) => {
+  try {
+    const commodity = (req.query.commodity as string) || (req.query.id as string) || 'milk';
+    const report = await fetchRedditDairyPackagingIntelligence(commodity);
+    res.json({ success: true, source: 'Reddit Packaging & Dairy Science Communities', report });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to fetch Reddit Dairy Packaging Intelligence' });
+  }
+});
+
+// 8.2 Perseuss Cold-Chain Cartonization & Thermal Packout API
+app.post('/api/cold-chain/perseuss-cartonization', (req, res) => {
+  try {
+    const {
+      commodityId = 'milk',
+      commodityName = 'Fresh Milk',
+      commodityCategory = 'Dairy',
+      payloadWeightKg = 25,
+      payloadDimensionsCm,
+      targetTempProfile = 'CHILLED_2_8C',
+      ambientMaxTempC = 38,
+      transitDurationHours = 24,
+      shipperMaterialPreference = 'EPS_FOAM'
+    } = req.body;
+
+    const result = calculatePerseussColdCartonization({
+      commodityId,
+      commodityName,
+      commodityCategory,
+      payloadWeightKg,
+      payloadDimensionsCm,
+      targetTempProfile,
+      ambientMaxTempC,
+      transitDurationHours,
+      shipperMaterialPreference
+    });
+
+    res.json({ success: true, source: 'Perseuss Cold Cartonization Engine', result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to calculate Perseuss Cold Cartonization' });
+  }
+});
+
+// 8.3 USDA FoodData Central API for Fresh Veggies & Fruits
+app.get('/api/crops/usda-fooddata', async (req, res) => {
+  try {
+    const commodity = (req.query.commodity as string) || (req.query.query as string) || 'beetroot';
+    const result = await fetchUsdaFoodDataProfile(commodity);
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to fetch USDA FoodData Central Profile' });
+  }
+});
+
+// 8.4 PackageSmart AI API for Dry Fruits & Nuts
+app.get('/api/packaging/packagesmart-ai', async (req, res) => {
+  try {
+    const commodity = (req.query.commodity as string) || (req.query.id as string) || 'almond';
+    const spec = await calculatePackageSmartDryFruitIntelligence(commodity);
+    res.json({ success: true, source: 'PackageSmart AI Life Cycle & Barrier Engine', spec });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message || 'Failed to compute PackageSmart AI Dry Fruit Intelligence' });
+  }
 });
 
 import path from 'path';

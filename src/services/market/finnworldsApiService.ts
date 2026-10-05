@@ -228,7 +228,7 @@ export async function fetchFinnworldsCommodityPrice(
   }
 
   // 2. Day-offset dynamic progression engine (deterministic, zero random drift)
-  const anchorDate = new Date('2026-10-04T00:00:00Z').getTime();
+  const anchorDate = new Date('2026-10-05T00:00:00Z').getTime();
   const dayOffset = Math.floor((new Date().getTime() - anchorDate) / (1000 * 60 * 60 * 24));
   const hash = cleanKey.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
