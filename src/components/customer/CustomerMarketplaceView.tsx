@@ -107,7 +107,7 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
 
   const handleBuyNow = (product: ProductIntelligence) => {
     const qty = 5; // 5 kg/units default
-    const total = Math.round(product.market.basePricePerKg * qty);
+    const total = Math.round((product.market?.basePricePerKg || 30) * qty);
     
     // Deduct from wallet if available
     if (user.walletBalance >= total) {
@@ -319,7 +319,7 @@ export const CustomerMarketplaceView: React.FC<CustomerMarketplaceProps> = ({ on
                     <div>
                       <span className="text-[10px] text-slate-400 block uppercase font-bold">Direct Price</span>
                       <div className="text-base font-black text-emerald-400 font-mono">
-                        ₹{product.market.basePricePerKg.toFixed(2)} <span className="text-xs text-slate-400 font-sans font-normal">/ {product.market.priceUnit.replace('₹/', '')}</span>
+                        ₹{(product.market?.basePricePerKg ?? 0).toFixed(2)} <span className="text-xs text-slate-400 font-sans font-normal">/ {(product.market?.priceUnit || 'kg').replace('₹/', '')}</span>
                       </div>
                     </div>
 

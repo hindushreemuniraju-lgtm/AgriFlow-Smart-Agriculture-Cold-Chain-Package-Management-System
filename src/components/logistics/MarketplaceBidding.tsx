@@ -212,7 +212,7 @@ export const MarketplaceBidding: React.FC<MarketplaceBiddingProps> = ({
                   <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[11px] text-slate-400">
                     <span>Distance: <strong className="text-sky-300 font-mono">{order.distanceKm} km</strong></span>
                     <span>Weight: <strong className="text-white font-mono">{order.weightKg} kg</strong> ({order.boxesCount} boxes)</span>
-                    <span>Window: <strong className="text-amber-300">{order.pickupWindow.split('(')[0]}</strong></span>
+                    <span>Window: <strong className="text-amber-300">{order.pickupWindow ? order.pickupWindow.split('(')[0] : 'Flexible'}</strong></span>
                   </div>
                 </div>
 

@@ -299,8 +299,8 @@ export function geocodeShgRuralUnit(
 export function generateGs1DigitalLink(meta: Gs1OriginMetadata): string {
   // GS1 Standard format: (01)GTIN(10)Batch(11)MfgDate(17)ExpDate(21)Serial
   const gtin = '8901234567890';
-  const cleanMfg = meta.mfgDate.replace(/-/g, '').slice(2);
-  const cleanExp = meta.expiryDate.replace(/-/g, '').slice(2);
+  const cleanMfg = (meta.mfgDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '').slice(2);
+  const cleanExp = (meta.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10)).replace(/-/g, '').slice(2);
 
   return JSON.stringify({
     gs1_format: 'GS1_2D_DATAMATRIX',

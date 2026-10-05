@@ -9,10 +9,11 @@ interface ProductHeroBannerProps {
 }
 
 export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, onOpenSmartPlan }) => {
-  const [selectedCity, setSelectedCity] = useState<keyof typeof product.market.regionalPrices>('Bengaluru');
+  const regionalPrices = product.market?.regionalPrices || { Bengaluru: product.market?.basePricePerKg || 30 };
+  const [selectedCity, setSelectedCity] = useState<string>('Bengaluru');
   const visual = getVerifiedCropVisual(product.id, product.name);
 
-  const currentRegionalPrice = product.market?.regionalPrices?.[selectedCity] ?? product.market?.basePricePerKg ?? 30;
+  const currentRegionalPrice = regionalPrices[selectedCity] ?? product.market?.basePricePerKg ?? 30;
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 border border-purple-500/30 p-6 sm:p-8 shadow-[0_0_40px_rgba(168,85,247,0.15)]">
@@ -102,17 +103,17 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
               </span>
               <span className="flex items-center gap-1 text-emerald-400 font-semibold">
                 <TrendingUp className="w-3 h-3" />
-                {product.market.priceTrend}
+                {product.market?.priceTrend || 'Stable'}
               </span>
             </div>
 
             <div className="flex items-baseline justify-between gap-2">
               <div className="text-3xl font-extrabold text-emerald-400 font-mono">
                 ₹{currentRegionalPrice.toFixed(2)}
-                <span className="text-xs font-normal text-slate-400 ml-1">/{product.market.priceUnit.replace('₹/', '')}</span>
+                <span className="text-xs font-normal text-slate-400 ml-1">/{(product.market?.priceUnit || 'kg').replace('₹/', '')}</span>
               </div>
               <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
-                {product.market.priceStatus}
+                {product.market?.priceStatus || 'Fair Price'}
               </span>
             </div>
 
@@ -124,12 +125,12 @@ export const ProductHeroBanner: React.FC<ProductHeroBannerProps> = ({ product, o
               </span>
               <select
                 value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value as any)}
+                onChange={(e) => setSelectedCity(e.target.value)}
                 className="bg-slate-900 border border-purple-500/30 text-white text-[11px] rounded-lg px-2 py-1 outline-none focus:border-purple-400 font-mono cursor-pointer"
               >
-                {Object.keys(product.market.regionalPrices).map((city) => (
+                {Object.keys(regionalPrices).map((city) => (
                   <option key={city} value={city}>
-                    {city} Mandi (₹{product.market.regionalPrices[city as keyof typeof product.market.regionalPrices]}/kg)
+                    {city} Mandi (₹{regionalPrices[city]}/kg)
                   </option>
                 ))}
               </select>

@@ -34,7 +34,8 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
     : 1500;
 
   const totalYieldKg = Math.round(acres * baseYieldPerAcreKg);
-  const pricePerKg = product.market.regionalPrices[targetCity] ?? product.market.basePricePerKg;
+  const regionalPrices = product.market?.regionalPrices || { Bengaluru: product.market?.basePricePerKg || 30 };
+  const pricePerKg = regionalPrices[targetCity] ?? product.market?.basePricePerKg ?? 30;
 
   // Premium tier multiplier
   const tierMultiplier = marketTier === 'Export Grade-A' ? 1.35
@@ -129,9 +130,9 @@ export const ProductSmartPlanModal: React.FC<ProductSmartPlanModalProps> = ({
               onChange={(e) => setTargetCity(e.target.value as any)}
               className="w-full bg-slate-900 border border-purple-500/30 text-white font-mono text-xs px-3 py-2.5 rounded-xl outline-none focus:border-purple-400 cursor-pointer"
             >
-              {Object.keys(product.market.regionalPrices).map((c) => (
+              {Object.keys(regionalPrices).map((c) => (
                 <option key={c} value={c}>
-                  {c} Mandi (₹{product.market.regionalPrices[c as keyof typeof product.market.regionalPrices]}/kg)
+                  {c} Mandi (₹{regionalPrices[c]}/kg)
                 </option>
               ))}
             </select>

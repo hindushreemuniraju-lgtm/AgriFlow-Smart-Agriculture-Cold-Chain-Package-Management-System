@@ -273,9 +273,8 @@ export function generateProductPassportPDF(product: ProductIntelligence, batchId
  */
 export function generateOrderInvoicePDF(details: PDFOrderDetails): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const invoiceHash = computeDynamicDocHash(`${details.orderId}-${details.totalAmount}-${details.customerName}`);
-  
-  addAgriFlowHeader(doc, 'Tax Invoice / Receipt', `INV-${details.orderId.replace(/[^0-9]/g, '') || '9042'}`);
+  const safeOrderId = details.orderId || '9042';
+  addAgriFlowHeader(doc, 'Tax Invoice / Receipt', `INV-${safeOrderId.replace(/[^0-9]/g, '') || '9042'}`);
 
   let y = 42;
 
@@ -386,12 +385,14 @@ export function generateOrderInvoicePDF(details: PDFOrderDetails): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(21, 128, 61);
-  doc.text(`PAYMENT STATUS: COMPLETED VIA ${details.paymentMethod.toUpperCase()}`, 18, y + 7);
+  doc.text(`PAYMENT STATUS: COMPLETED VIA ${(details.paymentMethod || 'DIRECT / APMC').toUpperCase()}`, 18, y + 7);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Transaction Reference: TXN-${details.orderId.replace(/[^0-9]/g, '') || '883910'} • Document Integrity Hash: ${invoiceHash}`, 18, y + 14);
+  const safeTxnId = (details.orderId || '883910').replace(/[^0-9]/g, '') || '883910';
+  const docHash = details.orderId ? computeDynamicDocHash(`${details.orderId}-${details.totalAmount}-${details.customerName}`) : 'AGF-DOC-89211';
+  doc.text(`Transaction Reference: TXN-${safeTxnId} • Document Integrity Hash: ${docHash}`, 18, y + 14);
 
   y += 28;
 
