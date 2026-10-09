@@ -863,11 +863,12 @@ export interface PackagingMaterialSpec {
     estimatedBaseCostPerKg: number;
     sustainabilityScore: number;
   };
+  criticalFailureNotes?: string;
 }
 
 export const PACKAGING_MATERIALS_DATABASE: PackagingMaterialSpec[] = FOOD_PACKAGING_MATERIALS.map(m => {
-  const isBreathable = m.oxygenBarrier.tier === 'Breathable' || m.oxygenBarrier.tier === 'Porous';
-  const isPorousMoisture = m.moistureBarrier.tier === 'Porous';
+  const isBreathable = (m.oxygenBarrier.tier as string) === 'Breathable' || (m.oxygenBarrier.tier as string) === 'Porous';
+  const isPorousMoisture = (m.moistureBarrier.tier as string) === 'Porous';
   return {
     id: m.id,
     name: m.name,

@@ -82,13 +82,24 @@ const COMMODITY_REGISTRY: Record<string, {
   },
   'black-pepper': {
     symbol: 'PEPPER-IN',
-    name: 'Malabar Black Pepper (Garbled)',
-    exchange: 'IPSTA Kochi / Spices Board',
+    name: 'Malabar Black Pepper (Kalimirch / Garbled MG-1)',
+    exchange: 'IPSTA Kochi / Spices Board of India',
     originalUnit: 'INR/kg',
-    inrBasePriceKg: 640,
-    minPriceKg: 580,
-    maxPriceKg: 720,
-    source: 'Spices Board of India Terminal',
+    inrBasePriceKg: 1100,
+    minPriceKg: 950,
+    maxPriceKg: 1250,
+    source: 'Spices Board of India / Kochi Terminal Auction',
+    sourceUrl: 'https://indianspices.com'
+  },
+  'pepper': {
+    symbol: 'PEPPER-IN',
+    name: 'Malabar Black Pepper (Kalimirch / Garbled MG-1)',
+    exchange: 'IPSTA Kochi / Spices Board of India',
+    originalUnit: 'INR/kg',
+    inrBasePriceKg: 1100,
+    minPriceKg: 950,
+    maxPriceKg: 1250,
+    source: 'Spices Board of India / Kochi Terminal Auction',
     sourceUrl: 'https://indianspices.com'
   },
   'turmeric': {
@@ -166,7 +177,10 @@ export async function fetchFinnworldsCommodityPrice(
   symbolOrCrop: string,
   apiKey?: string
 ): Promise<FinnworldsApiResponse> {
-  const cleanKey = symbolOrCrop.toLowerCase().trim();
+  let cleanKey = symbolOrCrop.toLowerCase().trim();
+  if (cleanKey === 'pepper' || cleanKey === 'black pepper' || cleanKey.includes('black-pepper') || cleanKey.includes('kalimirch')) {
+    cleanKey = 'black-pepper';
+  }
   const key = apiKey || (typeof process !== 'undefined' ? process.env?.FINNWORLDS_API_KEY || process.env?.FINNHUB_API_KEY : '');
   const now = new Date().toISOString();
 

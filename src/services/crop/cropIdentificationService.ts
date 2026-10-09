@@ -8,6 +8,12 @@ import { resolveCropAlias, getDidYouMeanSuggestions, CANONICAL_CROP_ALIASES } fr
 import { fetchLiveProductPrice, LiveMarketPriceRecord } from '../market/livePriceService';
 import { computeImageSignature, getLearnedImageCorrection } from './imageCorrectionMemoryService';
 import { extractCanvasColorMetrics, classifyFromColorMetrics, ColorMetrics } from './pixelVisionClassifier';
+import {
+  computeDataUrlSha256,
+  computeCanvasDHash,
+  createThumbnailDataUrl,
+  checkCorrectionOnBackend
+} from './aiCorrectionClientService';
 
 export interface CandidateCrop {
   canonicalId: string;
@@ -42,6 +48,10 @@ export interface IdentificationResult {
   timestamp: string;
   uploadedPhotoPreviewUrl?: string;
   imageSignature?: string;
+  imageHash?: string;
+  imagePhash?: string;
+  imageThumbnail?: string;
+  isLearnedCorrection?: boolean;
   price?: LiveMarketPriceRecord;
 }
 
@@ -149,12 +159,18 @@ export function identifyCropFromText(query: string): IdentificationResult {
 /**
  * Compress / resize image and extract canvas color metrics
  */
-async function processImageCanvas(file: File, maxDimension: number = 1024): Promise<{ dataUrl: string; metrics: ColorMetrics }> {
+async function processImageCanvas(file: File, maxDimension: number = 1024): Promise<{ 
+  dataUrl: string; 
+  metrics: ColorMetrics;
+  imageHash: string;
+  imagePhash: string;
+  thumbnail: string;
+}> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         let width = img.width;
         let height = img.height;
 
@@ -175,47 +191,74 @@ async function processImageCanvas(file: File, maxDimension: number = 1024): Prom
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
           const metrics = extractCanvasColorMetrics(canvas, ctx);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const imageHash = await computeDataUrlSha256(dataUrl);
+          const imagePhash = computeCanvasDHash(canvas);
+          const thumbnail = createThumbnailDataUrl(canvas, 72);
           resolve({
-            dataUrl: canvas.toDataURL('image/jpeg', 0.85),
-            metrics
+            dataUrl,
+            metrics,
+            imageHash,
+            imagePhash,
+            thumbnail
           });
         } else {
+          const dataUrl = e.target?.result as string;
+          const imageHash = await computeDataUrlSha256(dataUrl);
           resolve({
-            dataUrl: e.target?.result as string,
+            dataUrl,
             metrics: {
               whiteRatio: 0.1,
               greenRatio: 0.2,
               darkGreenRatio: 0.1,
+              cardamomPodRatio: 0,
+              beetrootRubyRatio: 0,
               redRatio: 0.1,
               purpleRatio: 0.1,
               orangeRatio: 0.1,
               yellowPaleRatio: 0.1,
               goldenYellowRatio: 0.1,
               brownEarthRatio: 0.1,
+              darkBrownCoffeeRatio: 0,
+              darkTeaRatio: 0,
               aspectRatio: height / Math.max(1, width),
               totalPixels: width * height,
               isUniformOrBlank: false
-            }
+            },
+            imageHash,
+            imagePhash: '0'.repeat(16),
+            thumbnail: dataUrl
           });
         }
       };
-      img.onerror = () => resolve({
-        dataUrl: e.target?.result as string,
-        metrics: {
-          whiteRatio: 0.1,
-          greenRatio: 0.2,
-          darkGreenRatio: 0.1,
-          redRatio: 0.1,
-          purpleRatio: 0.1,
-          orangeRatio: 0.1,
-          yellowPaleRatio: 0.1,
-          goldenYellowRatio: 0.1,
-          brownEarthRatio: 0.1,
-          aspectRatio: 1.0,
-          totalPixels: 1000,
-          isUniformOrBlank: false
-        }
-      });
+      img.onerror = async () => {
+        const dataUrl = e.target?.result as string;
+        const imageHash = await computeDataUrlSha256(dataUrl);
+        resolve({
+          dataUrl,
+          metrics: {
+            whiteRatio: 0.1,
+            greenRatio: 0.2,
+            darkGreenRatio: 0.1,
+            cardamomPodRatio: 0,
+            beetrootRubyRatio: 0,
+            redRatio: 0.1,
+            purpleRatio: 0.1,
+            orangeRatio: 0.1,
+            yellowPaleRatio: 0.1,
+            goldenYellowRatio: 0.1,
+            brownEarthRatio: 0.1,
+            darkBrownCoffeeRatio: 0,
+            darkTeaRatio: 0,
+            aspectRatio: 1.0,
+            totalPixels: 1000,
+            isUniformOrBlank: false
+          },
+          imageHash,
+          imagePhash: '0'.repeat(16),
+          thumbnail: dataUrl
+        });
+      };
       img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
@@ -225,7 +268,7 @@ async function processImageCanvas(file: File, maxDimension: number = 1024): Prom
 /**
  * Identify crop from uploaded image file (JPG, PNG, WebP)
  * Multi-layer architecture:
- * 1. User-Learned Image Memory (checks if user previously verified this exact photo)
+ * 1. AI Human-Correction Memory (exact SHA-256 hash + 64-bit perceptual pHash near-duplicate)
  * 2. Real Gemini Multimodal Vision API (if online/available)
  * 3. Client-Side & Offline Pixel Computer Vision Classifier (chromatic spectrum + geometry analysis)
  * 4. Automated Live Price Sync
@@ -236,54 +279,66 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
   let uploadedPreviewUrl = '';
   let imageSignature = '';
   let colorMetrics: ColorMetrics | null = null;
+  let imageHash = '';
+  let imagePhash = '';
+  let thumbnail = '';
 
   try {
-    const { dataUrl, metrics } = await processImageCanvas(file, 1024);
-    uploadedPreviewUrl = dataUrl;
-    colorMetrics = metrics;
-    imageSignature = computeImageSignature(dataUrl, file.size);
+    const processed = await processImageCanvas(file, 1024);
+    uploadedPreviewUrl = processed.dataUrl;
+    colorMetrics = processed.metrics;
+    imageHash = processed.imageHash;
+    imagePhash = processed.imagePhash;
+    thumbnail = processed.thumbnail;
+    imageSignature = computeImageSignature(processed.dataUrl, file.size);
 
-    // LAYER 1: Check User-Learned Memory Cache first
-    const learnedCorrection = getLearnedImageCorrection(imageSignature);
-    if (learnedCorrection) {
-      const livePrice = await fetchLiveProductPrice(learnedCorrection.canonicalId, marketLocation);
+    // LAYER 1: Check User-Learned Memory (Exact SHA-256 + Perceptual pHash via Backend / Local Cache)
+    const backendCorrection = await checkCorrectionOnBackend(imageHash, imagePhash);
+    if (backendCorrection.matched && backendCorrection.record) {
+      const rec = backendCorrection.record;
+      const livePrice = await fetchLiveProductPrice(rec.corrected_normalized_name, marketLocation);
+      const conf = backendCorrection.confidence || 0.99;
       return {
         identified: true,
-        canonicalId: learnedCorrection.canonicalId,
-        name: learnedCorrection.name,
-        scientificName: learnedCorrection.scientificName,
-        category: learnedCorrection.category,
+        canonicalId: rec.corrected_normalized_name,
+        name: rec.corrected_product,
+        scientificName: resolveCropAlias(rec.corrected_normalized_name)?.scientificName || '',
+        category: rec.corrected_category,
         form: 'Fresh',
-        confidence: 0.99,
+        confidence: conf,
         confidenceLabel: 'HIGH',
         needsConfirmation: false,
         visualEvidence: [
-          `Learned user-verified identification: User confirmed this exact image as ${learnedCorrection.name}`,
-          'Perceptual fingerprint matched in persistent memory',
-          'Verified botanical classification stored'
+          backendCorrection.explanation || 'Learned from your previous correction',
+          `Original AI detection was "${rec.original_ai_result}" - user corrected to "${rec.corrected_product}"`,
+          `Persistent visual signature verified in memory (Times used: ${rec.times_matched})`
         ],
         condition: 'User verified sample',
-        qualityObservations: ['Saved to personal memory database'],
+        qualityObservations: ['Persistent human correction retrieved from database'],
         multipleProductsDetected: false,
         detectedProducts: [],
         isNonFoodOrBlurry: false,
         rejectionReason: null,
         candidates: [
           {
-            canonicalId: learnedCorrection.canonicalId,
-            name: learnedCorrection.name,
-            scientificName: learnedCorrection.scientificName,
-            category: learnedCorrection.category,
-            confidence: 0.99,
+            canonicalId: rec.corrected_normalized_name,
+            name: rec.corrected_product,
+            scientificName: resolveCropAlias(rec.corrected_normalized_name)?.scientificName || '',
+            category: rec.corrected_category,
+            confidence: conf,
             matchedTrait: 'User-Verified Learned Identification'
           }
         ],
         isRealAi: true,
         isDemoFallback: false,
-        source: 'AgriFlow Learned User Memory Engine',
+        isLearnedCorrection: true,
+        source: backendCorrection.explanation || 'AgriFlow Learned User Memory Engine',
         timestamp: now,
         uploadedPhotoPreviewUrl: uploadedPreviewUrl,
         imageSignature,
+        imageHash,
+        imagePhash,
+        imageThumbnail: thumbnail,
         price: livePrice
       };
     }
@@ -295,7 +350,9 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        imageBase64: dataUrl,
+        imageBase64: processed.dataUrl,
+        imageHash,
+        imagePhash,
         mimeType: file.type || 'image/jpeg',
         fileName: file.name,
         market: marketLocation
@@ -344,7 +401,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
           form: r.form || 'Fresh',
           confidence: r.confidence,
           confidenceLabel: r.confidenceLabel || (r.confidence >= 0.85 ? 'HIGH' : r.confidence >= 0.60 ? 'MEDIUM' : 'LOW'),
-          needsConfirmation: r.confidence < 0.85 || Boolean(r.multipleProductsDetected) || Boolean(r.isNonFoodOrBlurry),
+          needsConfirmation: r.confidence < 0.75 || Boolean(r.needsConfirmation) || Boolean(r.multipleProductsDetected) || Boolean(r.isNonFoodOrBlurry),
           visualEvidence: r.visualEvidence || ['Distinct morphological structure recognized'],
           condition: r.condition || 'Appears fresh',
           qualityObservations: r.qualityObservations || [],
@@ -355,10 +412,14 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
           candidates,
           isRealAi: Boolean(data.isRealAi),
           isDemoFallback: Boolean(data.isDemoFallback),
+          isLearnedCorrection: Boolean(data.isLearnedCorrection),
           source: r.source || (data.isRealAi ? 'Google Gemini Multimodal Vision AI' : 'AgriFlow Verified Botanical Vision Engine'),
           timestamp: now,
           uploadedPhotoPreviewUrl: uploadedPreviewUrl,
           imageSignature,
+          imageHash: r.imageHash || imageHash,
+          imagePhash: r.imagePhash || imagePhash,
+          imageThumbnail: thumbnail,
           price: livePrice
         };
       }
@@ -373,12 +434,16 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
     whiteRatio: 0.1,
     greenRatio: 0.2,
     darkGreenRatio: 0.1,
+    cardamomPodRatio: 0,
+    beetrootRubyRatio: 0,
     redRatio: 0.1,
     purpleRatio: 0.1,
     orangeRatio: 0.1,
     yellowPaleRatio: 0.1,
     goldenYellowRatio: 0.1,
     brownEarthRatio: 0.1,
+    darkBrownCoffeeRatio: 0,
+    darkTeaRatio: 0,
     aspectRatio: 1.0,
     totalPixels: 1000,
     isUniformOrBlank: false
@@ -428,6 +493,9 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
     timestamp: now,
     uploadedPhotoPreviewUrl: uploadedPreviewUrl,
     imageSignature,
+    imageHash,
+    imagePhash,
+    imageThumbnail: thumbnail,
     price: fallbackPrice
   };
 }

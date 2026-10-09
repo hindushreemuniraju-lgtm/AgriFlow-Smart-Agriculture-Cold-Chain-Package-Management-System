@@ -86,71 +86,18 @@ export async function identifyFoodFromImage(
     console.warn('[FoodPack AI Client] Vision backend API unreachable, using local fallback:', err);
   }
 
-  // Fallback heuristic based on file name or basic attributes
-  const cleanName = (file.name || '').toLowerCase();
-  let foodName = 'Beetroot';
-  let normName = 'beetroot';
-  let cat: any = 'Vegetable';
-  let sub = 'Root Vegetable';
-
-  if (cleanName.includes('tomato') || cleanName.includes('tamatar')) {
-    foodName = 'Tomato'; normName = 'tomato'; cat = 'Vegetable'; sub = 'Solanaceous Berry';
-  } else if (cleanName.includes('apple')) {
-    foodName = 'Apple'; normName = 'apple'; cat = 'Fruit'; sub = 'Pome Fruit';
-  } else if (cleanName.includes('banana')) {
-    foodName = 'Banana'; normName = 'banana'; cat = 'Fruit'; sub = 'Tropical Fruit';
-  } else if (cleanName.includes('potato')) {
-    foodName = 'Potato'; normName = 'potato'; cat = 'Vegetable'; sub = 'Tuber';
-  } else if (cleanName.includes('onion')) {
-    foodName = 'Onion'; normName = 'onion'; cat = 'Vegetable'; sub = 'Alliaceous Bulb';
-  } else if (cleanName.includes('paneer') || cleanName.includes('cheese')) {
-    foodName = 'Paneer (Cottage Cheese)'; normName = 'paneer'; cat = 'Dairy'; sub = 'Fresh Cheese';
-  } else if (cleanName.includes('milk')) {
-    foodName = 'Milk'; normName = 'milk'; cat = 'Dairy'; sub = 'Liquid Emulsion';
-  } else if (cleanName.includes('almond')) {
-    foodName = 'Almond'; normName = 'almond'; cat = 'Dry Fruit'; sub = 'Tree Nut';
-  } else if (cleanName.includes('phone') || cleanName.includes('laptop') || cleanName.includes('car')) {
-    return {
-      success: true,
-      isFood: false,
-      items: [],
-      primaryItem: null,
-      overallConfidence: 0.1,
-      needsConfirmation: false,
-      isNonFoodOrBlurry: true,
-      rejectionReason: 'This image does not appear to contain a supported food commodity.',
-      visualEvidence: ['Non-food object recognized'],
-      source: 'FoodPack AI Client Classifier',
-      timestamp: now
-    };
-  }
-
+  // Offline or unreachable fallback: Never invent Beetroot or fake commodities
   return {
     success: true,
-    isFood: true,
-    items: [
-      {
-        name: foodName,
-        normalizedName: normName,
-        category: cat,
-        subcategory: sub,
-        confidence: 0.94,
-        freshness: 'Fresh-looking'
-      }
-    ],
-    primaryItem: {
-      name: foodName,
-      normalizedName: normName,
-      category: cat,
-      subcategory: sub,
-      confidence: 0.94
-    },
-    overallConfidence: 0.94,
-    needsConfirmation: false,
-    isNonFoodOrBlurry: false,
-    rejectionReason: null,
-    visualEvidence: ['Visual spectrum and botanical parameters matched in offline baseline'],
-    source: 'FoodPack AI Client-Side Offline Engine',
+    isFood: false,
+    items: [],
+    primaryItem: null,
+    overallConfidence: 0.35,
+    needsConfirmation: true,
+    isNonFoodOrBlurry: true,
+    rejectionReason: 'Unable to confidently identify this product. Please ensure a clear, well-lit photo or select manually.',
+    visualEvidence: ['Offline client cannot perform deep multimodal pixel recognition without server connectivity'],
+    source: 'FoodPack AI Client-Side Offline Validator',
     timestamp: now
   };
 }

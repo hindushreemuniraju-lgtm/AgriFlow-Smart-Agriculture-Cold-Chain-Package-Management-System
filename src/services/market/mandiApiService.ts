@@ -95,6 +95,24 @@ const APMC_MANDI_BENCHMARKS: Record<string, Array<{
     { state: 'Karnataka', district: 'Kodagu', market: 'Madikeri Coffee Board Terminal', variety: 'Arabica Plantation A Beans', modalKg: 208, minKg: 190, maxKg: 235 },
     { state: 'Karnataka', district: 'Chikkamagaluru', market: 'Chikkamagaluru Market Yard', variety: 'Robusta Parchment / Cherry', modalKg: 205, minKg: 185, maxKg: 230 },
     { state: 'Kerala', district: 'Wayanad', market: 'Kalpetta Plantation Exchange', variety: 'Wayanad Robusta Bean', modalKg: 210, minKg: 192, maxKg: 238 }
+  ],
+  'black-pepper': [
+    { state: 'Kerala', district: 'Ernakulam', market: 'Spices Board Kochi Electronic Terminal', variety: 'Malabar Garbled (MG-1)', modalKg: 1100, minKg: 950, maxKg: 1250 },
+    { state: 'Kerala', district: 'Wayanad', market: 'Kalpetta APMC Spices Market', variety: 'Tellicherry Bold (TGSEB)', modalKg: 1120, minKg: 980, maxKg: 1280 },
+    { state: 'Karnataka', district: 'Hassan', market: 'Sakleshpur APMC Yard', variety: 'Karnataka Bold Ungarbled', modalKg: 1080, minKg: 940, maxKg: 1220 }
+  ],
+  'pepper': [
+    { state: 'Kerala', district: 'Ernakulam', market: 'Spices Board Kochi Electronic Terminal', variety: 'Malabar Garbled (MG-1)', modalKg: 1100, minKg: 950, maxKg: 1250 },
+    { state: 'Kerala', district: 'Wayanad', market: 'Kalpetta APMC Spices Market', variety: 'Tellicherry Bold (TGSEB)', modalKg: 1120, minKg: 980, maxKg: 1280 },
+    { state: 'Karnataka', district: 'Hassan', market: 'Sakleshpur APMC Yard', variety: 'Karnataka Bold Ungarbled', modalKg: 1080, minKg: 940, maxKg: 1220 }
+  ],
+  'capsicum': [
+    { state: 'Karnataka', district: 'Bengaluru Urban', market: 'Binny Mill (F&V) APMC', variety: 'Green Capsicum (Shimla Mirch)', modalKg: 48, minKg: 38, maxKg: 62 },
+    { state: 'Maharashtra', district: 'Pune', market: 'Gultekdi APMC', variety: 'Hybrid Green Bell', modalKg: 46, minKg: 36, maxKg: 60 }
+  ],
+  'bell-pepper': [
+    { state: 'Karnataka', district: 'Bengaluru Urban', market: 'Binny Mill (F&V) APMC', variety: 'Green Capsicum (Shimla Mirch)', modalKg: 48, minKg: 38, maxKg: 62 },
+    { state: 'Maharashtra', district: 'Pune', market: 'Gultekdi APMC', variety: 'Hybrid Green Bell', modalKg: 46, minKg: 36, maxKg: 60 }
   ]
 };
 
@@ -107,14 +125,22 @@ export async function fetchMandiPrices(
   districtFilter?: string,
   apiKey?: string
 ): Promise<MandiApiResponse> {
-  const cleanCrop = commodity.toLowerCase().trim();
+  let cleanCrop = commodity.toLowerCase().trim();
+  let officialCommodityQuery = commodity;
+  if (cleanCrop === 'pepper' || cleanCrop === 'black pepper' || cleanCrop.includes('black-pepper') || cleanCrop.includes('kalimirch')) {
+    cleanCrop = 'black-pepper';
+    officialCommodityQuery = 'Black Pepper';
+  } else if (cleanCrop.includes('bell pepper') || cleanCrop.includes('bell-pepper') || cleanCrop === 'capsicum') {
+    cleanCrop = 'capsicum';
+    officialCommodityQuery = 'Capsicum';
+  }
   const key = apiKey || (typeof process !== 'undefined' ? process.env?.MANDI_API_KEY || process.env?.DATA_GOV_IN_API_KEY : '');
   const now = new Date().toISOString();
 
   // Try calling real data.gov.in / Agmarknet Mandi API if API key is provided
   if (key && key !== 'your_mandi_api_key_here') {
     try {
-      const encodedCommodity = encodeURIComponent(commodity);
+      const encodedCommodity = encodeURIComponent(officialCommodityQuery);
       const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${encodeURIComponent(key)}&format=json&limit=20&filters[commodity]=${encodedCommodity}`;
       
       const response = await fetch(url);

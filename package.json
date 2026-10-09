@@ -6,12 +6,12 @@
   "scripts": {
     "dev": "concurrently \"npm run server\" \"vite\"",
     "client": "vite",
-    "server": "tsx server/index.ts",
+    "server": "tsx watch server/index.ts",
     "start": "tsx server/index.ts",
     "build": "vite build",
     "typecheck": "tsc -b",
     "lint": "oxlint",
-    "test": "tsx tests/cropIntelligence.test.ts",
+    "test": "tsx tests/cropIntelligence.test.ts && tsx tests/aiRecognitionAndVoiceArchitecture.test.ts && tsx tests/humanCorrectionLearning.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

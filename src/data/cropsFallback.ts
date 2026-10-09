@@ -1068,6 +1068,83 @@ export const CROPS_DATA: CropInfo[] = [
         ]
       }
     ]
+  },
+  {
+    id: 'crop-blackpepper',
+    name: 'Malabar Black Pepper (King of Spices)',
+    scientificName: 'Piper nigrum',
+    category: 'Dry Fruit',
+    icon: '⚫',
+    color: '#334155',
+    variety: 'Panniyur-1 / Tellicherry Garbled Extra Bold',
+    basePricePerKg: 1100,
+    optimalTempRange: [18, 25],
+    optimalHumidityRange: [50, 60],
+    ripenessDays: 90,
+    currentMaturityStage: 95,
+    ethyleneSensitivity: 'Low',
+    respirationRate: 'Low',
+    qualityTechniques: [
+      {
+        title: 'Sun-Drying to 10% Safe Moisture',
+        description: 'Dry harvested peppercorns on clean food-grade mats until moisture reaches 10-11% to prevent Aspergillus fungal growth.',
+        impact: 'Prevents aflatoxin, locks in 4.5% piperine pungency',
+        urgency: 'Scheduled'
+      }
+    ],
+    harvestingGuidance: {
+      daysRemaining: 5,
+      recommendedWindow: 'January - March',
+      sugarBrixTarget: 'Fully Developed Berries',
+      firmnessKgCm2: 'Hard Peppercorn Shell',
+      idealTimeOfDay: '08:00 AM - 12:00 PM',
+      fieldPrecautions: [
+        'Harvest when one or two berries on spike turn bright orange/red',
+        'Use clean ladders and threshing mats to prevent soil contamination'
+      ]
+    },
+    packagingPresets: {
+      recommendedMaterial: 'Hermetic Multi-Layer Met-PET Pouch with food-grade Nitrogen flush & Oxygen Scavenger',
+      coldChainTier: 'Cool & Dry Ambient Storage (18°C - 24°C, <60% RH)',
+      idealStorageTemp: '20°C',
+      humidityTarget: '55% RH',
+      shockDampeningRating: 4.8,
+      ventilationType: 'Hermetic Zero-Moisture Barrier',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Corrugated master carton with waterproof poly-liner',
+      estimatedCostPerKg: 12.5
+    },
+    nutrition: {
+      calories: 251,
+      vitaminC_mg: 0,
+      vitaminA_IU: 547,
+      dietaryFiber_g: 25.3,
+      potassium_mg: 1329,
+      antioxidantIndex: 98,
+      glycemicIndex: 0,
+      highlights: ['Rich in Piperine (enhances curcumin absorption by 2000%)', 'Potent antioxidant and thermogenic digestive catalyst']
+    },
+    shelfLife: {
+      ambientDays: 365,
+      recommendedColdDays: 730,
+      optimalPreservationSteps: [
+        'Store whole peppercorns in an airtight container away from light and heat',
+        'Grind freshly before use to retain volatile essential oils'
+      ],
+      spoilageIndicators: ['Musty mold odor', 'Softening from moisture absorption', 'Loss of sharp pungent aroma']
+    },
+    recipes: [
+      {
+        title: 'Ayurvedic Golden Piperine Elixir',
+        prepTime: '5 mins',
+        healthBenefit: 'Piperine dramatically multiplies antioxidant and curcumin bioavailability',
+        ingredients: ['1/4 tsp freshly crushed Malabar black pepper', '1/2 tsp pure turmeric', '1 cup warm milk', '1/2 tsp ghee', 'Pure honey'],
+        steps: [
+          'Crush whole black peppercorns coarsely in a mortar',
+          'Whisk into warm milk with turmeric and ghee; serve warm'
+        ]
+      }
+    ]
   }
 ];
 
@@ -1112,7 +1189,16 @@ export function generateDynamicCrop(query: string, preferredCategory?: 'Fruit' |
     calories = 25;
     shelfAmbient = 2;
     shelfCold = 10;
-  } else if (lower.includes('potato') || lower.includes('onion') || lower.includes('carrot') || lower.includes('garlic') || lower.includes('ginger') || lower.includes('cabbage') || lower.includes('cauliflower') || lower.includes('pepper') || lower.includes('tomato') || lower.includes('brinjal') || lower.includes('eggplant')) {
+  } else if (lower.includes('black pepper') || lower.includes('kalimirch') || lower.includes('peppercorn') || lower === 'pepper' || (lower.includes('pepper') && !lower.includes('bell') && !lower.includes('sweet') && !lower.includes('chilli') && !lower.includes('chili')) || lower.includes('cardamom') || lower.includes('clove') || lower.includes('cinnamon') || lower.includes('spices')) {
+    category = 'Dry Fruit';
+    icon = '⚫';
+    tempRange = [18, 25];
+    humidityRange = [50, 60];
+    price = 1100;
+    calories = 251;
+    shelfAmbient = 365;
+    shelfCold = 730;
+  } else if (lower.includes('potato') || lower.includes('onion') || lower.includes('carrot') || lower.includes('garlic') || lower.includes('ginger') || lower.includes('cabbage') || lower.includes('cauliflower') || lower.includes('bell pepper') || lower.includes('capsicum') || lower.includes('tomato') || lower.includes('brinjal') || lower.includes('eggplant')) {
     category = 'Vegetable';
     icon = '🥦';
     tempRange = [8, 12];

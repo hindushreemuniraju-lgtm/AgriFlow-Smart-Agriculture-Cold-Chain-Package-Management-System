@@ -7,6 +7,7 @@ import { getPriceHistoryAnalytics, PriceTrendAnalytics } from '../../services/ma
 import { generateSmartMarketRecommendation, SmartSellingRecommendation } from '../../services/market/marketRecommendationService';
 import { BarChart3, TrendingUp, TrendingDown, MapPin, Sparkles, AlertCircle, ShieldCheck, Scale, Truck, Box, ArrowRight, CheckCircle2, DollarSign } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
+import { OfficialPriceWidget } from './OfficialPriceWidget';
 
 interface MarketRadarSectionProps {
   product: EnrichedProductIntelligence;
@@ -114,6 +115,12 @@ export const MarketRadarSection: React.FC<MarketRadarSectionProps> = ({
           <span>{discoveryResult.radiusExpansionNote}</span>
         </div>
       )}
+
+      {/* Official Government of India data.gov.in Commodity Price Card */}
+      <OfficialPriceWidget
+        commodityName={product.name}
+        marketLocation={location.city || 'Bengaluru'}
+      />
 
       {/* 1. Smart Selling Recommendation Banner */}
       {smartRecommendation && (

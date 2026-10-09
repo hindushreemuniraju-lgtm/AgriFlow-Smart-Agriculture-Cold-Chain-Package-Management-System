@@ -1,6 +1,7 @@
 import { ProductIntelligence } from '../types/product';
 import { CropInfo } from '../types';
 import { getProductVisual } from '../utils/productImages';
+import { resolveProduct } from '../services/catalog/productNormalizationService';
 
 export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
   // ==========================================
@@ -3024,7 +3025,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       ventilationRequired: true,
       ventilationSpec: '12-16 micro-perforations per bag for respiration exchange',
       moistureProtection: 'High humidity retention without free water condensation',
-      ethyleneSensitivity: 'Moderate',
+      ethyleneSensitivity: 'Medium',
       ethyleneControl: 'Do not store with apples, bananas, or ripening tomatoes',
       cushioningSpecs: 'Rigid plastic crates prevent impact bruising and root breakage',
       shockRating: 3.5,
@@ -3032,45 +3033,60 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       packagingCapacity: '20 kg plastic crates',
       ecoCertification: '100% Recyclable Polyolefin',
       layers: [
-        { layerNumber: 1, material: 'Anti-fog Micro-perforated LDPE', thicknessMicrons: 30, purpose: 'Turgidity retention and anti-condensation' },
-        { layerNumber: 2, material: 'Food-grade Rigid HDPE Crate', thicknessMicrons: 2500, purpose: 'Transit crush protection and ventilation' }
+        { layer: 1, name: 'Liner Bag', material: 'Anti-fog Micro-perforated LDPE', function: 'Turgidity retention and anti-condensation', icon: '🥕', glowColor: '#f8fafc' },
+        { layer: 2, name: 'Crate', material: 'Food-grade Rigid HDPE Crate', function: 'Transit crush protection and ventilation', icon: '📦', glowColor: '#0284c7' }
       ]
     },
     transportation: {
-      preferredMode: 'Refrigerated Reefer Van / Ventilated Insulated Truck',
-      targetTemp: '2°C - 4°C',
-      maxTransitDays: 3,
-      humidityControl: 'Maintain 90-95% RH during transit',
+      recommendedVehicle: 'Refrigerated Reefer Van / Ventilated Insulated Truck',
       temperatureControlled: true,
-      stackingLimit: 'Maximum 8 crate tiers',
-      vibrationTolerance: 'Moderate; prevent root snapping',
-      transitChecklist: ['Pre-cool to 3°C prior to loading', 'Verify air circulation between crate stacks', 'Keep transit under 48 hours for ambient']
+      targetTemp: '2°C - 4°C',
+      maximumRecommendedDistance: '800 km',
+      handlingRequirements: ['Pre-cool to 3°C prior to loading', 'Verify air circulation between crate stacks', 'Keep transit under 48 hours for ambient'],
+      vibrationSensitivity: 'Moderate',
+      baseRatePerKm: 18.0
     },
     market: {
+      marketCategory: 'Fresh Root Vegetable Commodity',
+      priceUnit: '₹/kg',
       basePricePerKg: 36,
-      priceFluctuationRange: [22, 58],
-      marketDemand: 'Steady year-round domestic demand; high winter consumption',
-      exportPotential: 'Moderate (Regional Gulf air freight)',
-      majorMarkets: ['Azadpur Mandi Delhi', 'Vashi APMC Mumbai', 'Koyambedu Chennai', 'Yeshwanthpur Bengaluru'],
-      priceFactors: ['Root diameter & straightness', 'Absence of pithiness or cracks', 'Freshness of root skin']
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 38.0,
+        Mumbai: 36.0,
+        Delhi: 32.0,
+        Nashik: 30.0,
+        Hyderabad: 35.0,
+        Chennai: 37.0
+      },
+      priceTrend: 'Stable'
     },
     consumption: {
       nutritionalProfile: {
         calories: 16,
+        protein_g: 0.7,
+        carbs_g: 3.4,
+        fat_g: 0.1,
         vitaminC_mg: 14.8,
         vitaminA_IU: 7,
         dietaryFiber_g: 1.6,
         potassium_mg: 233,
+        iron_mg: 0.34,
         antioxidantIndex: 68,
         glycemicIndex: 15,
         highlights: ['Rich in Glucosinolates & Isothiocyanates', 'High dietary water (>95%) for hydration', 'Natural digestive and detoxifying properties']
       },
+      consumptionMethods: ['Fresh sliced in crunchy salads', 'Stuffed parathas and flatbreads', 'Pickled in mustard and turmeric brine'],
+      preparationMethods: ['Peel outer skin lightly with vegetable peeler', 'Grate and squeeze out excess moisture for fillings'],
+      nutrientPreservationTips: ['Consume fresh soon after peeling', 'Do not soak grated radish in water for long periods'],
+      recommendedPreparation: 'Enjoy raw sliced with rock salt, lemon juice, and green chillies as a digestive salad.',
+      servingGuidance: 'One medium root (100g) as part of lunch salad or cooked dish.',
+      bioavailabilityTip: 'Natural pungent mustard glycosides stimulate salivary and gastric juices, accelerating nutrient digestion.',
       recipes: [
         {
-          name: 'Crisp Mooli Paratha',
-          prepTimeMinutes: 20,
-          cookTimeMinutes: 15,
-          servings: 4,
+          title: 'Crisp Mooli Paratha',
+          prepTime: '20 mins',
+          healthBenefit: 'High digestive fiber and traditional Ayurvedic warming properties',
           ingredients: ['2 Grated Radishes (squeezed)', '2 cups Whole Wheat Flour', '1 Green Chilli chopped', '1/2 tsp Ajwain', 'Ghee for roasting'],
           steps: [
             'Squeeze excess water from grated radish and mix with spices.',
@@ -3174,7 +3190,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       ventilationRequired: true,
       ventilationSpec: '4-6 circular 25mm hand/ventilation holes per carton',
       moistureProtection: 'Dry ventilated storage; avoid moisture condensation on rind',
-      ethyleneSensitivity: 'High (Ethylene causes rind softening and flesh maceration)',
+      ethyleneSensitivity: 'High',
       ethyleneControl: 'Store and transport in ethylene-free zones',
       cushioningSpecs: 'Straw layer thickness 50mm or individual EPE foam sleeves',
       shockRating: 2.8,
@@ -3182,45 +3198,60 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       packagingCapacity: '20 kg master cartons or 400 kg corrugated bulk bins',
       ecoCertification: '100% Biodegradable & Recyclable Kraft Board',
       layers: [
-        { layerNumber: 1, material: 'EPE Foam Sleeve / Straw Layer', thicknessMicrons: 3000, purpose: 'Individual shock absorption and rind abrasion protection' },
-        { layerNumber: 2, material: '5-Ply Kraft Corrugated Master Box', thicknessMicrons: 4500, purpose: 'Heavy load stacking and compression integrity' }
+        { layer: 1, name: 'Sleeve', material: 'EPE Foam Sleeve / Straw Layer', function: 'Individual shock absorption and rind abrasion protection', icon: '🍉', glowColor: '#ef4444' },
+        { layer: 2, name: 'Master Box', material: '5-Ply Kraft Corrugated Master Box', function: 'Heavy load stacking and compression integrity', icon: '📦', glowColor: '#dc2626' }
       ]
     },
     transportation: {
-      preferredMode: 'Ventilated Truck with Straw Bedding or Reefer Container set at 12°C',
-      targetTemp: '12°C - 15°C',
-      maxTransitDays: 6,
-      humidityControl: '85% - 90% RH',
+      recommendedVehicle: 'Ventilated Truck with Straw Bedding or Reefer Container set at 12°C',
       temperatureControlled: false,
-      stackingLimit: 'Maximum 4-5 layers on straw bedding; do not over-stack',
-      vibrationTolerance: 'Moderate; prevent internal rind cracking',
-      transitChecklist: ['Lay 75mm clean dry paddy straw on truck floor', 'Stack melons horizontally in interlocking rows', 'Never transport with ethylene-generating fruits']
+      targetTemp: '12°C - 15°C',
+      maximumRecommendedDistance: '1,200 km',
+      handlingRequirements: ['Lay 75mm clean dry paddy straw on truck floor', 'Stack melons horizontally in interlocking rows', 'Never transport with ethylene-generating fruits'],
+      vibrationSensitivity: 'Moderate',
+      baseRatePerKm: 18.0
     },
     market: {
+      marketCategory: 'Seasonal Hydro-Commodity Fruit',
+      priceUnit: '₹/kg',
       basePricePerKg: 32,
-      priceFluctuationRange: [18, 52],
-      marketDemand: 'Peak demand March - June across all Indian metros and export corridors',
-      exportPotential: 'High to Middle East (UAE, Saudi Arabia, Oman, Qatar)',
-      majorMarkets: ['APMC Navi Mumbai', 'Azadpur Delhi', 'Kallikuppam Chennai', 'Bowenpally Hyderabad'],
-      priceFactors: ['Brix sugar content (>11.5°)', 'Fruit symmetry and deep crimson flesh color', 'Rind integrity and absence of sunscald']
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 34.0,
+        Mumbai: 32.0,
+        Delhi: 35.0,
+        Nashik: 30.0,
+        Hyderabad: 31.0,
+        Chennai: 33.0
+      },
+      priceTrend: 'Stable'
     },
     consumption: {
       nutritionalProfile: {
         calories: 30,
+        protein_g: 0.6,
+        carbs_g: 7.6,
+        fat_g: 0.2,
         vitaminC_mg: 8.1,
         vitaminA_IU: 569,
         dietaryFiber_g: 0.4,
         potassium_mg: 112,
+        iron_mg: 0.24,
         antioxidantIndex: 84,
         glycemicIndex: 72,
         highlights: ['High Lycopene (superior to raw tomatoes)', 'L-Citrulline for nitric oxide cardiovascular health', '92% natural electrolyte hydration']
       },
+      consumptionMethods: ['Fresh chilled sliced table melon', 'Hydration juice with black salt and mint', 'Fruit popsicles and sorbets'],
+      preparationMethods: ['Wash outer rind thoroughly before slicing', 'Slice with clean stainless chef knife on food-safe board'],
+      nutrientPreservationTips: ['Keep cut sections covered in refrigeration at 4°C', 'Consume within 2 days of slicing'],
+      recommendedPreparation: 'Enjoy freshly sliced and chilled on hot afternoons.',
+      servingGuidance: 'One to two wedges (200g-300g) for optimal natural electrolyte rehydration.',
+      bioavailabilityTip: 'High lycopene content is best absorbed with minor healthy dietary fats.',
       recipes: [
         {
-          name: 'Chilled Watermelon Mint Cooler',
-          prepTimeMinutes: 10,
-          cookTimeMinutes: 0,
-          servings: 4,
+          title: 'Chilled Watermelon Mint Cooler',
+          prepTime: '10 mins',
+          healthBenefit: 'Instant hydration and antioxidant boost',
           ingredients: ['4 cups Diced Seedless Watermelon', '10 Fresh Mint Leaves', '1 tbsp Lime Juice', '1/2 tsp Black Salt', 'Crushed Ice'],
           steps: [
             'Blend watermelon cubes with fresh mint, black salt, and lime juice for 45 seconds.',
@@ -3243,7 +3274,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
   {
     id: 'butter',
     name: 'Butter (Pasteurized Table Butter / Desi Makkhan)',
-    category: 'Dairy Products',
+    category: 'Dairy',
     subcategory: 'Processed Dairy Fat',
     scientificName: 'Butyrum (Pasteurized Cream Butter)',
     variety: 'Pasteurized Salted Table Butter (80% Milk Fat Minimum)',
@@ -3329,7 +3360,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       ventilationRequired: false,
       ventilationSpec: '100% Hermetic seal; zero ventilation (moisture and oxygen barrier essential)',
       moistureProtection: 'High grease-resistance and water-vapor barrier',
-      ethyleneSensitivity: 'None (Inorganic gas insensitive, but volatile-odor sensitive)',
+      ethyleneSensitivity: 'Low',
       ethyleneControl: 'Store away from all aromatic and chemical fumes',
       cushioningSpecs: 'Rigid outer shipper prevents compression deformation of soft butter blocks',
       shockRating: 4.0,
@@ -3337,46 +3368,61 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       packagingCapacity: '20 kg master corrugated cases (40 x 500g bricks)',
       ecoCertification: 'FSC Certified Recyclable Outer Cartons',
       layers: [
-        { layerNumber: 1, material: 'Vegetable Parchment / Alu-foil laminate', thicknessMicrons: 45, purpose: 'Grease resistance, moisture barrier, and light blocking' },
-        { layerNumber: 2, material: 'Food Grade Solid Bleached Sulfate (SBS) Carton', thicknessMicrons: 320, purpose: 'Structural rigidity and retail UV shield' },
-        { layerNumber: 3, material: '5-Ply Heavy Duty Corrugated Master Shipper', thicknessMicrons: 4000, purpose: 'Cold store stacking and reefer transit protection' }
+        { layer: 1, name: 'Laminate Wrap', material: 'Vegetable Parchment / Alu-foil laminate', function: 'Grease resistance, moisture barrier, and light blocking', icon: '🧈', glowColor: '#eab308' },
+        { layer: 2, name: 'SBS Carton', material: 'Food Grade Solid Bleached Sulfate (SBS) Carton', function: 'Structural rigidity and retail UV shield', icon: '📦', glowColor: '#ca8a04' },
+        { layer: 3, name: 'Master Shipper', material: '5-Ply Heavy Duty Corrugated Master Shipper', function: 'Cold store stacking and reefer transit protection', icon: '🧊', glowColor: '#0284c7' }
       ]
     },
     transportation: {
-      preferredMode: 'Dedicated Refrigerated Reefer Container (-18°C or 2°C - 4°C)',
-      targetTemp: '2°C - 4°C (Domestic Retail) or -18°C (Bulk Inter-state)',
-      maxTransitDays: 14,
-      humidityControl: '65% - 75% RH',
+      recommendedVehicle: 'Dedicated Refrigerated Reefer Container (-18°C or 2°C - 4°C)',
       temperatureControlled: true,
-      stackingLimit: 'Maximum 6 carton tiers',
-      vibrationTolerance: 'High; ensure temperature is maintained',
-      transitChecklist: ['Verify reefer datalogger setpoint at -18°C / 4°C', 'Ensure pallet shrink-wrap is secure', 'Inspect container for zero cross-odors']
+      targetTemp: '2°C - 4°C (Domestic Retail) or -18°C (Bulk Inter-state)',
+      maximumRecommendedDistance: '2,500 km',
+      handlingRequirements: ['Verify reefer datalogger setpoint at -18°C / 4°C', 'Ensure pallet shrink-wrap is secure', 'Inspect container for zero cross-odors'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 26.0
     },
     market: {
+      marketCategory: 'Essential Value-Added Dairy Commodity',
+      priceUnit: '₹/kg',
       basePricePerKg: 560,
-      priceFluctuationRange: [520, 620],
-      marketDemand: 'Massive consistent domestic FMCG demand (Horeca, bakeries, households)',
-      exportPotential: 'High to Southeast Asia, Middle East, and USA',
-      majorMarkets: ['National Retail & Horeca Networks (Amul, Mother Dairy, Nandini, Britannia)'],
-      priceFactors: ['Milk fat percentage (>80%)', 'Fresh clean lactic flavor without acid bite', 'Uniform yellow/white hue without oxidation streaks']
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 560.0,
+        Mumbai: 550.0,
+        Delhi: 570.0,
+        Nashik: 555.0,
+        Hyderabad: 565.0,
+        Chennai: 575.0
+      },
+      priceTrend: 'Stable'
     },
     consumption: {
       nutritionalProfile: {
         calories: 717,
+        protein_g: 0.9,
+        carbs_g: 0.1,
+        fat_g: 81.1,
         vitaminC_mg: 0,
         vitaminA_IU: 2499,
         dietaryFiber_g: 0,
         potassium_mg: 24,
+        iron_mg: 0.02,
         antioxidantIndex: 45,
         glycemicIndex: 0,
         highlights: ['Rich source of Fat-Soluble Vitamin A, D, E, and K2', 'Conjugated Linoleic Acid (CLA)', 'Rapid energy source via Short & Medium-Chain Fatty Acids']
       },
+      consumptionMethods: ['Spread on warm artisan toast and rotis', 'Cooking and baking fat in pastries and cakes', 'Traditional tempering and finishing agent for dals'],
+      preparationMethods: ['Bring to room temperature (18°C-20°C) 15 mins prior to spreading', 'Melt gently over low heat to avoid browning'],
+      nutrientPreservationTips: ['Keep chilled in opaque container away from light', 'Avoid repeated freeze-thaw cycles'],
+      recommendedPreparation: 'Melt a single pat (10g) over hot lentil curries or whole grain flatbreads.',
+      servingGuidance: 'Moderate consumption (10g-15g daily) within balanced dietary macronutrients.',
+      bioavailabilityTip: 'Natural dairy fats enhance absorption of fat-soluble vitamins (A, D, E, K) from vegetables and pulses.',
       recipes: [
         {
-          name: 'Classic Dal Makhani with Butter Tempering',
-          prepTimeMinutes: 20,
-          cookTimeMinutes: 60,
-          servings: 6,
+          title: 'Classic Dal Makhani with Butter Tempering',
+          prepTime: '20 mins',
+          healthBenefit: 'High protein recovery with rich satiety and micronutrient absorption',
           ingredients: ['1 cup Whole Black Urad Dal', '1/4 cup Rajma', '4 tbsp Pasteurized Butter', '1 cup Tomato Puree', '2 tbsp Fresh Cream', 'Kasuri Methi'],
           steps: [
             'Slow simmer boiled black urad and rajma with tomato puree and Kashmiri chilli for 45 minutes.',
@@ -3480,7 +3526,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       ventilationRequired: false,
       ventilationSpec: '100% Hermetic seal; zero perforations (volatile terpene & moisture barrier mandatory)',
       moistureProtection: 'Ultra-high water vapor and oxygen barrier (WVTR < 0.5 g/m²/day, OTR < 1.0 cc/m²/day)',
-      ethyleneSensitivity: 'None (Dry non-climacteric spice)',
+      ethyleneSensitivity: 'Low',
       ethyleneControl: 'Zero chemical contamination; keep isolated from harsh external aromas',
       cushioningSpecs: 'Pouch sealing prevents capsule crushing and seed detachment',
       shockRating: 4.2,
@@ -3488,46 +3534,61 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       packagingCapacity: '1 kg retail pouches or 25 kg master export cartons',
       ecoCertification: 'Spices Board of India Certified Export Grade',
       layers: [
-        { layerNumber: 1, material: 'Reverse Printed 12µm Polyethylene Terephthalate (PET)', thicknessMicrons: 12, purpose: 'Printability, mechanical strength, and UV protection' },
-        { layerNumber: 2, material: 'Vacuum Metallized PET (Met-PET) Barrier Film', thicknessMicrons: 12, purpose: 'High oxygen, light, and aroma barrier (prevents terpene loss)' },
-        { layerNumber: 3, material: 'Food Grade Linear Low-Density Polyethylene (LLDPE)', thicknessMicrons: 76, purpose: 'Hermetic heat seal layer and moisture vapor barrier' }
+        { layer: 1, name: 'Outer Barrier', material: 'Reverse Printed 12µm Polyethylene Terephthalate (PET)', function: 'Printability, mechanical strength, and UV protection', icon: '🌿', glowColor: '#22c55e' },
+        { layer: 2, name: 'Met-PET Core', material: 'Vacuum Metallized PET (Met-PET) Barrier Film', function: 'High oxygen, light, and aroma barrier (prevents terpene loss)', icon: '🛡️', glowColor: '#16a34a' },
+        { layer: 3, name: 'Seal Layer', material: 'Food Grade Linear Low-Density Polyethylene (LLDPE)', function: 'Hermetic heat seal layer and moisture vapor barrier', icon: '📦', glowColor: '#15803d' }
       ]
     },
     transportation: {
-      preferredMode: 'Dry Clean Weatherproof Container Truck / Air Cargo for Export',
-      targetTemp: '15°C - 22°C (Dry ambient enclosed container)',
-      maxTransitDays: 21,
-      humidityControl: '<60% RH',
+      recommendedVehicle: 'Dry Clean Weatherproof Container Truck / Air Cargo for Export',
       temperatureControlled: false,
-      stackingLimit: 'Maximum 8 carton tiers',
-      vibrationTolerance: 'High; capsules protected inside sealed barrier packs',
-      transitChecklist: ['Verify pouches are hermetically vacuum/nitrogen sealed', 'Ensure transit container is clean, dry, and odor-free', 'Inspect moisture silica desiccant pouches inside master carton']
+      targetTemp: '15°C - 22°C (Dry ambient enclosed container)',
+      maximumRecommendedDistance: '3,000 km',
+      handlingRequirements: ['Verify pouches are hermetically vacuum/nitrogen sealed', 'Ensure transit container is clean, dry, and odor-free', 'Inspect moisture silica desiccant pouches inside master carton'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 28.0
     },
     market: {
+      marketCategory: 'High-Value Queen of Spices Commodity',
+      priceUnit: '₹/kg',
       basePricePerKg: 1950,
-      priceFluctuationRange: [1650, 2400],
-      marketDemand: 'Ultra-high national & global export demand (Middle East, Europe, North America, Ayurvedic pharma, FMCG confectionery)',
-      exportPotential: 'Very High (India is one of the world top exporters via Spices Board E-Auctions)',
-      majorMarkets: ['Bodinayakanur E-Auction (Tamil Nadu)', 'Vandanmettu Auction Centre (Kerala)', 'Spices Board Kochi', 'Khari Baoli (Delhi)'],
-      priceFactors: ['Capsule size grade (AGEB 8mm+ fetches highest premium)', 'Green color retention (chlorophyll index)', 'Volatile oil content (>3.5% v/w)', 'Moisture percentage (<10.5%)']
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 2000.0,
+        Mumbai: 2050.0,
+        Delhi: 2100.0,
+        Nashik: 1950.0,
+        Hyderabad: 1980.0,
+        Chennai: 1960.0
+      },
+      priceTrend: 'Rising'
     },
     consumption: {
       nutritionalProfile: {
         calories: 311,
+        protein_g: 10.8,
+        carbs_g: 68.5,
+        fat_g: 6.7,
         vitaminC_mg: 21,
         vitaminA_IU: 0,
         dietaryFiber_g: 28,
         potassium_mg: 1119,
+        iron_mg: 13.97,
         antioxidantIndex: 94,
         glycemicIndex: 0,
         highlights: ['Rich in 1,8-Cineole, Terpinyl Acetate, and Linalool', 'Powerful digestive and carminative properties', 'High manganese and potassium bio-availability']
       },
+      consumptionMethods: ['Whole bruised pods in biryanis and curries', 'Fresh ground powder in masala chai and desserts', 'Mouth freshener chew after meals'],
+      preparationMethods: ['Lightly crush green pods to release seeds before adding to liquids', 'Dry roast gently at low heat for 60 seconds to intensify aroma'],
+      nutrientPreservationTips: ['Store whole pods and grind only when needed', 'Keep away from light and humidity in airtight tin or jar'],
+      recommendedPreparation: 'Infuse freshly crushed pods into boiling water or milk for aromatic digestive tea.',
+      servingGuidance: 'One to two whole pods or a pinch (0.5g) of fresh powder per serving.',
+      bioavailabilityTip: 'Essential cineole oils enhance digestive enzyme secretion and nutrient absorption in gastrointestinal tract.',
       recipes: [
         {
-          name: 'Royal Shahi Biryani Spice Blend (Garam Masala Infusion)',
-          prepTimeMinutes: 10,
-          cookTimeMinutes: 5,
-          servings: 12,
+          title: 'Royal Shahi Biryani Spice Blend (Garam Masala Infusion)',
+          prepTime: '10 mins',
+          healthBenefit: 'Potent digestive stimulant, anti-inflammatory, and antioxidant aroma',
           ingredients: ['15g Green Cardamom Pods', '10g Black Pepper', '10g Cloves', '20g Cinnamon sticks', '5g Mace'],
           steps: [
             'Lightly warm whole green cardamom and spices on low heat for 90 seconds to release aromatic essential oils.',
@@ -3544,6 +3605,172 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       excessRainRisk: 'Continuous heavy monsoon rain causes Azhukal capsule rot in plantations.',
       transitShockRisk: 'Low; protect outer cartons from water ingress and high humidity.',
       mitigationStrategy: 'Cure immediately post-harvest to 10% moisture and pack in hermetic Met-PET/PE aroma-barrier pouches with desiccant.'
+    }
+  },
+
+  // 19B. BLACK PEPPER (HIGH-VALUE KING OF SPICES COMMODITY)
+  {
+    id: 'black-pepper',
+    name: 'Black Pepper (Malabar Kalimirch / King of Spices)',
+    category: 'Spice',
+    subcategory: 'Whole Dried Spice Berry',
+    scientificName: 'Piper nigrum',
+    variety: 'Panniyur-1 / Tellicherry Garbled Extra Bold (TGSEB)',
+    description: 'The ancient King of Spices cultivated along the Malabar Coast of India. Sun-cured black peppercorns containing volatile terpenes (pinene, limonene) and piperine, an alkaloid with immense medicinal and digestive bio-enhancement value. Requires strict protection from moisture (>65% RH induces mold) and high heat (>30°C causes aroma dissipation).',
+    icon: '⚫',
+    color: '#1e293b',
+    aliases: ['black pepper', 'pepper', 'black-pepper', 'kalimirch', 'kali mirch', 'peppercorn', 'black peppercorn', 'piper nigrum', 'kalu menasu', 'miriyalu', 'milagu'],
+    images: {
+      productImage: 'cardamom',
+      productImageAlt: 'Premium Malabar Black Peppercorns'
+    },
+    growing: {
+      climate: 'Humid tropical evergreen rainforest canopy (Malabar Coast / Western Ghats) with 2000-3500 mm annual rainfall and 18°C - 35°C temperature.',
+      soil: 'Rich red laterite or fertile forest loamy soil with high organic matter and rapid drainage.',
+      idealSoilPh: '5.5 - 6.5',
+      temperatureRange: [18, 35],
+      rainfallRequirement: '2000 - 3000 mm well-distributed',
+      sowingMethod: 'Runner shoot stem cutting planting against living support trees (standards)',
+      sowingSeason: 'Monsoon onset (May - June)',
+      seedRequirement: 'Rooted cuttings ~1600 - 1800 vines / hectare',
+      spacing: '2.5 m between rows x 2.5 m between support trees',
+      growthDuration: 'Perennial climbing vine; full economic harvest from 4th year onwards',
+      growthDays: 180,
+      currentMaturityStage: 90,
+      irrigation: 'Protective drip/basin irrigation during summer drought months (Feb-May) every 10-14 days.',
+      fertilizerGuidance: [
+        { stage: 'Pre-Monsoon (May-June)', recommendation: 'NPK 100:40:140 g/vine in split doses + Neem cake 1 kg/vine', impact: 'Stimulates lateral fruiting branches (plagiotropes)', urgency: 'Immediate' },
+        { stage: 'Post-Monsoon (Sept-Oct)', recommendation: 'Foliar spray 1% Bordeaux mixture + 0.2% Zinc Sulfate', impact: 'Fungal prophylaxis & spike berry retention', urgency: 'Scheduled' }
+      ],
+      commonPests: ['Pollu Beetle (Longitarsus nigripennis)', 'Top Shoot Borer', 'Root Knot Nematode'],
+      diseaseRisks: ['Quick Wilt / Foot Rot (Phytophthora capsici)', 'Slow Wilt (Fusarium & Radopholus)', 'Pollu Anthracnose'],
+      criticalCareTips: [
+        'Regulate shade of support trees before southwest monsoon to prevent fungus buildup.',
+        'Apply Trichoderma harzianum fortified organic manure to root basins for biological foot-rot control.',
+        'Harvest when one or two berries on spike turn bright orange-red for peak piperine density.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 20,
+      recommendedWindow: 'Selective manual spike picking from December through March',
+      maturityIndicators: [
+        'One or two berries on the spike turn bright orange or red.',
+        'Berries feel hard and firm when squeezed between thumb and forefinger.',
+        'Whole spikes separate cleanly from vine nodes.'
+      ],
+      harvestingMethod: 'Manual hand picking using bamboo ladders and harvest sacks.',
+      bestHarvestTime: 'Dry clear sunny mornings',
+      firmnessTarget: 'Hard mature berries (550 g/L bulk density for TGSEB grade)',
+      postHarvestHandling: [
+        'Threshing berries from spikes manually or using mechanical rubber roller threshers.',
+        'Hot water dipping (blanching) at 80°C for 60 seconds to accelerate enzymatic browning and uniform jet-black coloration.',
+        'Sun drying on clean food-grade mats for 7-10 days until moisture drops below 10.5%.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '12 to 24 Months in hermetic moisture-barrier packaging',
+      shelfLifeCold: '24 to 36 Months in controlled temperature dry warehouse',
+      ambientDays: 365,
+      coldDays: 730,
+      storageTemperature: '15°C - 24°C (Dry Ventilated Warehouse)',
+      humidity: '50% - 60% RH (Must prevent moisture absorption >11% to avoid mold and aflatoxins)',
+      coldStorageRequired: false,
+      storageMethod: 'Hermetically sealed multi-layer metallized poly pouches inside corrugated master cartons stored on wooden pallets',
+      preservationSteps: [
+        'Keep relative humidity strictly below 60% to avoid Aspergillus mold growth.',
+        'Store whole peppercorns rather than powder to retain volatile pinene and piperine oils.',
+        'Protect from direct sunlight and heat radiation to prevent terpene dissipation.'
+      ],
+      spoilageIndicators: ['Musty mold odor', 'Softening from moisture re-absorption', 'Loss of pungent sharp bite'],
+      curingRequired: true,
+      curingInstructions: 'Sun dry on clean tarpaulins to 10% moisture; optional 1-min hot blanching prior to drying for uniform jet black color.'
+    },
+    packaging: {
+      primaryPackaging: 'Multi-layer Metallized Polyester / Polyethylene (PET / Met-PET / PE) Hermetic Pouches (500g / 1kg / 5kg)',
+      secondaryPackaging: 'Heavy Duty 5-Ply Corrugated Master Cartons (25kg bulk export shipper)',
+      recommendedMaterials: ['PET / Met-PET / Polyethylene (100 µm)', 'Aluminium Foil Barrier Laminate', 'High-Barrier EVOH Pouches with Nitrogen Flushing'],
+      ventilationRequired: false,
+      ventilationSpec: '100% Hermetic seal; zero perforations (volatile terpene & moisture barrier mandatory)',
+      moistureProtection: 'Ultra-high water vapor and oxygen barrier (WVTR < 0.5 g/m²/day, OTR < 1.0 cc/m²/day)',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Zero chemical contamination; keep isolated from harsh external aromas',
+      cushioningSpecs: 'Corrugated master carton with waterproof inner poly-liner',
+      shockRating: 4.8,
+      estimatedPackagingCostPerKg: 12.50,
+      packagingCapacity: '1 kg retail pouches or 25 kg master export cartons',
+      ecoCertification: 'Spices Board of India Certified Export Grade',
+      layers: [
+        { layer: 1, name: 'Outer Barrier', material: 'Reverse Printed 12µm Polyethylene Terephthalate (PET)', function: 'Printability, mechanical strength, and UV protection', icon: '🌿', glowColor: '#334155' },
+        { layer: 2, name: 'Met-PET Core', material: 'Vacuum Metallized PET (Met-PET) Barrier Film', function: 'High oxygen, light, and aroma barrier (prevents terpene loss)', icon: '🛡️', glowColor: '#475569' },
+        { layer: 3, name: 'Seal Layer', material: 'Food Grade Linear Low-Density Polyethylene (LLDPE)', function: 'Hermetic heat seal layer and moisture vapor barrier', icon: '📦', glowColor: '#64748b' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Dry Clean Weatherproof Container Truck / Air Cargo for Export',
+      temperatureControlled: false,
+      targetTemp: '18°C - 24°C (Dry ambient enclosed container)',
+      maximumRecommendedDistance: '3,000 km',
+      handlingRequirements: ['Verify pouches are hermetically vacuum/nitrogen sealed', 'Ensure transit container is clean, dry, and odor-free', 'Inspect moisture silica desiccant pouches inside master carton'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 28.0
+    },
+    market: {
+      marketCategory: 'High-Value King of Spices Commodity',
+      priceUnit: '₹/kg',
+      basePricePerKg: 1100,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 1120.0,
+        Mumbai: 1150.0,
+        Delhi: 1180.0,
+        Nashik: 1110.0,
+        Hyderabad: 1130.0,
+        Chennai: 1115.0
+      },
+      priceTrend: 'Stable'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 251,
+        protein_g: 10.4,
+        carbs_g: 64.0,
+        fat_g: 3.3,
+        vitaminC_mg: 0,
+        vitaminA_IU: 547,
+        dietaryFiber_g: 25.3,
+        potassium_mg: 1329,
+        iron_mg: 9.7,
+        antioxidantIndex: 98,
+        glycemicIndex: 0,
+        highlights: ['Rich in Piperine (increases curcumin bioavailability by up to 2000%)', 'Potent digestive stimulant and carminative', 'High manganese and potassium bio-density']
+      },
+      consumptionMethods: ['Fresh coarsely ground in curries, soups, and eggs', 'Whole corns in biryanis, rasam, and marinades', 'Ayurvedic Kashayam and golden milk infusion'],
+      preparationMethods: ['Crush whole peppercorns right before cooking or serving to preserve volatile essential oils', 'Do not boil excessively; add towards the final stages of cooking for maximum aroma'],
+      nutrientPreservationTips: ['Store whole and grind on demand', 'Keep sealed in an opaque, airtight container away from heat and light'],
+      recommendedPreparation: 'Coarsely crush 4-5 peppercorns and steep with pure turmeric and warm milk for an immunity elixir.',
+      servingGuidance: '0.5g to 1g (1/4 tsp) of freshly ground pepper per serving.',
+      bioavailabilityTip: 'Piperine inhibits hepatic glucuronidation, dramatically multiplying nutrient and herbal absorption.',
+      recipes: [
+        {
+          title: 'Authentic South Indian Milagu Rasam (Spiced Black Pepper Broth)',
+          prepTime: '15 mins',
+          healthBenefit: 'Instant relief from nasal congestion, sore throat, and digestive stagnation',
+          ingredients: ['1 tsp Malabar Black Peppercorns', '1 tsp Cumin Seeds', '3 Garlic cloves', '1 Ripe Tomato', 'Tamarind pulp', 'Curry leaves', 'Ghee'],
+          steps: [
+            'Coarsely crush black peppercorns, cumin seeds, and garlic in a mortar.',
+            'Simmer tomato and tamarind extract with turmeric and crushed spice blend for 8 minutes.',
+            'Temper with mustard seeds and curry leaves in pure ghee; serve steaming hot.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Humidity above 65% causes moisture re-absorption and rapid white/green mold growth (Aspergillus flavus).',
+      highTempRisk: 'Storage above 30°C volatilizes essential piperine and pinene terpenes, causing loss of pungency and aroma.',
+      frostRisk: 'Tolerant in cured dried state; plantation vines killed by sub-zero cold.',
+      excessRainRisk: 'Water ingress during storage or transit destroys quality within 48 hours.',
+      transitShockRisk: 'Low; keep master cartons sealed and dry.',
+      mitigationStrategy: 'Store at 10-11% moisture in multi-layer Met-PET vacuum or nitrogen-flushed barrier bags with silica desiccant.'
     }
   },
 
@@ -3630,7 +3857,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       ventilationRequired: true,
       ventilationSpec: 'Micro-perforations (4-6 holes of 6mm diameter per kg) to balance high humidity retention with aerobic respiration',
       moistureProtection: 'High moisture retention liner (maintains local microclimate >95% RH while allowing CO2 release)',
-      ethyleneSensitivity: 'Low to Moderate',
+      ethyleneSensitivity: 'Low',
       ethyleneControl: 'Store away from high-ethylene emitters like ripening apples and bananas to prevent early sprouting',
       cushioningSpecs: 'Smooth carton lining prevents skin scuffing and abrasion damage',
       shockRating: 3.6,
@@ -3638,45 +3865,60 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       packagingCapacity: '20 kg master export corrugated cartons or 10 kg mesh bags',
       ecoCertification: '100% Recyclable FSC Certified Outer Corrugated Shippers',
       layers: [
-        { layerNumber: 1, material: 'Food Grade Micro-Perforated LDPE Liner Film (25µm)', thicknessMicrons: 25, purpose: 'High relative humidity microclimate (>95% RH) and anti-transpirational shrivel protection' },
-        { layerNumber: 2, material: '5-Ply High-Stiffness Kraft Corrugated Master Shipper', thicknessMicrons: 4200, purpose: 'Stacking strength, compression resistance, and cold store ventilation' }
+        { layer: 1, name: 'Liner Film', material: 'Food Grade Micro-Perforated LDPE Liner Film (25µm)', function: 'High relative humidity microclimate (>95% RH) and anti-transpirational shrivel protection', icon: '🛡️', glowColor: '#e11d48' },
+        { layer: 2, name: 'Master Shipper', material: '5-Ply High-Stiffness Kraft Corrugated Master Shipper', function: 'Stacking strength, compression resistance, and cold store ventilation', icon: '📦', glowColor: '#9333ea' }
       ]
     },
     transportation: {
-      preferredMode: 'Refrigerated Reefer Container (0°C - 2°C) or Ventilated Insulated Truck',
-      targetTemp: '0°C - 2°C (Reefer) or <12°C (Short Distance)',
-      maxTransitDays: 14,
-      humidityControl: '90% - 95% RH',
+      recommendedVehicle: 'Refrigerated Reefer Container (0°C - 2°C) or Ventilated Insulated Truck',
       temperatureControlled: true,
-      stackingLimit: 'Maximum 6 carton tiers',
-      vibrationTolerance: 'Moderate; protected inside padded corrugated master cartons',
-      transitChecklist: ['Verify reefer setpoint at 0°C - 2°C', 'Inspect micro-perforated liners are intact', 'Ensure zero skin scuffing or water soaking in cartons']
+      targetTemp: '0°C - 2°C (Reefer) or <12°C (Short Distance)',
+      maximumRecommendedDistance: '1,500 km',
+      handlingRequirements: ['Verify reefer setpoint at 0°C - 2°C', 'Inspect micro-perforated liners are intact', 'Ensure zero skin scuffing or water soaking in cartons'],
+      vibrationSensitivity: 'Moderate',
+      baseRatePerKm: 19.5
     },
     market: {
+      marketCategory: 'Fresh Root Vegetable Commodity',
+      priceUnit: '₹/kg',
       basePricePerKg: 38,
-      priceFluctuationRange: [28, 52],
-      marketDemand: 'Steady national year-round culinary & health juice demand; growing export potential to GCC and Europe',
-      exportPotential: 'Moderate to High (Fresh washed trimmed beetroot in 10kg cartons)',
-      majorMarkets: ['Azadpur Mandi (Delhi)', 'Kolar APMC (Karnataka)', 'Gultekdi APMC (Pune)', 'Koyambedu F&V Terminal (Chennai)'],
-      priceFactors: ['Root diameter uniformity (50-65mm Grade A premium)', 'Intense dark ruby-red internal betacyanin ring density', 'Clean smooth skin without surface scars', 'Zero internal pithiness or black heart']
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 40.0,
+        Mumbai: 42.0,
+        Delhi: 36.0,
+        Nashik: 34.0,
+        Hyderabad: 38.0,
+        Chennai: 41.0
+      },
+      priceTrend: 'Stable'
     },
     consumption: {
       nutritionalProfile: {
         calories: 43,
+        protein_g: 1.6,
+        carbs_g: 9.6,
+        fat_g: 0.2,
         vitaminC_mg: 4.9,
         vitaminA_IU: 33,
         dietaryFiber_g: 2.8,
         potassium_mg: 325,
+        iron_mg: 0.8,
         antioxidantIndex: 88,
         glycemicIndex: 61,
         highlights: ['Rich in Betalains (Betanin & Vulgaxanthin)', 'High Dietary Inorganic Nitrates (supports cardiovascular health and athletic stamina)', 'Excellent source of Folate (Vitamin B9) and Manganese']
       },
+      consumptionMethods: ['Fresh pressed cold juice with ginger and apple', 'Steamed or boiled salad cubes with lemon juice', 'Traditional South Indian poriyal or North Indian subzi'],
+      preparationMethods: ['Wash thoroughly to remove soil before peeling', 'Steam unpeeled to preserve betalain pigments then peel'],
+      nutrientPreservationTips: ['Do not overboil in discarded water to retain water-soluble betalains', 'Pair with vitamin C for maximum iron absorption'],
+      recommendedPreparation: 'Steam lightly for 10-12 minutes with a touch of rock salt and cold-pressed coconut oil.',
+      servingGuidance: 'Ideal in daily diet (100g-150g) for cardiovascular wellness.',
+      bioavailabilityTip: 'Combine with citrus juice or amla to enhance non-heme iron and antioxidant assimilation.',
       recipes: [
         {
-          name: 'South Indian Chukandar Poriyal (Spiced Beetroot Stir-Fry)',
-          prepTimeMinutes: 10,
-          cookTimeMinutes: 15,
-          servings: 4,
+          title: 'South Indian Chukandar Poriyal (Spiced Beetroot Stir-Fry)',
+          prepTime: '20 mins',
+          healthBenefit: 'Boosts stamina, nitric oxide blood flow, and digestive fiber',
           ingredients: ['500g Fresh Beetroot (diced/grated)', '1 tsp Mustard seeds', '1 tbsp Urad dal', '2 Green chillies', '1 sprig Curry leaves', '3 tbsp Fresh grated coconut'],
           steps: [
             'Heat coconut oil in a pan, add mustard seeds, urad dal, green chillies, and curry leaves until fragrant.',
@@ -3694,6 +3936,516 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       transitShockRisk: 'Moderate; protect roots from skin abrasion which causes dark oxidized blemishes.',
       mitigationStrategy: 'Trim tops to 2cm, wash in sanitized water, pack in micro-perforated LDPE liners, and store at 0-2°C with 95% RH.'
     }
+  },
+  // ==========================================
+  // 23. APPLE (HIGH-ALTITUDE POME FRUIT)
+  // ==========================================
+  {
+    id: 'apple',
+    name: 'Apple (Kashmiri & Kinnaur Royal Delicious)',
+    category: 'Fruit',
+    subcategory: 'Pome Fruit',
+    scientificName: 'Malus domestica',
+    variety: 'Royal Delicious / Red Chief / Kashmiri Golden',
+    description: 'Crisp, high-altitude pome fruit with exceptional storage longevity under controlled atmosphere. Highly sensitive to mechanical bruising, high respiration at ambient temperatures, and ethylene emission.',
+    icon: '🍎',
+    color: '#dc2626',
+    aliases: [
+      'apple', 'apples', 'fresh apple', 'royal delicious', 'shimla apple', 'kinnaur apple', 'kashmiri apple',
+      'seb', 'sebu', 'aapal', 'सेब', 'ಸೇಬು', 'ఆపిల్', 'ஆப்பிள்'
+    ],
+    images: {
+      productImage: 'apple',
+      productImageAlt: 'Crisp Red Royal Delicious Mountain Apples'
+    },
+    growing: {
+      climate: 'Cool temperate climate requiring 1,000–1,500 chilling hours below 7°C during winter dormancy.',
+      soil: 'Deep well-drained loamy to sandy clay loam soil rich in organic matter.',
+      idealSoilPh: '5.5 - 6.8',
+      temperatureRange: [0, 24],
+      rainfallRequirement: '1000 - 1250 mm distributed evenly across growing season',
+      sowingMethod: 'Grafted clonal rootstock planting on contour terraces',
+      sowingSeason: 'Dormant winter planting (December - February)',
+      seedRequirement: '500 - 1250 trees / hectare depending on canopy architecture',
+      spacing: '4m x 4m (Semi-dwarf) or 3m x 1.5m (High-density trellis)',
+      growthDuration: 'Perennial orchard; 130 - 150 days from petal fall to harvest',
+      growthDays: 140,
+      currentMaturityStage: 90,
+      irrigation: 'Drip fertigation during fruit cell expansion stage; avoid water stress during June drop.',
+      fertilizerGuidance: [
+        { stage: 'Dormant Bud Break', recommendation: 'FYM 30 t/ha + 350g N + 175g P2O5 + 350g K2O per mature tree', impact: 'Strong spur vigor and uniform blossom set', urgency: 'Immediate' },
+        { stage: 'Fruitlet Set', recommendation: 'Foliar Boron (0.1%) + Zinc Sulfate (0.5%) spray', impact: 'Prevents fruit cracking and enhances calyx structure', urgency: 'Scheduled' },
+        { stage: 'Pre-Harvest (30 Days)', recommendation: 'Calcium Chloride (0.5%) foliar spray twice', impact: 'Increases cell wall calcium and prevents bitter pit / breakdown', urgency: 'Monitoring' }
+      ],
+      commonPests: ['San Jose Scale (Quadraspidiotus perniciosus)', 'Woolly Apple Aphid', 'European Red Mite'],
+      diseaseRisks: ['Apple Scab (Venturia inaequalis)', 'Powdery Mildew', 'Bitter Pit (Calcium deficiency)'],
+      criticalCareTips: [
+        'Apply pre-harvest calcium sprays to prevent bitter pit disorder.',
+        'Prune water sprouts to maximize sunlight penetration into the inner canopy.',
+        'Pre-cool harvested fruit within 12 hours of picking to arrest ripening.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 14,
+      recommendedWindow: 'Morning hours when ground color changes from green to creamy yellow',
+      maturityIndicators: [
+        'Starch-iodine index pattern reaches rating 5–6.',
+        'Soluble solids content (TSS) reaches 12.5–14.5 °Brix.',
+        'Flesh firmness measures 7.5–8.2 kg/cm² on penetrometer with 11mm probe.'
+      ],
+      harvestingMethod: 'Manual hand picking using palm grasp with thumb at the abscission zone; lift and twist gently.',
+      bestHarvestTime: 'Early morning (06:00 AM - 10:30 AM) while ambient temperature is low',
+      firmnessTarget: '7.5 - 8.2 kg/cm²',
+      sugarBrixTarget: '13.0 - 14.5 °Bx',
+      postHarvestHandling: [
+        'Pre-cooling rapidly to 2°C - 4°C within 12 hours of harvest.',
+        '1-MCP (1-Methylcyclopropene) treatment to block ethylene receptors.',
+        'Sorting into Grade Extra Fancy, Grade A, and culinary processing fruit.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '10 to 14 Days (Rapid starch breakdown and softening at >20°C)',
+      shelfLifeCold: '180 to 240 Days in Controlled Atmosphere (CA: 1.5% O2, 1.0% CO2 at 0.5°C - 1.5°C)',
+      ambientDays: 12,
+      coldDays: 210,
+      storageTemperature: '0.5°C - 2°C (Cold Storage / CA)',
+      humidity: '90% - 95% RH (High humidity required to prevent skin wrinkling)',
+      coldStorageRequired: true,
+      storageMethod: 'Controlled Atmosphere (CA) cold rooms with molded pulp cell trays stacked in ventilated 5-ply cartons on pallets',
+      preservationSteps: [
+        'Maintain continuous storage temperature between 0.5°C and 1.5°C without fluctuation.',
+        'Apply 1-MCP within 7 days of harvest to arrest climacteric ethylene production.',
+        'Ensure continuous scrubber operation to keep ethylene concentration below 1 ppm.'
+      ],
+      spoilageIndicators: ['Mealy dry texture', 'Bitter pit skin depressions', 'Internal core browning (senescent breakdown)'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Molded Paper Pulp Fruit Trays (Cell sizes 80 to 120)',
+      secondaryPackaging: '5-Ply Heavy Duty Ventilated Corrugated Master Telescopic Cartons (18-20kg net)',
+      recommendedMaterials: ['Molded Recycled Paper Pulp Trays', '5-Ply High-Stiffness Kraft Corrugated Board', 'Food-Grade Micro-Perforated LDPE Box Liners'],
+      ventilationRequired: true,
+      ventilationSpec: 'Ventilation slots (4-5% of total carton surface area) aligned with tray channels',
+      moistureProtection: 'Breathable humidity retention without surface condensation',
+      ethyleneSensitivity: 'High',
+      ethyleneControl: '1-MCP freshness treatment + ethylene scrubbers; high ethylene emitter',
+      cushioningSpecs: 'Individual pulp cell cup dividers prevent fruit-to-fruit contact and vibration abrasion',
+      shockRating: 4.8,
+      estimatedPackagingCostPerKg: 3.50,
+      packagingCapacity: '20 kg telescopic export cartons with 4 tiers of 20-25 fruit each',
+      ecoCertification: '100% Biodegradable & Recyclable Pulp and Kraft Materials',
+      layers: [
+        { layer: 1, name: 'Pulp Tray', material: 'Molded Biodegradable Recycled Paper Pulp Cell Tray', function: 'Individual fruit pocket isolation, shock absorption, and contact bruise prevention', icon: '🪺', glowColor: '#dc2626' },
+        { layer: 2, name: 'Outer Shipper', material: '5-Ply Telescopic Kraft Corrugated Outer Master Shipper', function: 'High compression stack strength (up to 8 tiers) in cold storage', icon: '📦', glowColor: '#b91c1c' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Refrigerated Reefer Container (0.5°C - 2°C)',
+      temperatureControlled: true,
+      targetTemp: '0.5°C - 2°C',
+      maximumRecommendedDistance: '2,200 km',
+      handlingRequirements: ['Verify reefer thermostat at 1°C', 'Verify pulp trays are snug without loose fruit movement', 'Ensure ethylene scrubber filter is operational'],
+      vibrationSensitivity: 'Moderate',
+      baseRatePerKm: 22.0
+    },
+    market: {
+      marketCategory: 'Premium High-Altitude Table Fruit',
+      priceUnit: '₹/kg',
+      basePricePerKg: 135,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 140.0,
+        Mumbai: 145.0,
+        Delhi: 130.0,
+        Nashik: 135.0,
+        Hyderabad: 140.0,
+        Chennai: 148.0
+      },
+      priceTrend: 'Stable'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 52,
+        protein_g: 0.3,
+        carbs_g: 13.8,
+        fat_g: 0.2,
+        vitaminC_mg: 4.6,
+        vitaminA_IU: 54,
+        dietaryFiber_g: 2.4,
+        potassium_mg: 107,
+        iron_mg: 0.12,
+        antioxidantIndex: 89,
+        glycemicIndex: 36,
+        highlights: ['Rich in Quercetin flavonoid for cardiovascular and cellular wellness', 'Pectin prebiotic soluble fiber supporting gut microbiome', 'Natural polyphenols and anthocyanin pigment']
+      },
+      consumptionMethods: ['Fresh whole sliced table fruit', 'Cold-pressed raw juice and smoothies', 'Stewed compote with warming spices'],
+      preparationMethods: ['Wash thoroughly under running water before consumption', 'Leave skin intact to maximize quercetin bioflavonoid intake'],
+      nutrientPreservationTips: ['Slice immediately before eating to avoid enzymatic browning', 'Sprinkle with lemon juice to prevent polyphenol oxidation'],
+      recommendedPreparation: 'Enjoy whole fresh at ambient temperature with skin intact.',
+      servingGuidance: 'One medium apple (150g-180g) daily as a mid-morning prebiotic snack.',
+      bioavailabilityTip: 'Consume with natural skin for maximum pectin and insoluble dietary fiber synergy.',
+      recipes: [
+        {
+          title: 'Warm Spiced Himalayan Apple & Cinnamon Compote',
+          prepTime: '20 mins',
+          healthBenefit: 'Supports stable glycemic response and gut mucosal integrity',
+          ingredients: ['4 Fresh Royal Apples (peeled and diced)', '1 Ceylon cinnamon stick', '2 Whole cloves', '1 tbsp Raw forest honey', '1 tsp Lemon juice'],
+          steps: [
+            'Place diced apples, cinnamon, cloves, and 3 tablespoons water in a heavy-bottomed pan.',
+            'Cover and simmer on low heat for 12–14 minutes until apples are fork-tender and fragrant.',
+            'Remove from heat, discard whole spices, fold in raw honey and fresh lemon juice, and serve warm.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'RH above 98% promotes blue mold rot (Penicillium expansum) at wounded lenticels.',
+      highTempRisk: 'Storage above 4°C causes rapid climacteric respiration, mealy texture, and internal breakdown.',
+      frostRisk: 'Freezing below -1.5°C causes irreversible cell membrane rupture and water-soaked flesh collapse.',
+      excessRainRisk: 'Late rains during ripening induce fruit splitting and skin micro-cracking.',
+      transitShockRisk: 'High; fruit-to-fruit impact causes deep brown bruising within 24 hours.',
+      mitigationStrategy: 'Pre-cool to 1°C within 12h, pack in individual molded pulp cell trays, and store in CA with ethylene scrubbing.'
+    }
+  },
+  // ==========================================
+  // 24. ORANGE (CITRUS MANDARIN)
+  // ==========================================
+  {
+    id: 'orange',
+    name: 'Orange (Nagpur Mandarin / Coorg Orange)',
+    category: 'Fruit',
+    subcategory: 'Citrus Fruit',
+    scientificName: 'Citrus reticulata / Citrus sinensis',
+    variety: 'Nagpur Mandarin / Coorg Loose Jacket / Kinnow',
+    description: 'Juicy, aromatic hesperidium citrus fruit celebrated for high ascorbic acid and vibrant color. Non-climacteric fruit that must reach full maturity on tree. Vulnerable to chilling injury if stored below 4°C.',
+    icon: '🍊',
+    color: '#f97316',
+    aliases: [
+      'orange', 'oranges', 'nagpur orange', 'mandarin', 'santre', 'santra', 'narangi',
+      'kittale', 'kithale', 'ಕಿತ್ತಳೆ', 'संतरा', 'నారింజ', 'ஆரஞ்சு'
+    ],
+    images: {
+      productImage: 'orange',
+      productImageAlt: 'Fresh Juicy Nagpur Mandarin Oranges'
+    },
+    growing: {
+      climate: 'Sub-tropical to tropical climate with distinct dry period to induce flower flushing (Ambia & Mrig Bahar).',
+      soil: 'Deep well-drained loamy to black cotton soil with high base saturation and good drainage.',
+      idealSoilPh: '6.5 - 7.5',
+      temperatureRange: [13, 35],
+      rainfallRequirement: '750 - 1000 mm annual rainfall',
+      sowingMethod: 'Budded seedlings on Rangpur lime / Rough lemon rootstock',
+      sowingSeason: 'Monsoon transplanting (July - August)',
+      seedRequirement: '275 - 400 trees / hectare',
+      spacing: '6m x 6m square planting system',
+      growthDuration: 'Perennial citrus grove; 210 - 240 days from fruit set to harvest',
+      growthDays: 220,
+      currentMaturityStage: 92,
+      irrigation: 'Drip irrigation with regulated water deficit stress to trigger flowering, followed by regular watering during fruit swelling.',
+      fertilizerGuidance: [
+        { stage: 'Post-Harvest Pruning', recommendation: 'FYM 40 t/ha + 400g N + 200g P2O5 + 300g K2O per bearing tree', impact: 'Vegetative restoration and root growth', urgency: 'Immediate' },
+        { stage: 'Fruit Enlargement', recommendation: 'Foliar micronutrient spray (Zinc 0.5% + Manganese 0.3% + Magnesium 0.5%)', impact: 'Prevents mottle leaf and boosts rind color', urgency: 'Scheduled' },
+        { stage: 'Color Break Stage', recommendation: 'Potassium Nitrate (1%) foliar spray', impact: 'Maximizes TSS, juice percentage, and rind sweetness', urgency: 'Monitoring' }
+      ],
+      commonPests: ['Citrus Psylla (Diaphorina citri)', 'Citrus Leaf Miner', 'Fruit Sucking Moth'],
+      diseaseRisks: ['Citrus Greening (HLB)', 'Gummosis (Phytophthora)', 'Citrus Canker'],
+      criticalCareTips: [
+        'Do not store below 4°C to prevent peel pitting and chilling injury.',
+        'Clip fruit with short stems; do not pull by hand to avoid stem-end skin tearing.',
+        'Ensure gentle handling to protect delicate essential oil glands in the flavedo.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 10,
+      recommendedWindow: 'Morning after dew has dried completely to prevent oleocellosis peel staining',
+      maturityIndicators: [
+        'Peel color turns from deep green to bright golden orange (minimum 70% color break).',
+        'TSS to Acid ratio reaches 10:1 or higher (Brix 10–12°).',
+        'Juice content exceeds 40% by fruit weight.'
+      ],
+      harvestingMethod: 'Careful clipper cutting leaving 2mm button pedicel; never pull or tear.',
+      bestHarvestTime: 'Mid-morning (09:00 AM - 01:00 PM) when rind turgor has softened slightly',
+      firmnessTarget: 'Firm elastic turgor (4.5 - 5.5 kg/cm²)',
+      sugarBrixTarget: '10.5 - 12.5 °Bx',
+      postHarvestHandling: [
+        'Washing in warm sanitized water (100 ppm chlorine) and food-grade wax coating.',
+        'Ethylene degreening (3–5 ppm at 25°C, 90% RH for 48 hours) for early season fruit.',
+        'Grading into Super, Special, and Standard based on fruit diameter (60–75 mm).'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '7 to 10 Days at 22°C - 26°C (Rapid transpirational shriveling)',
+      shelfLifeCold: '60 to 90 Days at 5°C - 7°C with 85% - 90% RH',
+      ambientDays: 8,
+      coldDays: 75,
+      storageTemperature: '5°C - 7°C (Must NEVER drop below 4°C)',
+      humidity: '85% - 90% RH (Balancing moisture retention with decay prevention)',
+      coldStorageRequired: true,
+      storageMethod: 'Ventilated 5-ply corrugated telescopic cartons with food-grade paper wraps in well-aerated cold storage',
+      preservationSteps: [
+        'Maintain strict temperature control between 5°C and 7°C to prevent chilling injury.',
+        'Ensure continuous air circulation of 0.1 to 0.2 m/s through pallet stacks.',
+        'Apply natural carnauba wax coating to reduce weight loss by 40%.'
+      ],
+      spoilageIndicators: ['Peel pitting and brown sunken spots (chilling injury)', 'Green mold (Penicillium digitatum)', 'Stem-end watery rot'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Individual Food-Grade Tissue Wrap or Open-Weave Leno Sacks (10kg)',
+      secondaryPackaging: '5-Ply Heavy Duty Ventilated Corrugated Master Cartons (15-20kg net)',
+      recommendedMaterials: ['Ventilated 5-Ply Corrugated CFB Box', 'High-Density Polyethylene Leno Mesh Sacks', 'Food-Grade Carnauba Protective Wax Coating'],
+      ventilationRequired: true,
+      ventilationSpec: 'Minimum 5% vent hole area on all sides for cross-ventilation',
+      moistureProtection: 'Breathable; avoiding high moisture traps that trigger Penicillium rot',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Standard ventilation; separate from ripening bananas and papayas',
+      cushioningSpecs: 'Corrugated dividers or soft tissue wrappers between tiers',
+      shockRating: 3.9,
+      estimatedPackagingCostPerKg: 1.80,
+      packagingCapacity: '15 kg / 20 kg master cartons',
+      ecoCertification: '100% Recyclable Kraft Board and Organic Bio-Wax',
+      layers: [
+        { layer: 1, name: 'Protective Wax', material: 'Food Grade Natural Carnauba Wax Emulsion Coating', function: 'Transpirational water loss barrier and natural peel luster', icon: '✨', glowColor: '#f97316' },
+        { layer: 2, name: 'Export Shipper', material: '5-Ply High-Ventilation Kraft Corrugated Export Shipper', function: 'Compression strength and aerated transit protection', icon: '📦', glowColor: '#ea580c' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Refrigerated Reefer Container (5.5°C - 7.5°C) or Ventilated Insulated Truck',
+      temperatureControlled: true,
+      targetTemp: '6°C - 8°C',
+      maximumRecommendedDistance: '1,800 km',
+      handlingRequirements: ['Verify reefer setpoint at 6°C (NOT below 4°C)', 'Ensure ventilation holes are unobstructed', 'Inspect cartons for zero dampness'],
+      vibrationSensitivity: 'Moderate',
+      baseRatePerKm: 18.0
+    },
+    market: {
+      marketCategory: 'Citrus Table & Processing Commodity',
+      priceUnit: '₹/kg',
+      basePricePerKg: 65,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 70.0,
+        Mumbai: 65.0,
+        Delhi: 68.0,
+        Nashik: 60.0,
+        Hyderabad: 65.0,
+        Chennai: 72.0
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 47,
+        protein_g: 0.9,
+        carbs_g: 11.8,
+        fat_g: 0.1,
+        vitaminC_mg: 53.2,
+        vitaminA_IU: 225,
+        dietaryFiber_g: 2.4,
+        potassium_mg: 181,
+        iron_mg: 0.1,
+        antioxidantIndex: 82,
+        glycemicIndex: 43,
+        highlights: ['Exceptional Vitamin C (meets 88% daily requirement)', 'High Hesperidin and Naringenin citrus bioflavonoids', 'Supports immune resistance and vascular integrity']
+      },
+      consumptionMethods: ['Fresh peeled segments', 'Fresh cold-pressed citrus juice with pulp', 'Fruit salads and citrus marinades'],
+      preparationMethods: ['Peel outer rind gently by hand or knife', 'Retain inner white albedo mesh for maximum bioflavonoid intake'],
+      nutrientPreservationTips: ['Consume immediately after juicing to prevent vitamin C oxidation', 'Do not boil citrus juice'],
+      recommendedPreparation: 'Enjoy fresh as whole peeled fruit to benefit from both fiber and vitamin C.',
+      servingGuidance: 'One to two medium oranges daily for optimal immune and collagen support.',
+      bioavailabilityTip: 'Combine with plant-based iron foods (spinach, lentils) to dramatically boost non-heme iron uptake.',
+      recipes: [
+        {
+          title: 'Fresh Nagpur Orange & Mint Cooler',
+          prepTime: '5 mins',
+          healthBenefit: 'Instant hydration, vitamin C replenishment, and electrolyte recovery',
+          ingredients: ['4 Fresh Nagpur Oranges (juiced)', '6 Fresh mint leaves', '1/4 tsp Roasted cumin powder', '1/4 tsp Black salt', 'Crushed ice'],
+          steps: [
+            'Extract fresh orange juice without pressing the bitter inner white pith.',
+            'Lightly bruise fresh mint leaves with black salt and cumin powder in a glass.',
+            'Pour in fresh orange juice, stir gently, top with ice, and serve immediately.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Humidity above 92% combined with poor air circulation causes explosive green mold (Penicillium digitatum).',
+      highTempRisk: 'Temperatures above 25°C cause rapid rind drying, spongy loose skin, and sour fermentation.',
+      frostRisk: 'Freezing below 0°C crystallizes juice vesicles and ruins pulp texture completely.',
+      excessRainRisk: 'Heavy rains during harvest induce rind water-soaking and peel breakdown.',
+      transitShockRisk: 'Rind oleocellosis caused by vibrations against rough packaging walls.',
+      mitigationStrategy: 'Clip fruit with pedicel, coat in carnauba wax, pack in ventilated CFB cartons, and maintain reefer at 6°C.'
+    }
+  },
+  // ==========================================
+  // 25. BUTTER FRUIT (AVOCADO)
+  // ==========================================
+  {
+    id: 'butter-fruit',
+    name: 'Butter Fruit (Western Ghats Coorg Avocado)',
+    category: 'Fruit',
+    subcategory: 'Subtropical Drupe (Avocado)',
+    scientificName: 'Persea americana',
+    variety: 'Hass / Fuerte / Coorg Green Butter Fruit',
+    description: 'Creamy, nutrient-dense subtropical drupe high in monounsaturated oleic fat. Strictly separate botanical entity from Dairy Butter. Strong climacteric fruit with dramatic ethylene production during softening. Susceptible to chilling injury below 4°C.',
+    icon: '🥑',
+    color: '#65a30d',
+    aliases: [
+      'butter fruit', 'butterfruit', 'avocado', 'butter-fruit', 'coorg butter fruit',
+      'hass avocado', 'fuerte', 'coorg avocado', 'ಬೆಣ್ಣೆ ಹಣ್ಣು', 'बटर फ्रूट', 'వెన్న పండు', 'வெண்ணெய் பழம்'
+    ],
+    images: {
+      productImage: 'butter-fruit',
+      productImageAlt: 'Creamy Coorg Green Butter Fruit (Avocado)'
+    },
+    growing: {
+      climate: 'Humid subtropical to tropical high-altitude hills (1,000–1,600m above sea level) with mild frost-free temperatures (15°C - 28°C).',
+      soil: 'Deep well-drained volcanic or red lateritic soil with high organic matter and no waterlogging.',
+      idealSoilPh: '5.5 - 6.5',
+      temperatureRange: [12, 30],
+      rainfallRequirement: '1200 - 1800 mm well-distributed annual rainfall',
+      sowingMethod: 'Grafted vegetative planting on seedling rootstock',
+      sowingSeason: 'Early Monsoon (June - July)',
+      seedRequirement: '200 - 280 trees / hectare',
+      spacing: '7m x 7m or 6m x 6m spacing',
+      growthDuration: 'Perennial tree; 150 - 200 days from flowering to maturity',
+      growthDays: 180,
+      currentMaturityStage: 88,
+      irrigation: 'Regular drip irrigation during dry winter and fruit development; avocado roots are extremely shallow and sensitive to water stress.',
+      fertilizerGuidance: [
+        { stage: 'Post-Harvest Rest', recommendation: 'FYM 35 t/ha + 250g N + 150g P2O5 + 300g K2O per tree', impact: 'Rebuilds carbohydrate reserves in evergreen foliage', urgency: 'Immediate' },
+        { stage: 'Spring Flush & Bloom', recommendation: 'Zinc (0.2%) + Boron (0.1%) foliar nutrition spray', impact: 'Increases flower retention and fruitlet set', urgency: 'Scheduled' },
+        { stage: 'Fruit Oil Accumulation', recommendation: 'Potassium Sulfate (SOP) fertigation (1.5 kg/tree)', impact: 'Maximizes monounsaturated oil percentage and pulp density', urgency: 'Monitoring' }
+      ],
+      commonPests: ['Avocado Thrips', 'Lace Bugs', 'Fruit Borers'],
+      diseaseRisks: ['Phytophthora Root Rot (Phytophthora cinnamomi)', 'Anthracnose (Colletotrichum gloeosporioides)', 'Cercospora Spot'],
+      criticalCareTips: [
+        'Never store hard-green avocados below 4.5°C to avoid irreversible chilling injury.',
+        'Do not allow fruit to touch moist bare soil at any point during harvest.',
+        'Handle with cotton gloves to prevent finger-tip compression bruising.'
+      ]
+    },
+    harvesting: {
+      harvestingDays: 8,
+      recommendedWindow: 'Morning when dew is gone; harvest hard-mature fruit with dry matter >21%',
+      maturityIndicators: [
+        'Skin loses bright shiny gloss and develops a dull matte texture.',
+        'Fruit dry matter reaches minimum 21–23% (oil content >8%).',
+        'Pedicel fruit stem begins yellowing at the junction.'
+      ],
+      harvestingMethod: 'Hand clip with sharp secateurs leaving 3mm stem button intact; never pull or shake trees.',
+      bestHarvestTime: 'Early morning (07:00 AM - 11:00 AM)',
+      firmnessTarget: 'Solid hard-mature (>12 kg/cm² on harvest penetrometer)',
+      sugarBrixTarget: '6.0 - 7.5 °Bx (High natural monounsaturated lipid content)',
+      postHarvestHandling: [
+        'Pre-cooling down to 6°C within 10 hours of picking to delay ripening.',
+        'Fungicidal prochloraz / biocontrol dip to eliminate latent anthracnose spores.',
+        'Grading into Size Count 12, 14, 16, 18, and 20.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '4 to 6 Days (Rapid climacteric softening and pulp darkening at 22°C - 28°C)',
+      shelfLifeCold: '28 to 35 Days (Hard-mature green fruit at 5.5°C with 85-90% RH)',
+      ambientDays: 5,
+      coldDays: 32,
+      storageTemperature: '5.5°C - 7°C (Hard Mature) or 2°C - 4°C (Firm Ripe)',
+      humidity: '85% - 90% RH',
+      coldStorageRequired: true,
+      storageMethod: 'Single-layer molded fiber trays inside ventilated 4kg corrugated cartons in high-humidity reefer rooms',
+      preservationSteps: [
+        'Strictly avoid temperatures below 4.5°C for green fruit; causes gray pulp vascular browning.',
+        'Use 1-MCP treatment (300 ppb for 16h) if 40+ days maritime export transit is required.',
+        'Maintain continuous ventilation to prevent ethylene accumulation exceeding 0.5 ppm.'
+      ],
+      spoilageIndicators: ['Vascular browning (gray internal fibers from chilling injury)', 'Soft sunken black anthracnose lesions', 'Rancid lipid oxidation'],
+      curingRequired: false
+    },
+    packaging: {
+      primaryPackaging: 'Individual Molded Paper Pulp Pocket Trays (Single Tier of 10 to 18 fruits)',
+      secondaryPackaging: '5-Ply High-Stiffness Kraft Corrugated Master Cartons (4kg / 5kg net)',
+      recommendedMaterials: ['Molded Recycled Fiber Trays', '5-Ply Ventilated Corrugated Master Boxes', 'Biodegradable Tissue Wrappers'],
+      ventilationRequired: true,
+      ventilationSpec: 'Side ventilation slots (4-5% total wall area) to permit uniform cool airflow',
+      moistureProtection: 'High humidity retention while preventing free surface moisture condensation',
+      ethyleneSensitivity: 'High',
+      ethyleneControl: 'Ventilated transit; isolate from ripe fruit emitters; optional 1-MCP treatment',
+      cushioningSpecs: 'Individual cell pockets completely isolate each fruit from mutual pressure',
+      shockRating: 4.6,
+      estimatedPackagingCostPerKg: 4.20,
+      packagingCapacity: '4 kg single-layer export cartons (12-16 count)',
+      ecoCertification: '100% Recyclable and Biodegradable FSC Certified Pulp Carton',
+      layers: [
+        { layer: 1, name: 'Pocket Tray', material: 'Molded Recycled Paper Fiber Pocket Tray', function: 'Individual fruit cup cushioning, vibration dampening, and abrasion isolation', icon: '🥑', glowColor: '#16a34a' },
+        { layer: 2, name: 'Master Shipper', material: '5-Ply High-Compression Kraft Corrugated Master Carton', function: 'Stacking strength and protective air circulation in cold chain', icon: '📦', glowColor: '#15803d' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Refrigerated Reefer Container (5.5°C ± 0.5°C)',
+      temperatureControlled: true,
+      targetTemp: '5.5°C - 6.5°C',
+      maximumRecommendedDistance: '1,600 km',
+      handlingRequirements: ['Verify reefer setpoint at exactly 5.5°C', 'Verify cartons are single-tier with molded trays', 'Check that ethylene exhaust vent is set at 15 m³/h'],
+      vibrationSensitivity: 'High',
+      baseRatePerKm: 24.0
+    },
+    market: {
+      marketCategory: 'Premium High-Nutrition Culinary Fruit',
+      priceUnit: '₹/kg',
+      basePricePerKg: 180,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 180.0,
+        Mumbai: 210.0,
+        Delhi: 240.0,
+        Nashik: 200.0,
+        Hyderabad: 195.0,
+        Chennai: 185.0
+      },
+      priceTrend: 'Rising'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 160,
+        protein_g: 2.0,
+        carbs_g: 8.5,
+        fat_g: 14.7,
+        vitaminC_mg: 10.0,
+        vitaminA_IU: 146,
+        dietaryFiber_g: 6.7,
+        potassium_mg: 485,
+        iron_mg: 0.6,
+        antioxidantIndex: 78,
+        glycemicIndex: 15,
+        highlights: ['Rich in heart-healthy Monounsaturated Oleic Fatty Acids (15g/100g)', 'Exceptional Potassium (higher than bananas) for electrolyte balance', 'High dietary fiber and Lutein carotenoid for retinal wellness']
+      },
+      consumptionMethods: ['Fresh scooped table fruit with honey or lime', 'Creamy smoothies with milk or coconut water', 'Artisan salads, spreads, and avocado toast'],
+      preparationMethods: ['Cut lengthwise around seed, twist halves apart, and scoop flesh with spoon', 'Sprinkle with lemon juice immediately to prevent enzymatic browning'],
+      nutrientPreservationTips: ['Do not expose to high heat to preserve delicate mono-unsaturated lipids', 'Store cut portions with seed intact tightly wrapped in refrigeration'],
+      recommendedPreparation: 'Blend fresh ripe flesh into chilled dairy or plant milk with a pinch of cardamom and raw honey.',
+      servingGuidance: 'Half to one fruit (100g-150g) per serving provides optimal essential fatty acids.',
+      bioavailabilityTip: 'Healthy avocado lipids increase absorption of fat-soluble vitamins (A, D, E, K) from accompanying vegetables by up to 400%.',
+      recipes: [
+        {
+          title: 'Coorg Fresh Butter Fruit & Cardamom Smoothie',
+          prepTime: '5 mins',
+          healthBenefit: 'Rich in monounsaturated fats and potassium for heart health',
+          ingredients: ['1 Ripe Coorg Butter Fruit (flesh scooped)', '1.5 cups Chilled A2 farm milk', '1 tbsp Raw honey', '1/4 tsp Ground green cardamom', 'Chopped almonds for garnish'],
+          steps: [
+            'Scoop creamy ripe butter fruit flesh into a blender jar.',
+            'Add chilled milk, raw honey, and fresh ground cardamom powder.',
+            'Blend for 45 seconds until silky and thick; pour into glasses, garnish with chopped almonds, and enjoy immediately.'
+          ]
+        }
+      ]
+    },
+    risks: {
+      highHumidityRisk: 'Condensation inside sealed plastic pouches induces Anthracnose rots within 48 hours.',
+      highTempRisk: 'Ambient heat above 28°C causes uneven softening, rubbery texture, and sour discoloration.',
+      frostRisk: 'Temperatures below 4°C induce chilling injury: dark gray vascular fibers and bitter off-flavors.',
+      excessRainRisk: 'Waterlogged roots cause tree dieback via Phytophthora root rot.',
+      transitShockRisk: 'Severe internal flesh bruising if fruits rattle loosely inside cartons.',
+      mitigationStrategy: 'Harvest hard-mature with 3mm stem, pre-cool to 6°C, pack in single-layer molded pulp trays, and store at 5.5°C.'
+    }
   }
 ];
 
@@ -3702,53 +4454,26 @@ export function resolveProductAlias(query: string): string {
   if (!query) return 'onion';
   const clean = query.trim().toLowerCase();
 
-  // Search exact match in products
+  // Tier 1: Centralized Multilingual Product Normalizer
+  const resolved = resolveProduct(clean);
+  if (resolved) {
+    const found = COMPREHENSIVE_PRODUCT_DATABASE.find(p => p.id === resolved.id);
+    if (found) return found.id;
+    return resolved.id;
+  }
+
+  // Tier 2: Search exact ID or name match in products
   for (const product of COMPREHENSIVE_PRODUCT_DATABASE) {
     if (product.id.toLowerCase() === clean || product.name.toLowerCase() === clean) {
       return product.id;
     }
-    if (product.aliases.some(alias => alias.toLowerCase() === clean || clean.includes(alias.toLowerCase()))) {
-      return product.id;
-    }
   }
 
-  // Broad partial search
+  // Tier 3: Search exact alias match
   for (const product of COMPREHENSIVE_PRODUCT_DATABASE) {
-    if (clean.includes(product.id.toLowerCase()) || product.id.toLowerCase().includes(clean)) {
+    if (product.aliases.some(alias => alias.toLowerCase() === clean)) {
       return product.id;
     }
-    if (product.aliases.some(alias => clean.includes(alias.toLowerCase()) || alias.toLowerCase().includes(clean))) {
-      return product.id;
-    }
-  }
-
-  // Dynamic fallback mapping
-  if (clean.includes('beetroot') || clean.includes('chukandar') || clean.includes('beet') || clean.includes('beta vulgaris')) {
-    return 'beetroot';
-  }
-  if (clean.includes('fruit') || clean.includes('apple') || clean.includes('banana') || clean.includes('orange') || clean.includes('grape') || clean.includes('berry')) {
-    return 'mango';
-  }
-  if (clean.includes('grain') || clean.includes('wheat') || clean.includes('corn') || clean.includes('maize') || clean.includes('oat') || clean.includes('millet')) {
-    return 'rice';
-  }
-  if (clean.includes('pulse') || clean.includes('dal') || clean.includes('bean') || clean.includes('lentil') || clean.includes('gram') || clean.includes('pea')) {
-    return 'chickpea';
-  }
-  if (clean.includes('nut') || clean.includes('cashew') || clean.includes('walnut') || clean.includes('pista') || clean.includes('kaju')) {
-    return 'almond';
-  }
-  if (clean.includes('cardamom') || clean.includes('elaichi') || clean.includes('elakki') || clean.includes('elachi')) {
-    return 'cardamom';
-  }
-  if (clean.includes('coffee') || clean.includes('arabica') || clean.includes('robusta')) {
-    return 'coffee';
-  }
-  if (clean.includes('tea') || clean.includes('chai')) {
-    return 'tea';
-  }
-  if (clean.includes('spice') || clean.includes('pepper') || clean.includes('chilli') || clean.includes('ginger')) {
-    return 'turmeric';
   }
 
   return 'onion';
@@ -3789,7 +4514,7 @@ export function productToCropInfo(product: ProductIntelligence): CropInfo {
     optimalHumidityRange: [65, 85],
     ripenessDays: product.harvesting.harvestingDays,
     currentMaturityStage: product.growing.currentMaturityStage,
-    ethyleneSensitivity: product.packaging.ethyleneSensitivity,
+    ethyleneSensitivity: (product.packaging.ethyleneSensitivity === 'High' || product.packaging.ethyleneSensitivity === 'Low') ? product.packaging.ethyleneSensitivity : 'Medium',
     respirationRate: product.category === 'Fruit' ? 'High' : 'Moderate',
     qualityTechniques: product.growing.fertilizerGuidance.map(f => ({
       title: `${f.stage} Nutrition`,

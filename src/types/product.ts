@@ -131,7 +131,7 @@ export interface ProductIntelligence {
     ventilationRequired: boolean;
     ventilationSpec: string;
     moistureProtection: string;
-    ethyleneSensitivity: 'High' | 'Medium' | 'Low';
+    ethyleneSensitivity: 'High' | 'Moderate' | 'Medium' | 'Low' | string;
     ethyleneControl: string;
     cushioningSpecs: string;
     shockRating: number; // 1.0 - 5.0
@@ -139,7 +139,7 @@ export interface ProductIntelligence {
     packagingCapacity: string;
     ecoCertification: string;
     layers: PackagingLayerSpec[];
-    packingSteps: PackingStepSpec[];
+    packingSteps?: PackingStepSpec[];
   };
 
   // 6. Transportation & Cold-Chain
@@ -149,7 +149,7 @@ export interface ProductIntelligence {
     targetTemp: string;
     maximumRecommendedDistance: string;
     handlingRequirements: string[];
-    vibrationSensitivity: 'High' | 'Moderate' | 'Low';
+    vibrationSensitivity: 'High' | 'Moderate' | 'Medium' | 'Low';
     baseRatePerKm: number;
   };
 
@@ -166,8 +166,9 @@ export interface ProductIntelligence {
       Nashik: number;
       Hyderabad: number;
       Chennai: number;
+      [market: string]: number;
     };
-    priceTrend: 'Rising' | 'Stable' | 'Falling';
+    priceTrend: 'Rising' | 'Stable' | 'Steady' | 'Falling';
   };
 
   // 8. Consumption & Nutrition

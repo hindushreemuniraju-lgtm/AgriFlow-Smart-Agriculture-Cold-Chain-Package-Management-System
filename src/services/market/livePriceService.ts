@@ -67,6 +67,9 @@ export function getProductPricingCategory(productId: string): PricingCategory {
     return 'TEA_COFFEE';
   }
   if (['turmeric', 'chilli-powder', 'pepper', 'cardamom', 'cumin', 'clove', 'cinnamon', 'coriander-seed'].some(k => id.includes(k))) {
+    if (id.includes('bell-pepper') || id.includes('bell pepper') || id.includes('capsicum')) {
+      return 'FRESH_PRODUCE';
+    }
     return 'SPICES';
   }
   if (['almond', 'cashew', 'walnut', 'raisin', 'pistachio', 'dates'].some(k => id.includes(k))) {
@@ -106,6 +109,8 @@ const BENCHMARK_PRICES: Record<string, {
   'cabbage': { name: 'Cabbage', category: 'FRESH_PRODUCE', modal: 28, min: 20, max: 36, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'cauliflower': { name: 'Cauliflower', category: 'FRESH_PRODUCE', modal: 44, min: 34, max: 56, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'green-chilli': { name: 'Green Chilli', category: 'FRESH_PRODUCE', modal: 78, min: 62, max: 95, unit: 'kg', source: 'Agmarknet / Guntur & APMC Yard', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
+  'capsicum': { name: 'Capsicum / Bell Pepper (Shimla Mirch)', category: 'FRESH_PRODUCE', modal: 48, min: 38, max: 62, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
+  'bell-pepper': { name: 'Capsicum / Bell Pepper (Shimla Mirch)', category: 'FRESH_PRODUCE', modal: 48, min: 38, max: 62, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'green-beans': { name: 'Green Beans (French Beans)', category: 'FRESH_PRODUCE', modal: 68, min: 52, max: 84, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'mango': { name: 'Mango (Alphonso / Kesar)', category: 'FRESH_PRODUCE', modal: 185, min: 140, max: 240, unit: 'kg', source: 'APMC Fruit Terminal / Agmarknet', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'apple': { name: 'Apple (Shimla / Kinnaur)', category: 'FRESH_PRODUCE', modal: 165, min: 130, max: 210, unit: 'kg', source: 'Azadpur APMC Apple Terminal', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
@@ -136,7 +141,8 @@ const BENCHMARK_PRICES: Record<string, {
   'coffee': { name: 'Arabica / Robusta Coffee Beans', category: 'TEA_COFFEE', modal: 208, min: 190, max: 235, unit: 'kg', source: 'Coffee Board of India / Farmgate Auction Terminal', sourceUrl: 'https://indiacoffee.org', priceType: 'commodity' },
   'cardamom': { name: 'Small Green Cardamom (Elaichi / Chhoti Elaichi)', category: 'SPICES', modal: 1950, min: 1650, max: 2400, unit: 'kg', source: 'Spices Board of India / Bodinayakanur & Vandanmettu E-Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'turmeric': { name: 'Salem Cured Turmeric Finger', category: 'SPICES', modal: 165, min: 140, max: 195, unit: 'kg', source: 'Spices Board of India / Salem APMC', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
-  'black-pepper': { name: 'Malabar Black Pepper', category: 'SPICES', modal: 640, min: 580, max: 720, unit: 'kg', source: 'Spices Board / Kochi Terminal', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
+  'black-pepper': { name: 'Malabar Black Pepper (Kalimirch)', category: 'SPICES', modal: 1100, min: 950, max: 1250, unit: 'kg', source: 'Spices Board of India / Kochi Terminal Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
+  'pepper': { name: 'Malabar Black Pepper (Kalimirch)', category: 'SPICES', modal: 1100, min: 950, max: 1250, unit: 'kg', source: 'Spices Board of India / Kochi Terminal Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'almond': { name: 'California / Mamra Almonds', category: 'DRY_FRUITS', modal: 820, min: 740, max: 920, unit: 'kg', source: 'Dry Fruits Wholesale Traders Association', sourceUrl: 'https://agmarknet.gov.in', priceType: 'wholesale' }
 };
 
@@ -160,7 +166,12 @@ export async function fetchLiveProductPrice(
   productId: string,
   marketLocation: string = 'Bengaluru'
 ): Promise<LiveMarketPriceRecord> {
-  const cleanId = productId.toLowerCase().trim();
+  let cleanId = productId.toLowerCase().trim();
+  if (cleanId === 'pepper' || cleanId === 'black pepper' || cleanId.includes('black-pepper') || cleanId.includes('kalimirch')) {
+    cleanId = 'black-pepper';
+  } else if (cleanId.includes('bell pepper') || cleanId.includes('bell-pepper') || cleanId.includes('capsicum')) {
+    cleanId = 'capsicum';
+  }
   const cacheKey = `${cleanId}_${marketLocation.toLowerCase()}`;
 
   // 1. Check local cache

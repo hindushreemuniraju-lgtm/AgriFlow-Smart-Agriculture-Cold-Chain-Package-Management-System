@@ -4,6 +4,8 @@
  * Aligned with SIH26236 Master Food Commodity Classification.
  */
 
+import { matchProduct } from '../catalog/productNormalizationService';
+
 export interface CropAliasMapping {
   canonicalId: string;
   name: string;
@@ -1754,6 +1756,31 @@ export function resolveCropAlias(query: string): AliasMatchResult | null {
   if (!query || !query.trim()) return null;
   const clean = query.toLowerCase().trim();
 
+  // Tier 0: Centralized Multilingual Normalizer (Apple, Orange, Butter vs Butter Fruit, Indic Kannada/Hindi)
+  const norm = matchProduct(clean);
+  if (norm.matched && norm.product) {
+    let cat: CropAliasMapping['category'] = 'Processed Product';
+    if (norm.product.category === 'fruit') cat = 'Fruit';
+    else if (norm.product.category === 'vegetable') cat = 'Vegetable';
+    else if (norm.product.category === 'dairy') cat = 'Dairy';
+    else if (norm.product.category === 'dry-fruit') cat = 'Dry Fruit';
+    else if (norm.product.category === 'grain') cat = 'Grain';
+    else if (norm.product.category === 'pulse') cat = 'Pulse';
+    else if (norm.product.category === 'spice') cat = 'Spice';
+    else if (norm.product.category === 'oil') cat = 'Oil & Oilseed';
+    else if (norm.product.category === 'flour') cat = 'Flour';
+
+    return {
+      canonicalId: norm.product.id,
+      name: norm.product.displayName,
+      scientificName: norm.product.scientificName || norm.product.displayName,
+      category: cat,
+      matchedTerm: query,
+      confidence: norm.confidence,
+      isExact: norm.matchType === 'EXACT_CANONICAL' || norm.matchType === 'EXACT_ALIAS'
+    };
+  }
+
   // 1. Direct Exact Match on Canonical ID or Exact Name or Scientific Name
   for (const crop of CANONICAL_CROP_ALIASES) {
     if (crop.canonicalId === clean || crop.name.toLowerCase() === clean || crop.scientificName.toLowerCase() === clean) {
@@ -1782,29 +1809,23 @@ export function resolveCropAlias(query: string): AliasMatchResult | null {
     }
   }
 
-  // 2. Substring & Token matching (prioritize exact word match)
+  // 2. Exact Whole Word Boundary matching (AVOID loose substring collision like 'butter' in 'butter fruit')
   for (const crop of CANONICAL_CROP_ALIASES) {
     for (const alias of crop.aliases) {
       const aliasLower = alias.toLowerCase();
-      if (clean === aliasLower) {
+      // Word boundary regex: ensure full word match
+      const escaped = aliasLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'i');
+      if (regex.test(clean)) {
+        // Anti-collision: if searching 'butter' without 'fruit', do NOT match 'butter fruit'
+        if (clean === 'butter' && aliasLower.includes('fruit')) continue;
         return {
           canonicalId: crop.canonicalId,
           name: crop.name,
           scientificName: crop.scientificName,
           category: crop.category,
           matchedTerm: alias,
-          confidence: 0.98,
-          isExact: true
-        };
-      }
-      if (clean.includes(aliasLower) || aliasLower.includes(clean)) {
-        return {
-          canonicalId: crop.canonicalId,
-          name: crop.name,
-          scientificName: crop.scientificName,
-          category: crop.category,
-          matchedTerm: alias,
-          confidence: 0.90,
+          confidence: 0.95,
           isExact: false
         };
       }

@@ -24,12 +24,14 @@ export interface EnrichedProductIntelligence extends ProductIntelligence {
 /**
  * Generate a high-fidelity, botanically consistent dynamic profile for any newly discovered crop.
  */
-function synthesizeDynamicCropProfile(rawQuery: string, category: 'Vegetable' | 'Fruit' | 'Grain' | 'Pulse' | 'Dry Fruit' | 'Spice' = 'Vegetable'): ProductIntelligence {
-  const cleanName = rawQuery
+function synthesizeDynamicCropProfile(rawQuery?: string | null, category: 'Vegetable' | 'Fruit' | 'Grain' | 'Pulse' | 'Dry Fruit' | 'Spice' = 'Vegetable'): ProductIntelligence {
+  const safeQuery = (typeof rawQuery === 'string' && rawQuery.trim()) ? rawQuery.trim() : 'Produce';
+  const cleanName = safeQuery
     .split(' ')
+    .filter(Boolean)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
-  const cleanId = rawQuery.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    .join(' ') || 'Produce';
+  const cleanId = safeQuery.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'produce';
   const visual = getVerifiedCropVisual(cleanId, cleanName);
 
   const isFruit = category === 'Fruit';
@@ -117,7 +119,7 @@ function synthesizeDynamicCropProfile(rawQuery: string, category: 'Vegetable' | 
       ventilationRequired: !isGrain,
       ventilationSpec: isGrain ? 'Hermetically sealed' : '4-6% precision side ventilation slots',
       moistureProtection: 'Equilibrium relative humidity barrier',
-      ethyleneSensitivity: isFruit ? 'High' : 'Moderate',
+      ethyleneSensitivity: isFruit ? 'High' : 'Medium',
       ethyleneControl: 'Ethylene scrubber sachet insert',
       cushioningSpecs: 'Shock absorbing inner dividers',
       shockRating: 4.4,
@@ -209,8 +211,9 @@ function synthesizeDynamicCropProfile(rawQuery: string, category: 'Vegetable' | 
  * Retrieve verified ProductIntelligence for any crop query.
  * Always returns enriched data with source tags and zero cross-crop leaks.
  */
-export function getEnrichedCropKnowledge(query: string): EnrichedProductIntelligence {
-  const resolved = resolveCropAlias(query);
+export function getEnrichedCropKnowledge(query?: string | null): EnrichedProductIntelligence {
+  const safeQuery = (typeof query === 'string' && query.trim()) ? query.trim() : 'Produce';
+  const resolved = resolveCropAlias(safeQuery);
   const now = new Date().toISOString();
 
   if (resolved) {
@@ -231,7 +234,7 @@ export function getEnrichedCropKnowledge(query: string): EnrichedProductIntellig
   }
 
   // Synthesize dynamic profile for unknown/new crop
-  const dynamicProfile = synthesizeDynamicCropProfile(query, (resolved?.category as any) || 'Vegetable');
+  const dynamicProfile = synthesizeDynamicCropProfile(safeQuery, (resolved?.category as any) || 'Vegetable');
   return {
     ...dynamicProfile,
     knowledgeMeta: {

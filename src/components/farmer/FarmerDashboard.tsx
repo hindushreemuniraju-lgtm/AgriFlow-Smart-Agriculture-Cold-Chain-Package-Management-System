@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CropInfo, PackagingRecommendation, FarmerOrder } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { CropIdentificationBar } from './CropIdentificationBar';
@@ -16,7 +16,9 @@ import { getEnrichedCropKnowledge, EnrichedProductIntelligence } from '../../ser
 import { GeocodedAddress, INDIAN_AGRI_DISTRICTS } from '../../services/location/geocodingService';
 import { WeatherTelemetry } from '../../services/weather/weatherService';
 import { DiscoveredMandi } from '../../services/market/mandiDiscoveryService';
-import { Box, Sprout, Wheat, HeartPulse, ShieldAlert, Truck, Sparkles, BarChart3 } from 'lucide-react';
+import { evaluatePostHarvestRisk, PostHarvestAlert } from '../../services/weather/postHarvestAlertService';
+import { EmergencyAlertModal } from '../common/EmergencyAlertModal';
+import { Box, Sprout, Wheat, HeartPulse, ShieldAlert, Truck, Sparkles, BarChart3, AlertOctagon, AlertTriangle } from 'lucide-react';
 
 interface FarmerDashboardProps {
   crops: CropInfo[];
@@ -50,6 +52,16 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
   });
 
   const [weather, setWeather] = useState<WeatherTelemetry | null>(null);
+  const [dismissedEmergency, setDismissedEmergency] = useState<boolean>(false);
+
+  // Combine GPS + Weather + Forecast + Detected Commodity for Post-Harvest Risks
+  const postHarvestAlert: PostHarvestAlert = useMemo(() => {
+    return evaluatePostHarvestRisk(weather, selectedCrop.name, currentAddress.formattedAddress);
+  }, [weather, selectedCrop.name, currentAddress.formattedAddress]);
+
+  useEffect(() => {
+    setDismissedEmergency(false);
+  }, [selectedCrop.name, currentAddress.formattedAddress]);
 
   // Retrieve 100% verified EnrichedProductIntelligence for selected produce (zero data leak guarantee)
   const productIntelligence: EnrichedProductIntelligence = useMemo(() => {
@@ -79,7 +91,7 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
       optimalHumidityRange: [65, 85],
       ripenessDays: enrichedCrop.harvesting.harvestingDays,
       currentMaturityStage: enrichedCrop.growing.currentMaturityStage,
-      ethyleneSensitivity: enrichedCrop.packaging.ethyleneSensitivity,
+      ethyleneSensitivity: (enrichedCrop.packaging.ethyleneSensitivity === 'High' || enrichedCrop.packaging.ethyleneSensitivity === 'Low') ? enrichedCrop.packaging.ethyleneSensitivity : 'Medium',
       respirationRate: 'Moderate',
       qualityTechniques: enrichedCrop.growing.fertilizerGuidance.map(f => ({
         title: `${f.stage} Nutrition`,
@@ -137,6 +149,58 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
           onWeatherUpdated={setWeather}
         />
       </section>
+
+      {/* 2.5 Prominent Post-Harvest Weather Risk Banner (EMERGENCY or WARNING) */}
+      {postHarvestAlert.level === 'EMERGENCY' ? (
+        <section className="p-4 sm:p-5 rounded-3xl bg-rose-950/70 border-2 border-rose-500 shadow-[0_0_35px_rgba(244,63,94,0.4)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-fade-in">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-rose-600/30 text-rose-300 flex items-center justify-center text-2xl border border-rose-500/50 shrink-0 animate-pulse">
+              <AlertOctagon className="w-7 h-7 text-rose-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider animate-pulse">
+                  🔴 EMERGENCY ALERT
+                </span>
+                <span className="text-xs font-bold text-white">
+                  {postHarvestAlert.crop}: {postHarvestAlert.risk}
+                </span>
+              </div>
+              <p className="text-xs text-rose-200 mt-1 font-medium leading-relaxed">
+                <strong>Recommended action:</strong> {postHarvestAlert.recommendedAction}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setDismissedEmergency(false)}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold shrink-0 cursor-pointer shadow-lg shadow-rose-950/50"
+          >
+            Review Emergency Alert
+          </button>
+        </section>
+      ) : postHarvestAlert.level === 'WARNING' ? (
+        <section className="p-3.5 sm:p-4 rounded-3xl bg-amber-950/40 border border-amber-500/40 flex items-center justify-between gap-3 text-left">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+            <div>
+              <span className="text-xs font-bold text-amber-300">
+                {postHarvestAlert.title}
+              </span>
+              <p className="text-[11px] text-amber-200/90 mt-0.5">
+                {postHarvestAlert.risk} • {postHarvestAlert.recommendedAction}
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Emergency Alert Modal Popup */}
+      {!dismissedEmergency && postHarvestAlert.level === 'EMERGENCY' && (
+        <EmergencyAlertModal
+          alert={postHarvestAlert}
+          onDismiss={() => setDismissedEmergency(true)}
+        />
+      )}
 
       {/* 3. Verified Product Hero Banner with Live Mandi Price & Smart Plan CTA */}
       <section>

@@ -38,6 +38,10 @@ export interface FoodPackRequirements {
   desiredShelfLife: ShelfLifeOption;
   desiredShelfLifeDays: number;
   userPriorities: UserPriorityWeights;
+  fssaiVerifiedFbo?: FssaiVerifiedDetails;
+  customCommodity?: string;
+  shelfLife?: string;
+  unit?: string;
 }
 
 export interface FoodPackagingMaterial {
@@ -281,6 +285,10 @@ export interface FoodDetectionResult {
   visualEvidence: string[];
   source: string;
   timestamp: string;
+  imageHash?: string;
+  imagePhash?: string;
+  imageThumbnail?: string;
+  isLearnedCorrection?: boolean;
   usdaEnrichment?: {
     fdcId?: number;
     description?: string;
@@ -317,3 +325,39 @@ export interface FoodPackAnalyticsSummary {
   mostRecommendedMaterials: { name: string; count: number; percentage: number }[];
   costVsSustainabilityPoints: { name: string; costPerKg: number; ecoScore: number }[];
 }
+
+export type FssaiVerificationStatus = 'VERIFIED' | 'NOT_FOUND' | 'UNABLE_TO_VERIFY' | 'INVALID_FORMAT';
+
+export interface FssaiVerifiedDetails {
+  fssaiNumber: string;
+  fboName: string;
+  kindOfBusiness: string;
+  licenseType: 'Central License' | 'State License' | 'Registration (Basic)';
+  stateCode: string;
+  stateName: string;
+  issueDate: string;
+  expiryDate?: string;
+  validityStatus: 'ACTIVE' | 'INACTIVE' | 'EXPIRED' | 'SUSPENDED';
+  validityLabel: string;
+  foodCategories: string[];
+  premisesAddress?: string;
+  district?: string;
+  certificateRef?: string;
+  source: 'Official FSSAI FoSCoS';
+  sourceUrl: string;
+  officialRecordUrl: string;
+  verificationTimestamp: string;
+  isCompliantWithCommodity?: boolean;
+  complianceNotes?: string;
+}
+
+export interface FssaiVerificationResult {
+  success: boolean;
+  status: FssaiVerificationStatus;
+  fssaiNumber: string;
+  message: string;
+  data?: FssaiVerifiedDetails;
+  timestamp: string;
+  cached?: boolean;
+}
+

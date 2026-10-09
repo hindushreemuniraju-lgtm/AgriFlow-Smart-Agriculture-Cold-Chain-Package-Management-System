@@ -134,10 +134,14 @@ export interface FarmerOrder {
   destination: string;
   distanceKm: number;
   weightKg: number;
+  quantityKg?: number;
   boxesCount: number;
   targetMarket: 'Local Mandi' | 'Supermarket Chain' | 'Export' | 'Processing Plant';
   pickupWindow: string;
   specialHandling: string[];
+  expectedPrice?: number;
+  deliveryLocation?: string;
+  createdAt?: string;
   harvestDate: string;
   status: 'Requested' | 'Assigned' | 'In Transit' | 'Delivered';
   driverId?: string;

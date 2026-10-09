@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Layers
 } from 'lucide-react';
+import { PMFBYGuidanceCard } from './PMFBYGuidanceCard';
 
 interface ProductRiskAnalysisProps {
   product: ProductIntelligence;
@@ -229,6 +230,9 @@ export const ProductRiskAnalysis: React.FC<ProductRiskAnalysisProps> = ({ produc
           </div>
         </div>
       </div>
+
+      {/* Official Government of India PMFBY Crop Insurance & Post-Harvest Risk Protection */}
+      <PMFBYGuidanceCard cropName={product.name} />
 
     </div>
   );

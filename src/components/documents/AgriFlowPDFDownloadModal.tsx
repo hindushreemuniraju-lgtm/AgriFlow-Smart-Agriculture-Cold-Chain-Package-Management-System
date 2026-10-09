@@ -50,7 +50,7 @@ export const AgriFlowPDFDownloadModal: React.FC<AgriFlowPDFDownloadModalProps> =
 
   // Resolve Product and Order data
   const product: ProductIntelligence = initialProduct || getProductIntelligence(batchId);
-  const order: FarmerOrder = initialOrder || {
+  const order: FarmerOrder = initialOrder || ({
     id: `ord-${batchId}`,
     batchId: batchId,
     cropId: product.id,
@@ -78,7 +78,7 @@ export const AgriFlowPDFDownloadModal: React.FC<AgriFlowPDFDownloadModalProps> =
     status: 'In Transit',
     driverName: 'Gaurav Express Fleet',
     createdAt: new Date().toISOString()
-  };
+  } as FarmerOrder);
 
   const handleDownload = async (docType: 'passport' | 'invoice' | 'packaging' | 'delivery' | 'master') => {
     setDownloadingDoc(docType);

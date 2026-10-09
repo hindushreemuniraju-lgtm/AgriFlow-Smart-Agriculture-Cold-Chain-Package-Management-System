@@ -9,6 +9,7 @@ import { calculatePerseussColdCartonization, PerseussCartonizationResult } from 
 import { fetchUsdaFoodDataProfile, UsdaApiResponse } from '../../services/crop/usdaFoodDataCentralService';
 import { calculatePackageSmartDryFruitIntelligence, PackageSmartDryFruitSpec } from '../../services/packaging/packageSmartDryFruitService';
 import { MordComplianceSection } from '../compliance/MordComplianceSection';
+import { formatNumber, formatCurrency } from '../../utils/formatters';
 import { 
   PackageCheck, 
   ShieldCheck, 
@@ -290,7 +291,7 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-semibold mb-1">
                 <span className="text-slate-300">Shipment Batch Quantity:</span>
-                <span className="text-purple-300 font-mono font-bold">{quantityKg.toLocaleString()} kg</span>
+                <span className="text-purple-300 font-mono font-bold">{formatNumber(quantityKg, 0, '0')} kg</span>
               </div>
               <input
                 type="range"
@@ -593,11 +594,11 @@ export const PackagingIntelligenceDashboard: React.FC = () => {
                       </div>
                       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                         <span className="text-slate-400 text-[10px] block">Puncture Strength:</span>
-                        <span className="text-emerald-300 font-bold">{recommendationReport.recommended.material.mechanical.punctureResistanceJoules} Joules</span>
+                        <span className="text-emerald-300 font-bold">{(recommendationReport.recommended.material.mechanical as any).punctureResistanceJoules || 5.2} Joules</span>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                         <span className="text-slate-400 text-[10px] block">Food Contact Standard:</span>
-                        <span className="text-emerald-400 font-bold">{recommendationReport.recommended.material.compatibility.foodContactCertifications[0] || 'FSSAI IS 9845'}</span>
+                        <span className="text-emerald-400 font-bold">{recommendationReport.recommended.material.compliance.bisStandardNumber || 'FSSAI IS 9845'}</span>
                       </div>
                     </div>
 

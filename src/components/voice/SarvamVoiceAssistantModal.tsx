@@ -49,6 +49,22 @@ interface ChatMessage {
   audioBase64?: string;
 }
 
+function getLocalizedWelcome(code: string): string {
+  if (code.startsWith('kn')) return 'ನಮಸ್ಕಾರ! ನಾನು ಅಗ್ರಿಫ್ಲೋ ಸರ್ವಮ್ AI ಧ್ವನಿ ಮಿತ್ರ. ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲಿ ಯಾವುದೇ ಬೆಳೆ, ಮಾರುಕಟ್ಟೆ ಬೆಲೆ ಅಥವಾ ಪ್ಯಾಕೇಜಿಂಗ್ ಬಗ್ಗೆ ಕೇಳಬಹುದು.';
+  if (code.startsWith('te')) return 'నమస్కారం! నేను అగ్రిఫ్లో సర్వం AI వాయిస్ మిత్రుడిని. మీ మాతృభాషలో పంటలు, మార్కెట్ ధరలు లేదా ప్యాకేజింగ్ గురించి అడగవచ్చు.';
+  if (code.startsWith('ta')) return 'வணக்கம்! நான் அக்ரிஃப்ளோ சர்வம் AI குரல் உதவியாளர். உங்கள் தாய்மொழியில் பயிர்கள், சந்தை விலை அல்லது பேக்கேஜிங் பற்றி கேட்கலாம்.';
+  if (code.startsWith('en')) return 'Hello! I am AgriFlow Sarvam AI Voice Assistant. Ask me in your regional language about any crop, live APMC price, or certified packaging.';
+  return 'नमस्ते! मैं एग्रीफ्लो का सर्वम AI वॉयस मित्र हूँ। आप अपनी भाषा में किसी भी फसल, मंडी भाव या पैकेजिंग के बारे में पूछ सकते हैं।';
+}
+
+function getLocalizedErrorMessage(code: string): string {
+  if (code.startsWith('kn')) return 'ಕ್ಷಮಿಸಿ, ಧ್ವನಿ ಗುರುತಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೊಮ್ಮೆ ಸ್ಪಷ್ಟವಾಗಿ ಮಾತನಾಡಿ ಅಥವಾ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ.';
+  if (code.startsWith('te')) return 'క్షమించండి, వాయిస్ అర్థం కాలేదు. దయచేసి మళ్లీ మాట్లాడండి లేదా టైప్ చేయండి.';
+  if (code.startsWith('ta')) return 'மன்னிக்கவும், குரல் புரியவில்லை. தயவுசெய்து மீண்டும் பேசவும் அல்லது தட்டச்சு செய்யவும்.';
+  if (code.startsWith('en')) return 'Sorry, could not process the voice audio. Please speak again clearly or type your question below.';
+  return 'माफ़ कीजिए, आवाज़ समझ नहीं आई। कृपया दोबारा बोलें या टेक्स्ट लिखें।';
+}
+
 export const SarvamVoiceAssistantModal: React.FC<SarvamVoiceAssistantModalProps> = ({
   isOpen,
   onClose,
@@ -130,12 +146,13 @@ export const SarvamVoiceAssistantModal: React.FC<SarvamVoiceAssistantModalProps>
       await handleExecuteQuery(queryText);
     } catch (err: any) {
       console.error('Audio processing failed:', err);
+      const errMsg = getLocalizedErrorMessage(selectedLanguage.code);
       setMessages((prev) => [
         ...prev,
         {
           id: `err-${Date.now()}`,
           sender: 'assistant',
-          text: 'माफ़ कीजिए, आवाज़ समझ नहीं आई। कृपया दोबारा बोलें या टेक्स्ट लिखें।',
+          text: errMsg,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -323,7 +340,20 @@ export const SarvamVoiceAssistantModal: React.FC<SarvamVoiceAssistantModalProps>
           {SARVAM_SUPPORTED_LANGUAGES.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => setSelectedLanguage(lang)}
+              onClick={() => {
+                setSelectedLanguage(lang);
+                setMessages((prev) => {
+                  if (prev.length <= 1) {
+                    return [{
+                      id: `welcome-${Date.now()}`,
+                      sender: 'assistant',
+                      text: getLocalizedWelcome(lang.code),
+                      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }];
+                  }
+                  return prev;
+                });
+              }}
               className={`px-2.5 py-1 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
                 selectedLanguage.code === lang.code
                   ? 'bg-purple-600 text-white shadow-md scale-105 border border-purple-400'

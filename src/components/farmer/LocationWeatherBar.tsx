@@ -77,7 +77,7 @@ export const LocationWeatherBar: React.FC<LocationWeatherBarProps> = ({
               Farmer Origin Location
             </span>
             <span className="px-1.5 py-0.2 text-[9px] font-mono rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              {currentAddress.source === 'gps' ? 'Live GPS' : 'Verified District'}
+              {(currentAddress.source as string) === 'gps' || currentAddress.source === 'osm' ? 'Live GPS / OSM' : 'Verified District'}
             </span>
           </div>
 
@@ -119,9 +119,9 @@ export const LocationWeatherBar: React.FC<LocationWeatherBarProps> = ({
         </div>
       )}
 
-      {/* Right: Live Weather Telemetry */}
+      {/* Right: Live Weather Telemetry (Open-Meteo -> WeatherAPI -> OpenWeatherMap) */}
       {weather && (
-        <div className="flex items-center gap-4 text-xs pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+        <div className="flex items-center gap-4 text-xs pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-xl select-none">{weather.conditionIcon}</span>
             <div>
@@ -134,7 +134,7 @@ export const LocationWeatherBar: React.FC<LocationWeatherBarProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-[11px] font-mono border-l border-slate-800 pl-3">
+          <div className="flex items-center gap-3 text-[11px] font-mono border-l border-slate-800 pl-3 flex-wrap">
             <div className="text-slate-300 flex items-center gap-1">
               <Droplets className="w-3.5 h-3.5 text-blue-400" />
               <span>{weather.humidityPercent}% RH</span>
@@ -142,7 +142,17 @@ export const LocationWeatherBar: React.FC<LocationWeatherBarProps> = ({
 
             <div className={`flex items-center gap-1 font-bold ${weather.isRainThreat ? 'text-amber-400' : 'text-emerald-400'}`}>
               <CloudSun className="w-3.5 h-3.5" />
-              <span>{weather.rainProbabilityPercent}% Rain</span>
+              <span>{weather.rainProbabilityPercent}% Rain ({weather.rainfallMm} mm)</span>
+            </div>
+
+            <div className="text-slate-400 flex items-center gap-1">
+              <Wind className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{weather.windSpeedKmph} km/h</span>
+            </div>
+
+            <div className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-400">
+              {weather.updatedLabel || 'Updated just now'}
+              {weather.isCached && <span className="text-amber-400 ml-1 font-bold">• Cached</span>}
             </div>
           </div>
         </div>

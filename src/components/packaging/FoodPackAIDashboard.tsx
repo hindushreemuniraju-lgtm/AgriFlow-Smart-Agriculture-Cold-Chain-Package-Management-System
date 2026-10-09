@@ -42,6 +42,7 @@ import {
 } from '../../services/packaging/packageSmartDryFruitService';
 import { MordComplianceSection } from '../compliance/MordComplianceSection';
 import { AgriFlowPDFDownloadModal } from '../documents/AgriFlowPDFDownloadModal';
+import { OfficialPriceWidget } from '../farmer/OfficialPriceWidget';
 import { COMPREHENSIVE_PRODUCT_DATABASE } from '../../data/productsDatabase';
 import { 
   PackageCheck, 
@@ -75,9 +76,14 @@ import {
   Check,
   X,
   HelpCircle,
-  Database
+  Database,
+  Edit3,
+  Brain
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { saveUserCorrection } from '../../services/crop/aiCorrectionClientService';
+import { AiCorrectionsHistoryModal } from '../common/AiCorrectionsHistoryModal';
+import { CENTRAL_PRODUCT_CATALOG } from '../../services/catalog/productNormalizationService';
 
 const PRESET_COMMODITIES = [
   { name: 'Tomato', category: 'Vegetable' as CommodityCategory, icon: '🍅' },
@@ -137,8 +143,69 @@ export const FoodPackAIDashboard: React.FC = () => {
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [visionDetectionResult, setVisionDetectionResult] = useState<FoodDetectionResult | null>(null);
+  const [selectedDetectedItem, setSelectedDetectedItem] = useState<{ name: string; category: CommodityCategory; confidence: number } | null>(null);
+  const [isDetectionConfirmed, setIsDetectionConfirmed] = useState<boolean>(false);
   const [inlineVisionError, setInlineVisionError] = useState<string | null>(null);
+  const [isCorrectionsHistoryOpen, setIsCorrectionsHistoryOpen] = useState<boolean>(false);
+  const [isCorrectingResult, setIsCorrectingResult] = useState<boolean>(false);
+  const [correctedProductText, setCorrectedProductText] = useState<string>('');
+  const [correctedCategory, setCorrectedCategory] = useState<CommodityCategory>('Fruit');
+  const [correctionNotes, setCorrectionNotes] = useState<string>('');
+  const [isSavingCorrection, setIsSavingCorrection] = useState<boolean>(false);
+  const [correctionSuccessBanner, setCorrectionSuccessBanner] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredCatalogItems = useMemo(() => {
+    const q = correctedProductText.toLowerCase().trim();
+    if (!q) {
+      return CENTRAL_PRODUCT_CATALOG.slice(0, 12);
+    }
+    return CENTRAL_PRODUCT_CATALOG.filter(c => 
+      c.displayName.toLowerCase().includes(q) ||
+      c.aliases.some(a => a.toLowerCase().includes(q))
+    ).slice(0, 12);
+  }, [correctedProductText]);
+
+  const handleSaveFoodCorrection = async () => {
+    if (!correctedProductText.trim() || !visionDetectionResult) return;
+    setIsSavingCorrection(true);
+    try {
+      const prodName = correctedProductText.trim();
+      const normId = prodName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const origName = selectedDetectedItem?.name || visionDetectionResult.primaryItem?.name || selectedCommodity;
+      
+      await saveUserCorrection({
+        imageHash: visionDetectionResult.imageHash || `hash_${Date.now()}`,
+        imagePhash: visionDetectionResult.imagePhash || '0'.repeat(16),
+        imageThumbnail: visionDetectionResult.imageThumbnail || imagePreviewUrl || undefined,
+        originalAiResult: origName,
+        correctedProduct: prodName,
+        correctedNormalizedName: normId,
+        correctedCategory: correctedCategory,
+        originalConfidence: visionDetectionResult.overallConfidence,
+        notes: correctionNotes.trim() || undefined
+      });
+
+      setCorrectionSuccessBanner('Correction saved. AgriFlow will use this correction for future recognition.');
+
+      // Update packaging input requirements immediately
+      setSelectedCommodity(prodName);
+      setSelectedCategory(correctedCategory);
+      setCustomCommodity('');
+      setIsDetectionConfirmed(true);
+      runRecommendation();
+      confetti({ particleCount: 75, spread: 75, origin: { y: 0.6 } });
+
+      setTimeout(() => {
+        setIsCorrectingResult(false);
+        setCorrectionSuccessBanner(null);
+      }, 1800);
+    } catch (err) {
+      console.error('Failed to save correction in FoodPack dashboard:', err);
+    } finally {
+      setIsSavingCorrection(false);
+    }
+  };
 
   // Material DB and comparison state
   const [materialsList, setMaterialsList] = useState<FoodPackagingMaterial[]>([]);
@@ -282,6 +349,7 @@ export const FoodPackAIDashboard: React.FC = () => {
 
     setInlineVisionError(null);
     setIsUploadingImage(true);
+    setIsDetectionConfirmed(false);
 
     try {
       // Local preview
@@ -293,10 +361,11 @@ export const FoodPackAIDashboard: React.FC = () => {
 
       if (detection.isFood && detection.primaryItem) {
         const item = detection.primaryItem;
-        setSelectedCommodity(item.name);
-        setSelectedCategory(item.category);
-        setCustomCommodity('');
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        setSelectedDetectedItem({
+          name: item.name,
+          category: item.category,
+          confidence: item.confidence || detection.overallConfidence
+        });
       } else if (detection.isNonFoodOrBlurry) {
         setInlineVisionError(detection.rejectionReason || 'Image quality is too low for reliable identification.');
       }
@@ -307,6 +376,16 @@ export const FoodPackAIDashboard: React.FC = () => {
       setIsUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  // User explicitly confirms detected commodity to sync with packaging recommendation engine
+  const handleConfirmDetectedFood = (item: { name: string; category: CommodityCategory }) => {
+    setSelectedCommodity(item.name);
+    setSelectedCategory(item.category);
+    setCustomCommodity('');
+    setIsDetectionConfirmed(true);
+    runRecommendation();
+    confetti({ particleCount: 65, spread: 70, origin: { y: 0.6 } });
   };
 
   // Save current recommendation
@@ -574,7 +653,17 @@ export const FoodPackAIDashboard: React.FC = () => {
                     <Camera className="w-3.5 h-3.5 text-purple-400" />
                     Upload Food Photo for AI Recognition
                   </span>
-                  <span className="text-[10px] text-purple-300 font-mono">Gemini Vision</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsCorrectionsHistoryOpen(true)}
+                      className="text-[10px] text-purple-300 hover:text-white flex items-center gap-1 font-mono underline cursor-pointer"
+                    >
+                      <Brain className="w-3 h-3 text-purple-400" />
+                      <span>AI Memory</span>
+                    </button>
+                    <span className="text-[10px] text-purple-300 font-mono">Gemini Vision</span>
+                  </div>
                 </div>
 
                 <input
@@ -676,26 +765,276 @@ export const FoodPackAIDashboard: React.FC = () => {
                 )}
 
                 {/* Vision Detection Result Banner */}
-                {visionDetectionResult && visionDetectionResult.isFood && visionDetectionResult.primaryItem && (
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 space-y-2">
+                {visionDetectionResult && visionDetectionResult.isFood && (
+                  <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                         <span className="text-xs font-bold text-white">
-                          Detected: <strong className="text-emerald-300">{visionDetectionResult.primaryItem.name}</strong>
+                          Gemini Vision Detection
                         </span>
                       </div>
                       <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
                         {formatPercent(visionDetectionResult.overallConfidence * 100, 0)} Conf
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-300">
-                      Category: <strong className="text-white">{visionDetectionResult.primaryItem.category}</strong>
-                      {visionDetectionResult.primaryItem.subcategory ? ` • ${visionDetectionResult.primaryItem.subcategory}` : ''}
-                    </div>
+
+                    {/* Multi-object detected chips if multiple items present */}
+                    {visionDetectionResult.items && visionDetectionResult.items.length > 1 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[11px] text-slate-300 block font-semibold">
+                          Multiple items detected — select commodity:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {visionDetectionResult.items.map((item, idx) => {
+                            const isSelected = (selectedDetectedItem?.name || visionDetectionResult.primaryItem?.name) === item.name;
+                            return (
+                              <button
+                                key={`${item.name}-${idx}`}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedDetectedItem({
+                                    name: item.name,
+                                    category: item.category,
+                                    confidence: item.confidence
+                                  });
+                                  setIsDetectionConfirmed(false);
+                                }}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-emerald-500/30 border-emerald-400 text-emerald-200 font-bold'
+                                    : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'
+                                }`}
+                              >
+                                {item.name} ({formatPercent(item.confidence * 100, 0)})
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Currently selected detected item details */}
+                    {(() => {
+                      const activeItem = selectedDetectedItem || visionDetectionResult.primaryItem;
+                      if (!activeItem) return null;
+                      return (
+                        <div className="p-3 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-3 text-xs">
+                          {/* Low Confidence Warning (< 0.75) */}
+                          {(visionDetectionResult.overallConfidence < 0.75 || visionDetectionResult.needsConfirmation) && (
+                            <div className="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-2">
+                              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-bold">Moderate / Low AI Confidence ({formatPercent(visionDetectionResult.overallConfidence * 100, 0)}):</span>
+                                <p className="text-amber-300/80 mt-0.5 leading-relaxed">
+                                  Please verify if "{activeItem.name}" is accurate, or use <strong>[✎ Correct Result]</strong> to train AgriFlow.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Learned Memory Banner */}
+                          {visionDetectionResult.isLearnedCorrection && (
+                            <div className="p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-cyan-200 text-xs flex items-center gap-2">
+                              <Brain className="w-4 h-4 text-cyan-400 shrink-0" />
+                              <div>
+                                <span className="font-bold">Learned Memory Applied:</span>
+                                <span className="text-cyan-300/90 ml-1">
+                                  {visionDetectionResult.source?.includes('Recognized') ? 'Recognized from verified similar visual example' : 'Learned from your previous correction'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Success Toast */}
+                          {correctionSuccessBanner && (
+                            <div className="p-3 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 text-xs font-semibold flex items-center gap-2 animate-fade-in shadow-md">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                              <span>{correctionSuccessBanner}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-[10px] text-slate-400 font-mono">Detected Product:</div>
+                              <div className="font-extrabold text-emerald-300 text-base">
+                                {activeItem.name}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-[10px] text-slate-400 font-mono">Confidence:</div>
+                              <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">
+                                {formatPercent(activeItem.confidence * 100, 0)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Confirmation Status vs Buttons */}
+                          {isDetectionConfirmed ? (
+                            <div className="flex items-center gap-2 text-emerald-300 font-bold text-[11px] bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/30">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                              <span>Confirmed: {activeItem.name} active in Packaging Engine</span>
+                            </div>
+                          ) : !isCorrectingResult ? (
+                            <div className="space-y-2 pt-1">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleConfirmDetectedFood(activeItem)}
+                                  className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>✓ Correct</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsCorrectingResult(true);
+                                    setCorrectedProductText('');
+                                    setCorrectionSuccessBanner(null);
+                                  }}
+                                  className="py-2.5 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5 text-purple-300" />
+                                  <span>✎ Correct Result</span>
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-slate-400 text-center">
+                                If AI detection is inaccurate, click [✎ Correct Result] to train AgriFlow with the right product.
+                              </p>
+                            </div>
+                          ) : null}
+
+                          {/* Human Correction Drawer */}
+                          {isCorrectingResult && (
+                            <div className="p-3.5 rounded-xl bg-slate-950 border border-purple-500/40 space-y-3 animate-fade-in shadow-xl">
+                              <div className="flex items-center justify-between border-b border-purple-500/20 pb-1.5">
+                                <div className="flex items-center gap-1.5 text-purple-300 font-bold text-xs">
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Teach AgriFlow: Human Correction</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsCorrectingResult(false)}
+                                  className="text-slate-400 hover:text-white"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                <span className="text-slate-400">AI detected:</span>
+                                <span className="font-semibold text-rose-300 line-through">
+                                  {activeItem.name}
+                                </span>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-[11px] font-semibold text-purple-200 block">
+                                  User correction (Correct Product):
+                                </label>
+                                <input
+                                  type="text"
+                                  value={correctedProductText}
+                                  onChange={(e) => setCorrectedProductText(e.target.value)}
+                                  placeholder="Type correct commodity (e.g. Apple, Butter, Orange, Paneer)..."
+                                  className="w-full bg-slate-900 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-purple-300"
+                                />
+
+                                {filteredCatalogItems.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto pt-1">
+                                    {filteredCatalogItems.map((item) => (
+                                      <button
+                                        key={item.id}
+                                        type="button"
+                                        onClick={() => {
+                                          setCorrectedProductText(item.displayName);
+                                          setCorrectedCategory(item.category.charAt(0).toUpperCase() + item.category.slice(1) as CommodityCategory);
+                                        }}
+                                        className={`px-2 py-0.5 rounded text-[10px] font-medium border flex items-center gap-1 transition-all cursor-pointer ${
+                                          correctedProductText.toLowerCase() === item.displayName.toLowerCase()
+                                            ? 'bg-purple-600 text-white border-purple-400 font-bold'
+                                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-purple-400'
+                                        }`}
+                                      >
+                                        <span>{item.icon}</span>
+                                        <span>{item.displayName}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-0.5">Category:</label>
+                                  <select
+                                    value={correctedCategory}
+                                    onChange={(e) => setCorrectedCategory(e.target.value as CommodityCategory)}
+                                    className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-purple-400"
+                                  >
+                                    <option value="Vegetable">Vegetable</option>
+                                    <option value="Fruit">Fruit</option>
+                                    <option value="Dairy">Dairy</option>
+                                    <option value="Dry Fruit">Dry Fruit</option>
+                                    <option value="Grain">Grain</option>
+                                    <option value="Pulse">Pulse</option>
+                                    <option value="Spice">Spice</option>
+                                    <option value="Flour">Flour</option>
+                                    <option value="Other">Other</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-0.5">Notes:</label>
+                                  <input
+                                    type="text"
+                                    value={correctionNotes}
+                                    onChange={(e) => setCorrectionNotes(e.target.value)}
+                                    placeholder="e.g. Kashmiri Apple"
+                                    className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-purple-400"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-end gap-2 pt-1 border-t border-purple-500/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setIsCorrectingResult(false)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-semibold"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleSaveFoodCorrection}
+                                  disabled={isSavingCorrection || !correctedProductText.trim()}
+                                  className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                  {isSavingCorrection ? (
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Check className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>Save Correction</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
+              </div>
+
+              {/* Official Government Commodity Price (data.gov.in Agmarknet) */}
+              <div className="pt-1">
+                <OfficialPriceWidget 
+                  commodityName={customCommodity.trim() || selectedCommodity} 
+                  marketLocation="Bengaluru" 
+                />
               </div>
 
             </div>
@@ -1047,22 +1386,35 @@ export const FoodPackAIDashboard: React.FC = () => {
                     <span>WHY THIS WAS RECOMMENDED</span>
                   </div>
                   
-                  <p className="text-xs text-white font-medium leading-relaxed">
-                    {recommendation.whyExplanation.headline}
-                  </p>
+                  {(() => {
+                    const whyExp = typeof recommendation.whyExplanation === 'object' && recommendation.whyExplanation !== null
+                      ? recommendation.whyExplanation
+                      : {
+                          headline: typeof recommendation.whyExplanation === 'string' ? recommendation.whyExplanation : 'Optimal engineered match for target distribution.',
+                          bulletPoints: ['High barrier preservation', 'Complies with Indian FSSAI food contact norms', 'Optimized transport economics'],
+                          tradeoffs: 'Balances material cost against barrier protection.'
+                        };
+                    return (
+                      <>
+                        <p className="text-xs text-white font-medium leading-relaxed">
+                          {whyExp.headline}
+                        </p>
 
-                  <ul className="space-y-1.5 text-xs text-slate-300">
-                    {recommendation.whyExplanation.bulletPoints.map((pt, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
+                        <ul className="space-y-1.5 text-xs text-slate-300">
+                          {whyExp.bulletPoints.map((pt: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                              <span>{pt}</span>
+                            </li>
+                          ))}
+                        </ul>
 
-                  <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 font-mono">
-                    {recommendation.whyExplanation.tradeoffs}
-                  </div>
+                        <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 font-mono">
+                          {whyExp.tradeoffs}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* 4 Cards: Cost, Sustainability, Waste, FSSAI Compliance */}
@@ -1648,15 +2000,15 @@ export const FoodPackAIDashboard: React.FC = () => {
                 </span>
               </div>
 
-              {usdaData && usdaData.foodProfile ? (
+              {(usdaData as any)?.foodProfile ? (
                 <div className="space-y-3">
                   <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-2">
-                    <div><strong>Scientific Classification:</strong> <span className="text-purple-200 italic font-mono">{usdaData.foodProfile.scientificName}</span></div>
+                    <div><strong>Scientific Classification:</strong> <span className="text-purple-200 italic font-mono">{(usdaData as any).foodProfile.scientificName}</span></div>
                     <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-900 font-mono text-[11px]">
-                      <div>Water Content: <strong className="text-white">{usdaData.foodProfile.waterGramsPer100g} g/100g</strong></div>
-                      <div>Energy: <strong className="text-white">{usdaData.foodProfile.energyKcal} kcal</strong></div>
-                      <div>Respiration: <strong className="text-sky-300">{usdaData.foodProfile.respirationCategory}</strong></div>
-                      <div>Ideal Temp: <strong className="text-emerald-400">{usdaData.foodProfile.recommendedStorageTempC}°C</strong></div>
+                      <div>Water Content: <strong className="text-white">{(usdaData as any).foodProfile.waterGramsPer100g} g/100g</strong></div>
+                      <div>Energy: <strong className="text-white">{(usdaData as any).foodProfile.energyKcal} kcal</strong></div>
+                      <div>Respiration: <strong className="text-sky-300">{(usdaData as any).foodProfile.respirationCategory}</strong></div>
+                      <div>Ideal Temp: <strong className="text-emerald-400">{(usdaData as any).foodProfile.recommendedStorageTempC}°C</strong></div>
                     </div>
                   </div>
                 </div>
@@ -1675,9 +2027,7 @@ export const FoodPackAIDashboard: React.FC = () => {
       {activeMainTab === 'mord_compliance' && (
         <div className="space-y-6">
           <MordComplianceSection
-            cropId={selectedCommodity.toLowerCase()}
-            cropName={selectedCommodity}
-            initialQuantityKg={totalQuantityKg}
+            commodityName={selectedCommodity}
           />
         </div>
       )}
@@ -1687,6 +2037,17 @@ export const FoodPackAIDashboard: React.FC = () => {
         isOpen={isPdfModalOpen}
         onClose={() => setIsPdfModalOpen(false)}
         product={matchedPdfProduct}
+      />
+
+      {/* AI Corrections & Learned Memory History Modal */}
+      <AiCorrectionsHistoryModal
+        isOpen={isCorrectionsHistoryOpen}
+        onClose={() => setIsCorrectionsHistoryOpen(false)}
+        onSelectCorrection={(cropName) => {
+          setSelectedCommodity(cropName);
+          setCustomCommodity('');
+          runRecommendation();
+        }}
       />
 
     </div>

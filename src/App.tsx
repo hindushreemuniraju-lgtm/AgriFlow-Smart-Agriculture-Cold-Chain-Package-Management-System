@@ -15,6 +15,9 @@ import { CROPS_DATA } from './data/cropsFallback';
 import { INITIAL_ORDERS, INITIAL_DRIVERS } from './data/mockFallback';
 import { ShieldCheck, Sparkles, Activity, CheckCircle2, Heart, QrCode, ShoppingCart, Mic } from 'lucide-react';
 import { SarvamVoiceAssistantModal } from './components/voice/SarvamVoiceAssistantModal';
+import { DiagnosticsPanel } from './components/common/DiagnosticsPanel';
+import { resolveProduct } from './services/catalog/productNormalizationService';
+import { generateDynamicCrop } from './data/cropsFallback';
 
 import { AgriFlowPipelineVisualizer } from './components/common/AgriFlowPipelineVisualizer';
 import { formatCurrency } from './utils/formatters';
@@ -331,13 +334,42 @@ const AgriFlowMain: React.FC = () => {
         isOpen={isGlobalVoiceModalOpen}
         onClose={() => setIsGlobalVoiceModalOpen(false)}
         onSelectCropFromVoice={(cropName) => {
-          const found = crops.find(c => c.name.toLowerCase().includes(cropName.toLowerCase()));
+          const resolved = resolveProduct(cropName);
+          const targetId = resolved ? resolved.id : cropName.toLowerCase().trim();
+          let found = crops.find(c => 
+            c.id.toLowerCase().includes(targetId) ||
+            c.name.toLowerCase().includes(targetId) ||
+            (targetId === 'tomato' && c.id === 'crop-tomatoes') ||
+            (targetId === 'apple' && c.id === 'crop-apples') ||
+            (targetId === 'mango' && c.id === 'crop-mangoes') ||
+            (targetId === 'strawberry' && c.id === 'crop-strawberries') ||
+            (targetId === 'bell-pepper' && c.id === 'crop-bellpeppers') ||
+            (targetId === 'grape' && c.id === 'crop-grapes') ||
+            (targetId === 'onion' && c.id === 'crop-onion') ||
+            (targetId === 'wheat' && c.id === 'crop-wheat') ||
+            (targetId === 'spinach' && c.id === 'crop-spinach') ||
+            (targetId === 'almond' && c.id === 'crop-almonds') ||
+            (targetId === 'walnut' && c.id === 'crop-walnuts') ||
+            (targetId === 'cashew' && c.id === 'crop-cashews')
+          );
+          if (!found && resolved) {
+            const dynamic = generateDynamicCrop(resolved.displayName);
+            setCrops(prev => [...prev, dynamic]);
+            found = dynamic;
+          }
           if (found) {
             setSelectedCrop(found);
             switchRole('farmer');
+            showToast(
+              `Voice Selection: ${found.name}`,
+              `AgriFlow agronomy and logistics loaded for ${found.name}.`
+            );
           }
         }}
       />
+
+      {/* Part 26: Development & Architecture Diagnostics Panel */}
+      <DiagnosticsPanel currentProductQuery={selectedCrop.name} />
 
     </div>
   );

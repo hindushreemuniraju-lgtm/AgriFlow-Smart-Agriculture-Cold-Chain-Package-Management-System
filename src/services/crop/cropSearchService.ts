@@ -18,9 +18,13 @@ export interface CropSearchResult {
  * Execute search for a crop query
  */
 export async function searchUniversalCrop(query: string): Promise<CropSearchResult> {
-  const identification = identifyCropFromText(query);
-  const didYouMean = getDidYouMeanSuggestions(query, 3);
-  const product = getEnrichedCropKnowledge(identification.canonicalId !== 'unknown' ? identification.canonicalId : query);
+  const safeQuery = (typeof query === 'string' && query.trim()) ? query.trim() : 'Produce';
+  const identification = identifyCropFromText(safeQuery);
+  const didYouMean = getDidYouMeanSuggestions(safeQuery, 3);
+  const targetId = (identification?.canonicalId && identification.canonicalId !== 'unknown')
+    ? identification.canonicalId
+    : safeQuery;
+  const product = getEnrichedCropKnowledge(targetId);
 
   return {
     product,
@@ -34,12 +38,13 @@ export async function searchUniversalCrop(query: string): Promise<CropSearchResu
  */
 export async function searchCropByImage(file: File): Promise<CropSearchResult> {
   const identification = await identifyCropFromImage(file);
-  const didYouMean = identification.candidates.map(c => ({
+  const didYouMean = (identification?.candidates || []).map(c => ({
     name: c.name,
     canonicalId: c.canonicalId,
     confidence: c.confidence
   }));
-  const product = getEnrichedCropKnowledge(identification.canonicalId);
+  const targetId = identification?.canonicalId || identification?.name || 'Produce';
+  const product = getEnrichedCropKnowledge(targetId);
 
   return {
     product,

@@ -224,12 +224,8 @@ export async function transcribeAudioWithSarvam(
     }
   }
 
-  // 3. Fallback: Heuristic extraction for quick testing
-  return {
-    transcript: 'टमाटर',
-    languageCode,
-    source: 'fallback-simulation'
-  };
+  // 3. Fallback: Throw clear error so UI prompts user to speak again or type query
+  throw new Error('Speech transcription could not be completed. Please configure your Sarvam AI API key or enter your query using text.');
 }
 
 /**

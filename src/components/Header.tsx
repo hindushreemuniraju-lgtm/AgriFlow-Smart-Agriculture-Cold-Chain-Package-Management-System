@@ -20,9 +20,11 @@ import {
   PlusCircle, 
   Wallet,
   Settings,
-  Mic
+  Mic,
+  Bell
 } from 'lucide-react';
 import { SarvamVoiceAssistantModal } from './voice/SarvamVoiceAssistantModal';
+import { GovernmentNotificationsModal } from './common/GovernmentNotificationsModal';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -37,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState(false);
+  const [isGovNotifOpen, setIsGovNotifOpen] = useState(false);
 
   const currentLangObj = availableLanguages.find(l => l.code === language) || availableLanguages[0];
 
@@ -142,11 +145,81 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
               )}
             </button>
 
+            <div className="h-5 w-px bg-purple-500/30 mx-1 hidden sm:block" />
+
+            {/* Integrated Multilingual Switcher (In the Navigation Bar Area) */}
+            <div className="relative">
+              <button
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800/70 border border-purple-500/20 hover:border-purple-400/40 transition-all cursor-pointer shadow-sm"
+                title="Select Language / ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / भाषा चुनें"
+              >
+                <Globe className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-sm">{currentLangObj.flag}</span>
+                <span className="font-semibold text-slate-200 hidden sm:inline">{currentLangObj.native}</span>
+                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${langMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Language Dropdown Menu */}
+              {langMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setLangMenuOpen(false)} />
+                  <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-56 rounded-2xl bg-slate-900/95 backdrop-blur-2xl border border-purple-500/40 shadow-2xl p-1.5 z-50 animate-scale-in">
+                    <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-purple-500/20">
+                      Select Language / ಭಾಷೆ / भाषा
+                    </div>
+                    <div className="py-1 max-h-64 overflow-y-auto">
+                      {availableLanguages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            setLanguage(lang.code as LanguageCode);
+                            setLangMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm text-left transition-all cursor-pointer ${
+                            language === lang.code
+                              ? 'bg-purple-600/30 text-purple-200 font-semibold border border-purple-500/30'
+                              : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <span className="text-base">{lang.flag}</span>
+                            <span>{lang.native}</span>
+                          </span>
+                          <span className="text-xs text-slate-500 font-mono">({lang.label})</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
           </nav>
 
-          {/* Right Action Controls: Unified User Profile + Multilingual Switcher */}
-          <div className="flex items-center gap-3">
+          {/* Right Action Controls: Gov Notices + Voice Mitra + User Profile */}
+          <div className="flex items-center gap-2.5">
             
+            {/* Government Agriculture Notifications Button */}
+            <button
+              onClick={() => setIsGovNotifOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 hover:text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-[0_0_15px_rgba(245,158,11,0.25)] cursor-pointer"
+              title="Official Government Agriculture Notifications (data.gov.in / PMFBY)"
+            >
+              <Bell className="w-4 h-4 text-amber-400" />
+              <span className="hidden md:inline">Gov Notices</span>
+            </button>
+
+            {/* Sarvam AI Indic Voice Mitra Button */}
+            <button
+              onClick={() => setIsVoiceAssistantOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-purple-700/30 to-indigo-700/30 hover:from-purple-600/40 hover:to-indigo-600/40 border border-purple-500/40 text-purple-200 hover:text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] cursor-pointer"
+              title="Open Kisan Sarvam AI Voice Mitra"
+            >
+              <Mic className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span className="hidden sm:inline">Sarvam Voice</span>
+            </button>
+
             {/* Unified User Account Profile Dropdown */}
             <div className="relative">
               <button
@@ -275,62 +348,6 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
               )}
             </div>
 
-            {/* Sarvam AI Indic Voice Mitra Button */}
-            <button
-              onClick={() => setIsVoiceAssistantOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-purple-700/30 to-indigo-700/30 hover:from-purple-600/40 hover:to-indigo-600/40 border border-purple-500/40 text-purple-200 hover:text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] cursor-pointer"
-              title="Open Kisan Sarvam AI Voice Mitra"
-            >
-              <Mic className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="hidden sm:inline">Sarvam Voice</span>
-            </button>
-
-            {/* Multilingual Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-900/90 border border-purple-500/30 text-slate-200 hover:border-purple-400 text-xs sm:text-sm font-medium transition-all shadow-sm hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-              >
-                <Globe className="w-4 h-4 text-purple-400" />
-                <span className="text-sm">{currentLangObj.flag}</span>
-                <span className="font-semibold text-slate-200 hidden sm:inline">{currentLangObj.native}</span>
-              </button>
-
-              {/* Language Dropdown Menu */}
-              {langMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setLangMenuOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-slate-900/95 backdrop-blur-2xl border border-purple-500/40 shadow-2xl p-1.5 z-50 animate-scale-in">
-                    <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-purple-500/20">
-                      Select Language / भाषा
-                    </div>
-                    <div className="py-1 max-h-64 overflow-y-auto">
-                      {availableLanguages.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => {
-                            setLanguage(lang.code as LanguageCode);
-                            setLangMenuOpen(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm text-left transition-all ${
-                            language === lang.code
-                              ? 'bg-purple-600/30 text-purple-200 font-semibold border border-purple-500/30'
-                              : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2.5">
-                            <span className="text-base">{lang.flag}</span>
-                            <span>{lang.native}</span>
-                          </span>
-                          <span className="text-xs text-slate-500 font-mono">({lang.label})</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
           </div>
 
         </div>
@@ -340,6 +357,12 @@ export const Header: React.FC<HeaderProps> = ({ currentRole, onSelectRole, activ
       <SarvamVoiceAssistantModal
         isOpen={isVoiceAssistantOpen}
         onClose={() => setIsVoiceAssistantOpen(false)}
+      />
+
+      {/* Official Government Agriculture Notifications Modal */}
+      <GovernmentNotificationsModal
+        isOpen={isGovNotifOpen}
+        onClose={() => setIsGovNotifOpen(false)}
       />
     </header>
   );

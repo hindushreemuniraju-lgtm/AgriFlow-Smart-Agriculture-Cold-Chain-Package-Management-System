@@ -430,6 +430,13 @@ export function generateRecommendationExplanation(
     `Statutory FSSAI Norm: Fully aligned with ${material.fssaiStandardRef}.`
   ];
 
+  if (req.fssaiVerifiedFbo) {
+    const fbo = req.fssaiVerifiedFbo;
+    bulletPoints.push(
+      `FSSAI Licensed Operator: Active FoSCoS License #${fbo.fssaiNumber} (${fbo.fboName} • ${fbo.kindOfBusiness}). Package format aligns with declared product category compliance standards.`
+    );
+  }
+
   const technicalRationale = `Based on empirical food engineering parameters, ${req.commodity} requires controlled thermal and physical cushioning to prevent mechanical bruising and moisture loss. ${material.name} delivers ${material.advantages[0] || 'balanced barrier protection'} while maintaining a high safety score of ${scores.foodSafetyScore}/100.`;
 
   const tradeoffs = material.disadvantages.length > 0 
@@ -586,7 +593,9 @@ export function generateFoodPackRecommendation(req: FoodPackRequirements): FoodP
       requirement: compliance.requirement,
       source: compliance.source,
       sourceUrl: compliance.sourceUrl,
-      lastVerified: compliance.lastVerified
+      lastVerified: compliance.lastVerified,
+      fboVerified: Boolean(normalizedReq.fssaiVerifiedFbo),
+      verifiedFboDetails: normalizedReq.fssaiVerifiedFbo || null
     },
     sources,
     timestamp: new Date().toISOString()
