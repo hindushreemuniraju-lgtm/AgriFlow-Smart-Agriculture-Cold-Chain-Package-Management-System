@@ -8,7 +8,7 @@
 export interface PerseussCartonizationInput {
   commodityId: string;
   commodityName: string;
-  commodityCategory: 'Dairy' | 'Fresh Produce' | 'Frozen' | 'General Agri' | 'Beverage';
+  commodityCategory: 'Dairy' | 'Fresh Produce' | 'Frozen' | 'General Agri' | 'Beverage' | 'Spice';
   payloadWeightKg: number;
   payloadDimensionsCm?: { length: number; width: number; height: number };
   targetTempProfile: 'CHILLED_2_8C' | 'COOL_8_15C' | 'FROZEN_MINUS_18C' | 'AMBIENT_CONTROLLED_15_25C';
@@ -99,6 +99,12 @@ export function calculatePerseussColdCartonization(
     refrigerantType = 'Hydrated Polymer Gel Pack (0°C)';
     preconditioning = 'Refrigerate at +4°C (Do NOT freeze hard to avoid chilling injury)';
     latentHeatKjPerKg = 334;
+  } else if (input.targetTempProfile === 'AMBIENT_CONTROLLED_15_25C') {
+    targetMinTemp = 15;
+    targetMaxTemp = 25;
+    refrigerantType = 'Phase Change Material (+4°C PCM)';
+    preconditioning = 'Condition at +18°C to +22°C ambient buffer to shield against extreme highway heatwaves';
+    latentHeatKjPerKg = 190;
   }
 
   // 2. Select Shipper Insulation Type

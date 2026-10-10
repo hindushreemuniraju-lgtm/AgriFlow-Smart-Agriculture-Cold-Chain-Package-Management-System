@@ -344,6 +344,31 @@ function generateLocalVoiceResponse(query: string, languageCode: string): Assist
     price = 32;
     pkg = 'Micro-Perforated LDPE Produce Liner inside CFB Box';
     temp = '8°C - 10°C High Humidity (90-95% RH)';
+  } else if (q.includes('cardamom') || q.includes('elaichi') || q.includes('इलायची') || q.includes('ಏಲಕ್ಕಿ') || q.includes('elakki')) {
+    crop = 'Green Cardamom (Choti Elaichi)';
+    price = 1950;
+    pkg = 'Hermetic Met-PET / Polyethylene Aroma-Barrier Pouch';
+    temp = '10°C - 15°C Cool Dry Warehouse (<60% RH)';
+  } else if (q.includes('white pepper') || q.includes('safed mirch') || q.includes('सफेद मिर्च') || q.includes('ಬಿಳಿ ಮೆಣಸು')) {
+    crop = 'White Pepper (Safed Mirch)';
+    price = 1350;
+    pkg = 'Multi-layer Metallized Pouch (PET/Met-PET/PE)';
+    temp = '15°C - 24°C Dry (<60% RH)';
+  } else if (q.includes('green pepper') && (q.includes('corn') || q.includes('spice') || q.includes('ಹಸಿ ಕಾಳುಮೆಣಸು') || q.includes('हरी काली मिर्च'))) {
+    crop = 'Green Peppercorns (Kacha Menasu)';
+    price = 850;
+    pkg = 'Hermetic Food-Grade Pails / Acidified Brine Canisters';
+    temp = '2°C - 4°C Chilled Brine';
+  } else if (q.includes('capsicum') || q.includes('bell pepper') || q.includes('shimla') || q.includes('शिमला मिर्च') || q.includes('ದಪ್ಪ ಮೆಣಸಿನಕಾಯಿ')) {
+    crop = 'Capsicum / Bell Pepper (Shimla Mirch)';
+    price = 48;
+    pkg = 'Ventilated Corrugated CFB Crate with Foam Sleeves';
+    temp = '7°C - 10°C (90-95% RH)';
+  } else if (q.includes('pepper') || q.includes('black pepper') || q.includes('kali mirch') || q.includes('काली मिर्च') || q.includes('ಕಾಳುಮೆಣಸು') || q.includes('peppercorn')) {
+    crop = 'Black Pepper (Kali Mirch)';
+    price = 1100;
+    pkg = 'Hermetic Metallized Moisture-Barrier Pouch (Met-PET/PE)';
+    temp = '15°C - 24°C Dry (<60% RH)';
   }
 
   let answer = '';

@@ -113,6 +113,14 @@ const APMC_MANDI_BENCHMARKS: Record<string, Array<{
   'bell-pepper': [
     { state: 'Karnataka', district: 'Bengaluru Urban', market: 'Binny Mill (F&V) APMC', variety: 'Green Capsicum (Shimla Mirch)', modalKg: 48, minKg: 38, maxKg: 62 },
     { state: 'Maharashtra', district: 'Pune', market: 'Gultekdi APMC', variety: 'Hybrid Green Bell', modalKg: 46, minKg: 36, maxKg: 60 }
+  ],
+  'white-pepper': [
+    { state: 'Kerala', district: 'Ernakulam', market: 'Spices Board Kochi Electronic Terminal', variety: 'Decorticated White Grade-A', modalKg: 1350, minKg: 1150, maxKg: 1550 },
+    { state: 'Karnataka', district: 'Hassan', market: 'Sakleshpur APMC Yard', variety: 'White Peppercorn', modalKg: 1320, minKg: 1120, maxKg: 1500 }
+  ],
+  'green-peppercorn': [
+    { state: 'Karnataka', district: 'Hassan', market: 'Sakleshpur APMC Yard', variety: 'Tender Preserved Green Berry', modalKg: 850, minKg: 720, maxKg: 980 },
+    { state: 'Kerala', district: 'Wayanad', market: 'Kalpetta Spices Market', variety: 'Fresh Green Spikes', modalKg: 860, minKg: 740, maxKg: 990 }
   ]
 };
 
@@ -127,12 +135,18 @@ export async function fetchMandiPrices(
 ): Promise<MandiApiResponse> {
   let cleanCrop = commodity.toLowerCase().trim();
   let officialCommodityQuery = commodity;
-  if (cleanCrop === 'pepper' || cleanCrop === 'black pepper' || cleanCrop.includes('black-pepper') || cleanCrop.includes('kalimirch')) {
-    cleanCrop = 'black-pepper';
-    officialCommodityQuery = 'Black Pepper';
-  } else if (cleanCrop.includes('bell pepper') || cleanCrop.includes('bell-pepper') || cleanCrop === 'capsicum') {
+  if (cleanCrop.includes('white pepper') || cleanCrop.includes('safed mirch')) {
+    cleanCrop = 'white-pepper';
+    officialCommodityQuery = 'White Pepper';
+  } else if (cleanCrop.includes('green pepper') && (cleanCrop.includes('corn') || cleanCrop.includes('spice'))) {
+    cleanCrop = 'green-peppercorn';
+    officialCommodityQuery = 'Green Peppercorn';
+  } else if (cleanCrop.includes('bell pepper') || cleanCrop.includes('bell-pepper') || cleanCrop === 'capsicum' || cleanCrop.includes('shimla')) {
     cleanCrop = 'capsicum';
     officialCommodityQuery = 'Capsicum';
+  } else if (cleanCrop === 'pepper' || cleanCrop === 'black pepper' || cleanCrop.includes('black-pepper') || cleanCrop.includes('kalimirch')) {
+    cleanCrop = 'black-pepper';
+    officialCommodityQuery = 'Black Pepper';
   }
   const key = apiKey || (typeof process !== 'undefined' ? process.env?.MANDI_API_KEY || process.env?.DATA_GOV_IN_API_KEY : '');
   const now = new Date().toISOString();

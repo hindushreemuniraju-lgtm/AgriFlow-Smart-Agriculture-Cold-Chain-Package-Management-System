@@ -11,7 +11,7 @@
     "build": "vite build",
     "typecheck": "tsc -b",
     "lint": "oxlint",
-    "test": "tsx tests/cropIntelligence.test.ts && tsx tests/aiRecognitionAndVoiceArchitecture.test.ts && tsx tests/humanCorrectionLearning.test.ts",
+    "test": "tsx tests/cropIntelligence.test.ts && tsx tests/aiRecognitionAndVoiceArchitecture.test.ts && tsx tests/humanCorrectionLearning.test.ts && tsx tests/pepperAndSpiceIntegrity.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

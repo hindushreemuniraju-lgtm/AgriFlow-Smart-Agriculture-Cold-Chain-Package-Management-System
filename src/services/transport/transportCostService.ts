@@ -25,12 +25,16 @@ export function computeTransportGuidance(
   quantityKg: number,
   distanceKm: number
 ): TransportGuidance {
-  const cleanId = (cropId || '').toLowerCase();
-  const safeQty = Math.max(10, quantityKg);
-  const safeDist = Math.max(5, distanceKm);
+  const cleanId = (cropId || '').toLowerCase().replace(/^crop-/, '').trim();
+  const cleanName = (cropName || '').toLowerCase();
+  const safeQty = Math.max(10, quantityKg || 10);
+  const safeDist = Math.max(5, distanceKm || 5);
 
-  const isPerishable = ['tomato', 'mango', 'grapes', 'strawberry', 'spinach', 'capsicum', 'brinjal', 'apple'].includes(cleanId);
+  const isPerishable = ['tomato', 'mango', 'grapes', 'strawberry', 'spinach', 'capsicum', 'brinjal', 'apple'].includes(cleanId) ||
+    cleanName.includes('tomato') || cleanName.includes('capsicum') || cleanName.includes('berry');
   const isGrain = ['rice', 'wheat', 'maize', 'ragi', 'chickpea'].includes(cleanId);
+  const isSpice = ['black-pepper', 'pepper', 'white-pepper', 'green-peppercorn', 'cardamom', 'clove', 'cinnamon', 'nutmeg'].includes(cleanId) ||
+    cleanName.includes('pepper') || cleanName.includes('cardamom') || cleanName.includes('clove');
 
   let vehicle = 'Tata 407 LCV (Ventilated Agri-Cover)';
   let capacity = 2500;
@@ -39,7 +43,24 @@ export function computeTransportGuidance(
   let tempControlled = false;
   let maxDist = 1200;
 
-  if (safeQty > 3000) {
+  if (isSpice) {
+    // High-value spices require moisture-impervious, tamper-evident containerized transport
+    if (safeQty > 2000) {
+      vehicle = 'Heavy Sealed Container Freight (GPS Tracked & Climate Monitored)';
+      capacity = 10000;
+      baseRateKm = 24.0;
+      targetTemp = 'Dry Climate Controlled (18°C - 22°C, RH < 60%)';
+      tempControlled = true;
+      maxDist = 3000;
+    } else {
+      vehicle = 'Containerized High-Security Cargo Van (Moisture & Aroma Lockout)';
+      capacity = 2500;
+      baseRateKm = 19.5;
+      targetTemp = 'Moisture-Locked Ambient (18°C - 22°C, RH < 60%)';
+      tempControlled = true;
+      maxDist = 2000;
+    }
+  } else if (safeQty > 3000) {
     if (isPerishable) {
       vehicle = 'Heavy Reefer Truck (3.5T - 10T Cold-Chain Fleet)';
       capacity = 10000;
@@ -96,8 +117,14 @@ export function computeTransportGuidance(
 
   const handling = [
     'Ensure clean, dry cargo bed free of chemical contaminants or chemical odors.',
-    isPerishable ? 'Stack crates maximum 4 layers high with interlocking corner guides.' : 'Stack bags in interlocking chimney pattern maximum 10 layers.',
-    'Fasten cargo with elastic tension straps to minimize highway transit vibration and drop shock.',
+    isSpice 
+      ? 'Airtight moisture-barrier sealing mandatory to prevent humidity absorption and volatile essential oil degradation.'
+      : isPerishable 
+        ? 'Stack crates maximum 4 layers high with interlocking corner guides.' 
+        : 'Stack bags in interlocking chimney pattern maximum 10 layers.',
+    isSpice
+      ? 'High-value consignment: Apply tamper-evident electronic lock and maintain zero cross-odor exposure.'
+      : 'Fasten cargo with elastic tension straps to minimize highway transit vibration and drop shock.',
     'Driver must maintain continuous sealed cargo compartment without unauthorized stops.'
   ];
 

@@ -3621,7 +3621,7 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
     color: '#1e293b',
     aliases: ['black pepper', 'pepper', 'black-pepper', 'kalimirch', 'kali mirch', 'peppercorn', 'black peppercorn', 'piper nigrum', 'kalu menasu', 'miriyalu', 'milagu'],
     images: {
-      productImage: 'cardamom',
+      productImage: 'black-pepper',
       productImageAlt: 'Premium Malabar Black Peppercorns'
     },
     growing: {
@@ -3771,6 +3771,282 @@ export const COMPREHENSIVE_PRODUCT_DATABASE: ProductIntelligence[] = [
       excessRainRisk: 'Water ingress during storage or transit destroys quality within 48 hours.',
       transitShockRisk: 'Low; keep master cartons sealed and dry.',
       mitigationStrategy: 'Store at 10-11% moisture in multi-layer Met-PET vacuum or nitrogen-flushed barrier bags with silica desiccant.'
+    }
+  },
+
+  // 19C. WHITE PEPPER (HIGH-VALUE DECORTICATED SPICE)
+  {
+    id: 'white-pepper',
+    name: 'White Pepper (Safed Mirch / Decorticated Peppercorns)',
+    category: 'Spice',
+    subcategory: 'Decorticated Dried Spice Berry',
+    scientificName: 'Piper nigrum (Decorticated)',
+    variety: 'Muntok Type / Decorticated Grade-A',
+    description: 'Fully ripened berries of Piper nigrum with the dark outer pericarp removed by water retting/decortication. Delivers earthy pungency with reduced terpene bite, widely used in light-colored sauces, cream preparations, and medicinal remedies.',
+    icon: '⚪',
+    color: '#71717a',
+    aliases: ['white pepper', 'safed mirch', 'safed mirchi', 'bili menasu', 'thellati miriyalu', 'vellai milagu', 'piper nigrum album', 'white peppercorn', 'white-pepper'],
+    images: {
+      productImage: 'white-pepper',
+      productImageAlt: 'Premium Decorticated White Peppercorns'
+    },
+    growing: {
+      climate: 'Humid tropical Western Ghats / coastal evergreen belt (18°C - 35°C).',
+      soil: 'Rich fertile laterite or forest loamy soil with high drainage.',
+      idealSoilPh: '5.5 - 6.5',
+      temperatureRange: [18, 35],
+      rainfallRequirement: '2000 - 3000 mm',
+      sowingMethod: 'Runner cuttings on living support standards',
+      sowingSeason: 'Monsoon onset (May - June)',
+      seedRequirement: '1600 - 1800 vines / hectare',
+      spacing: '2.5m x 2.5m',
+      growthDuration: 'Perennial vine fruiting cycle 180 days',
+      growthDays: 180,
+      currentMaturityStage: 95,
+      irrigation: 'Protective summer irrigation every 10-14 days.',
+      fertilizerGuidance: [
+        { stage: 'Pre-Monsoon', recommendation: 'NPK 100:40:140 g/vine + Neem cake 1 kg', impact: 'Fruit branch setting', urgency: 'Immediate' }
+      ],
+      commonPests: ['Pollu Beetle', 'Root Knot Nematode'],
+      diseaseRisks: ['Quick Wilt (Phytophthora capsici)'],
+      criticalCareTips: ['Harvest strictly 100% fully red ripe berries for white pepper decortication.']
+    },
+    harvesting: {
+      harvestingDays: 15,
+      recommendedWindow: 'Hand picking fully red berries from January to March',
+      maturityIndicators: ['100% of berries on spike turn bright red/orange.', 'Pulp softens readily in water.'],
+      harvestingMethod: 'Selective hand picking of red-ripe spikes.',
+      bestHarvestTime: 'Clear sunny morning',
+      firmnessTarget: 'Firm decorticated seed kernel (600 g/L bulk density)',
+      postHarvestHandling: [
+        'Soaking ripe berries in running fresh water for 7-10 days to soften pericarp.',
+        'Washing and trampling to strip skin, followed by patio sun-drying to <10.5% moisture.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '18 to 24 Months in hermetic moisture barrier bags',
+      shelfLifeCold: '36 Months in controlled warehouse',
+      ambientDays: 540,
+      coldDays: 1080,
+      storageTemperature: '15°C - 24°C',
+      humidity: '50% - 60% RH',
+      coldStorageRequired: false,
+      storageMethod: 'Hermetically sealed Met-PET pouches inside master corrugated cartons',
+      preservationSteps: ['Keep relative humidity below 60% to prevent fungal discoloration.'],
+      spoilageIndicators: ['Musty mold odor', 'Grey/brown surface darkening'],
+      curingRequired: true,
+      curingInstructions: 'Water retting followed by clean sun-drying to 10% moisture.'
+    },
+    packaging: {
+      primaryPackaging: 'Multi-layer Metallized Pouch (PET/Met-PET/PE) (500g / 1kg / 5kg)',
+      secondaryPackaging: '5-Ply Corrugated Master Carton (25kg)',
+      recommendedMaterials: ['PET / Met-PET / PE (100 µm)', 'Hermetic Barrier Laminate'],
+      ventilationRequired: false,
+      ventilationSpec: '100% Hermetic seal (moisture & aroma barrier)',
+      moistureProtection: 'Ultra-high barrier (WVTR < 0.5 g/m²/day)',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Isolate from strong cross-odors',
+      cushioningSpecs: 'Corrugated master carton protection',
+      shockRating: 4.8,
+      estimatedPackagingCostPerKg: 12.50,
+      packagingCapacity: '1 kg pouches / 25 kg master shippers',
+      ecoCertification: 'Spices Board Certified Grade',
+      layers: [
+        { layer: 1, name: 'Outer Barrier', material: 'Reverse Printed PET', function: 'Printability and mechanical barrier', icon: '🌿', glowColor: '#71717a' },
+        { layer: 2, name: 'Met-PET', material: 'Vacuum Metallized PET', function: 'Aroma and moisture barrier', icon: '🛡️', glowColor: '#a1a1aa' },
+        { layer: 3, name: 'LLDPE', material: 'Food Grade Polyethylene', function: 'Hermetic heat seal', icon: '📦', glowColor: '#e4e4e7' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Weatherproof Container Truck',
+      temperatureControlled: false,
+      targetTemp: '18°C - 24°C Ambient Dry',
+      maximumRecommendedDistance: '3,000 km',
+      handlingRequirements: ['Strict odor-free dry shipping', 'Hermetic moisture check'],
+      vibrationSensitivity: 'Low',
+      baseRatePerKm: 28.0
+    },
+    market: {
+      marketCategory: 'High-Value Premium Spice Commodity',
+      priceUnit: '₹/kg',
+      basePricePerKg: 1350,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 1360.0,
+        Mumbai: 1390.0,
+        Delhi: 1420.0,
+        Nashik: 1350.0,
+        Hyderabad: 1370.0,
+        Chennai: 1365.0
+      },
+      priceTrend: 'Steady'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 296,
+        protein_g: 10.4,
+        carbs_g: 68.6,
+        fat_g: 2.1,
+        vitaminC_mg: 0,
+        vitaminA_IU: 0,
+        dietaryFiber_g: 26.2,
+        potassium_mg: 73,
+        iron_mg: 14.3,
+        antioxidantIndex: 88,
+        glycemicIndex: 0,
+        highlights: ['Concentrated Piperine core without outer husk tannins', 'Mild aromatic bite for gourmet cuisines', 'Digestive and metabolic stimulant']
+      },
+      consumptionMethods: ['Ground into white sauces, soups, and continental dishes', 'Ayurvedic formulations for respiratory and vision health'],
+      preparationMethods: ['Grind whole seeds fresh before adding to hot dishes'],
+      nutrientPreservationTips: ['Store in airtight glass or foil away from light'],
+      recommendedPreparation: 'Pinch of freshly ground white pepper in warm almond milk or vegetable broth.',
+      servingGuidance: '0.5g per serving.',
+      bioavailabilityTip: 'Enhances intestinal absorption of trace minerals and phytonutrients.'
+    },
+    risks: {
+      highHumidityRisk: 'Moisture above 12% causes fungal mold and surface grey staining.',
+      highTempRisk: 'Heat above 35°C dissipates essential oils.',
+      frostRisk: 'Tolerant in cured dry state.',
+      excessRainRisk: 'Water damage during transit spoils batch.',
+      transitShockRisk: 'Low; keep sealed and dry.',
+      mitigationStrategy: 'Vacuum pack in Met-PET barrier pouches with food-grade desiccant.'
+    }
+  },
+
+  // 19D. GREEN PEPPERCORNS (PRESERVED UNRIPE SPICE)
+  {
+    id: 'green-peppercorn',
+    name: 'Green Peppercorns (Kacha Menasu / Tender Green Peppercorns)',
+    category: 'Spice',
+    subcategory: 'Preserved Unripe Spice Berry',
+    scientificName: 'Piper nigrum (Unripe Berry)',
+    variety: 'Tender Malabar Green Spikes',
+    description: 'Immature, tender green berries of Piper nigrum harvested before ripening. Preserved in brine, vinegar, or freeze-dried to retain vibrant chlorophyll and fresh herbal piquancy. Delicate and perishable compared to sun-dried black pepper.',
+    icon: '🟢',
+    color: '#15803d',
+    aliases: ['green peppercorn', 'green peppercorns', 'kacha menasu', 'hasiru menasu', 'pachi miriyalu', 'pachai milagu', 'green pepper spice', 'green-peppercorn', 'fresh green pepper'],
+    images: {
+      productImage: 'green-peppercorn',
+      productImageAlt: 'Fresh Preserved Green Peppercorns'
+    },
+    growing: {
+      climate: 'Humid tropical rainforest canopy (18°C - 32°C).',
+      soil: 'Rich organic forest loamy soil with high drainage.',
+      idealSoilPh: '5.5 - 6.5',
+      temperatureRange: [18, 32],
+      rainfallRequirement: '2000 - 3000 mm',
+      sowingMethod: 'Vines on living standards',
+      sowingSeason: 'Monsoon onset (May - June)',
+      seedRequirement: '1600 - 1800 vines / hectare',
+      spacing: '2.5m x 2.5m',
+      growthDuration: 'Harvested at 120-140 days (unripe stage)',
+      growthDays: 130,
+      currentMaturityStage: 75,
+      irrigation: 'Regular micro-irrigation.',
+      fertilizerGuidance: [
+        { stage: 'Pre-Monsoon', recommendation: 'NPK + Compost', impact: 'Spike berry set', urgency: 'Immediate' }
+      ],
+      commonPests: ['Pollu Beetle'],
+      diseaseRisks: ['Foot Rot'],
+      criticalCareTips: ['Harvest when berries are fully developed but strictly green and tender before seed coat hardens.']
+    },
+    harvesting: {
+      harvestingDays: 10,
+      recommendedWindow: 'October to November (unripe stage)',
+      maturityIndicators: ['Berries are tender and green, easily crushed between fingers.', 'Zero seed coat lignification.'],
+      harvestingMethod: 'Careful hand picking of green spikes.',
+      bestHarvestTime: 'Early morning',
+      firmnessTarget: 'Tender fresh drupe',
+      postHarvestHandling: [
+        'Immediate washing and immersion in 15% salt brine with 0.5% citric acid, or IQF dehydration.'
+      ]
+    },
+    storage: {
+      shelfLifeAmbient: '1 to 2 Months in canned brine',
+      shelfLifeCold: '12 Months in chilled brine (2°C - 4°C)',
+      ambientDays: 60,
+      coldDays: 365,
+      storageTemperature: '2°C - 4°C Chilled (or ambient in sealed brine cans)',
+      humidity: '75% - 85% RH',
+      coldStorageRequired: true,
+      storageMethod: 'Airtight brine canisters or vacuum freeze-dried pouches',
+      preservationSteps: ['Maintain brine acidity (pH < 4.0) to preserve emerald green color.'],
+      spoilageIndicators: ['Blackening from enzymatic polyphenol oxidation', 'Cloudy brine'],
+      curingRequired: true,
+      curingInstructions: 'Acidified brine curing or quick blanching.'
+    },
+    packaging: {
+      primaryPackaging: 'Hermetic Glass Jars / Food-Grade HDPE Buckets in Brine (1kg / 5kg)',
+      secondaryPackaging: 'Corrugated Master Shipper with dividers',
+      recommendedMaterials: ['Food-grade HDPE', 'Glass Jars', 'Vacuum Retort Pouches'],
+      ventilationRequired: false,
+      ventilationSpec: '100% Hermetic seal',
+      moistureProtection: 'Liquid tight',
+      ethyleneSensitivity: 'Low',
+      ethyleneControl: 'Not required',
+      cushioningSpecs: 'Partitions for glass containers',
+      shockRating: 4.5,
+      estimatedPackagingCostPerKg: 14.00,
+      packagingCapacity: '1 kg jars / 10 kg pails',
+      ecoCertification: 'Recyclable Glass / Food HDPE',
+      layers: [
+        { layer: 1, name: 'Glass/HDPE Barrier', material: 'Hermetic Brine Pack', function: 'Retains aqueous brine', icon: '🟢', glowColor: '#22c55e' },
+        { layer: 2, name: 'Divider Box', material: '5-Ply Corrugated', function: 'Impact partition', icon: '📦', glowColor: '#16a34a' }
+      ]
+    },
+    transportation: {
+      recommendedVehicle: 'Insulated / Temperature-monitored truck',
+      temperatureControlled: true,
+      targetTemp: '4°C - 8°C (or ambient for sealed retort cans)',
+      maximumRecommendedDistance: '1,500 km',
+      handlingRequirements: ['Zero liquid leakage', 'Handle glass with care'],
+      vibrationSensitivity: 'Moderate',
+      baseRatePerKm: 22.0
+    },
+    market: {
+      marketCategory: 'Gourmet Specialty Spice Commodity',
+      priceUnit: '₹/kg',
+      basePricePerKg: 850,
+      priceStatus: 'Live Benchmark',
+      regionalPrices: {
+        Bengaluru: 860.0,
+        Mumbai: 890.0,
+        Delhi: 920.0,
+        Nashik: 850.0,
+        Hyderabad: 870.0,
+        Chennai: 865.0
+      },
+      priceTrend: 'Steady'
+    },
+    consumption: {
+      nutritionalProfile: {
+        calories: 120,
+        protein_g: 4.2,
+        carbs_g: 22.0,
+        fat_g: 1.2,
+        vitaminC_mg: 12.0,
+        vitaminA_IU: 240,
+        dietaryFiber_g: 9.5,
+        potassium_mg: 450,
+        iron_mg: 3.5,
+        antioxidantIndex: 92,
+        glycemicIndex: 0,
+        highlights: ['Fresh herbal piperine flavor', 'Retained chlorophyll antioxidants', 'Low sodium when rinsed from brine']
+      },
+      consumptionMethods: ['Whole in steak au poivre, Thai green curries, and pickled condiments'],
+      preparationMethods: ['Rinse brine lightly with cold water before using in sauces'],
+      nutrientPreservationTips: ['Keep submerged in brine in refrigerator after opening'],
+      recommendedPreparation: 'Sauté whole green peppercorns in butter or olive oil with fresh herbs.',
+      servingGuidance: '1 tsp whole berries per portion.',
+      bioavailabilityTip: 'Natural piperine and chlorophyll synergistically stimulate digestive secretions.'
+    },
+    risks: {
+      highHumidityRisk: 'N/A (stored in brine).',
+      highTempRisk: 'Heat accelerates polyphenol browning.',
+      frostRisk: 'Do not freeze in brine to avoid burst texture.',
+      excessRainRisk: 'Pre-harvest moisture can cause premature berry drop.',
+      transitShockRisk: 'Moderate; prevent jar breakage.',
+      mitigationStrategy: 'Store in acidified brine (pH 3.8) in cushioned corrugated cases.'
     }
   },
 

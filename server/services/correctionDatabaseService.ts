@@ -18,6 +18,7 @@ import { fileURLToPath } from 'url';
 export interface AiCorrectionRecord {
   id: string;
   image_hash: string;
+  raw_file_hash?: string;
   image_phash: string;
   image_thumbnail?: string;
   original_ai_result: string;
@@ -142,6 +143,12 @@ export function initCorrectionDatabase(): void {
       memoryRecords = JSON.parse(raw);
       if (!Array.isArray(memoryRecords)) {
         memoryRecords = [];
+      } else {
+        memoryRecords.forEach(r => {
+          if (!r.raw_file_hash && r.image_hash) {
+            r.raw_file_hash = r.image_hash;
+          }
+        });
       }
     } else {
       memoryRecords = [];
@@ -173,13 +180,20 @@ function persistDatabase(): void {
 }
 
 /**
- * STEP 1: Search for an exact same image match via SHA-256
+ * STEP 1: Search for an exact same image match via SHA-256 (checks primary hash or raw file hash)
  */
-export function findExactCorrection(imageSha256: string): AiCorrectionRecord | null {
+export function findExactCorrection(imageSha256: string, altSha256?: string): AiCorrectionRecord | null {
   initCorrectionDatabase();
-  if (!imageSha256) return null;
+  if (!imageSha256 && !altSha256) return null;
 
-  const match = memoryRecords.find(r => r.image_hash === imageSha256 && r.verified !== 'disputed');
+  const match = memoryRecords.find(r => 
+    (
+      (imageSha256 && (r.image_hash === imageSha256 || r.raw_file_hash === imageSha256)) ||
+      (altSha256 && (r.image_hash === altSha256 || r.raw_file_hash === altSha256))
+    ) && 
+    r.verified !== 'disputed'
+  );
+
   if (match) {
     match.times_matched = (match.times_matched || 0) + 1;
     match.updated_at = new Date().toISOString();
@@ -191,10 +205,11 @@ export function findExactCorrection(imageSha256: string): AiCorrectionRecord | n
 
 /**
  * STEP 2: Search for a near-duplicate image match via perceptual hash (Hamming distance <= maxDistance)
+ * Default maxDistance is 3 bits for high precision, preventing false overrides on unrelated images.
  */
 export function findNearDuplicateCorrection(
   imagePhash: string,
-  maxDistance: number = 6
+  maxDistance: number = 3
 ): { record: AiCorrectionRecord; distance: number } | null {
   initCorrectionDatabase();
   if (!imagePhash || imagePhash.length < 16) return null;
@@ -228,12 +243,13 @@ export function findNearDuplicateCorrection(
  */
 export function matchImageAgainstCorrections(
   imageSha256: string,
-  imagePhash?: string
+  imagePhash?: string,
+  altSha256?: string
 ): CorrectionMatchResult {
   initCorrectionDatabase();
 
   // 1. Exact match check
-  const exact = findExactCorrection(imageSha256);
+  const exact = findExactCorrection(imageSha256, altSha256);
   if (exact) {
     return {
       matched: true,
@@ -245,11 +261,11 @@ export function matchImageAgainstCorrections(
     };
   }
 
-  // 2. Near-duplicate check
-  if (imagePhash) {
-    const near = findNearDuplicateCorrection(imagePhash, 6);
+  // 2. Near-duplicate check - strict threshold (<= 3 bits) to guarantee only the same image triggers
+  if (imagePhash && imagePhash.length >= 16) {
+    const near = findNearDuplicateCorrection(imagePhash, 3);
     if (near) {
-      const conf = Math.max(0.92, +(1 - (near.distance / 64)).toFixed(3));
+      const conf = Math.max(0.95, +(1 - (near.distance / 64)).toFixed(3));
       return {
         matched: true,
         matchType: 'near_duplicate',
@@ -269,6 +285,7 @@ export function matchImageAgainstCorrections(
  */
 export function saveCorrection(params: {
   image_hash: string;
+  raw_file_hash?: string;
   image_phash: string;
   image_thumbnail?: string;
   original_ai_result: string;
@@ -282,26 +299,27 @@ export function saveCorrection(params: {
 }): AiCorrectionRecord {
   initCorrectionDatabase();
   const now = new Date().toISOString();
+  const rawHash = params.raw_file_hash || params.image_hash;
 
   // Check if an existing record has this exact image hash
-  const existingIndex = memoryRecords.findIndex(r => r.image_hash === params.image_hash);
+  const existingIndex = memoryRecords.findIndex(r => 
+    r.image_hash === params.image_hash || 
+    (rawHash && (r.raw_file_hash === rawHash || r.image_hash === rawHash))
+  );
 
   if (existingIndex >= 0) {
     const existing = memoryRecords[existingIndex];
 
-    // Conflict detection: if someone changes it to a completely different commodity
-    if (existing.corrected_normalized_name !== params.corrected_normalized_name && existing.times_matched > 1) {
-      existing.verified = 'disputed';
-      existing.notes = `Disputed correction: previously "${existing.corrected_product}", now corrected to "${params.corrected_product}".`;
-    } else {
-      existing.corrected_product = params.corrected_product;
-      existing.corrected_normalized_name = params.corrected_normalized_name;
-      existing.corrected_category = params.corrected_category;
-      existing.verified = 'user_corrected';
-    }
+    // Always respect user's latest manual correction
+    existing.corrected_product = params.corrected_product;
+    existing.corrected_normalized_name = params.corrected_normalized_name;
+    existing.corrected_category = params.corrected_category;
+    existing.verified = 'user_corrected';
+    if (params.notes) existing.notes = params.notes;
 
     if (params.image_thumbnail) existing.image_thumbnail = params.image_thumbnail;
     if (params.image_phash) existing.image_phash = params.image_phash;
+    if (params.raw_file_hash) existing.raw_file_hash = params.raw_file_hash;
     existing.original_ai_result = params.original_ai_result;
     existing.original_confidence = params.original_confidence ?? existing.original_confidence;
     existing.updated_at = now;
@@ -314,6 +332,7 @@ export function saveCorrection(params: {
   const newRecord: AiCorrectionRecord = {
     id: `corr_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`,
     image_hash: params.image_hash,
+    raw_file_hash: params.raw_file_hash || params.image_hash,
     image_phash: params.image_phash || computeFallbackPhash(''),
     image_thumbnail: params.image_thumbnail,
     original_ai_result: params.original_ai_result,

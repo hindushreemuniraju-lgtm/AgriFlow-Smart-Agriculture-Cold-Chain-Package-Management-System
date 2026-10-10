@@ -10,10 +10,12 @@ import { computeImageSignature, getLearnedImageCorrection } from './imageCorrect
 import { extractCanvasColorMetrics, classifyFromColorMetrics, ColorMetrics } from './pixelVisionClassifier';
 import {
   computeDataUrlSha256,
+  computeFileBlobSha256,
   computeCanvasDHash,
   createThumbnailDataUrl,
   checkCorrectionOnBackend
 } from './aiCorrectionClientService';
+import { resolveProduct } from '../catalog/productNormalizationService';
 
 export interface CandidateCrop {
   canonicalId: string;
@@ -49,6 +51,7 @@ export interface IdentificationResult {
   uploadedPhotoPreviewUrl?: string;
   imageSignature?: string;
   imageHash?: string;
+  rawFileHash?: string;
   imagePhash?: string;
   imageThumbnail?: string;
   isLearnedCorrection?: boolean;
@@ -163,9 +166,12 @@ async function processImageCanvas(file: File, maxDimension: number = 1024): Prom
   dataUrl: string; 
   metrics: ColorMetrics;
   imageHash: string;
+  rawFileHash: string;
   imagePhash: string;
   thumbnail: string;
 }> {
+  const rawFileHash = await computeFileBlobSha256(file);
+
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -199,6 +205,7 @@ async function processImageCanvas(file: File, maxDimension: number = 1024): Prom
             dataUrl,
             metrics,
             imageHash,
+            rawFileHash: rawFileHash || imageHash,
             imagePhash,
             thumbnail
           });
@@ -226,6 +233,7 @@ async function processImageCanvas(file: File, maxDimension: number = 1024): Prom
               isUniformOrBlank: false
             },
             imageHash,
+            rawFileHash: rawFileHash || imageHash,
             imagePhash: '0'.repeat(16),
             thumbnail: dataUrl
           });
@@ -255,6 +263,7 @@ async function processImageCanvas(file: File, maxDimension: number = 1024): Prom
             isUniformOrBlank: false
           },
           imageHash,
+          rawFileHash: rawFileHash || imageHash,
           imagePhash: '0'.repeat(16),
           thumbnail: dataUrl
         });
@@ -280,6 +289,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
   let imageSignature = '';
   let colorMetrics: ColorMetrics | null = null;
   let imageHash = '';
+  let rawFileHash = '';
   let imagePhash = '';
   let thumbnail = '';
 
@@ -288,21 +298,23 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
     uploadedPreviewUrl = processed.dataUrl;
     colorMetrics = processed.metrics;
     imageHash = processed.imageHash;
+    rawFileHash = processed.rawFileHash;
     imagePhash = processed.imagePhash;
     thumbnail = processed.thumbnail;
     imageSignature = computeImageSignature(processed.dataUrl, file.size);
 
-    // LAYER 1: Check User-Learned Memory (Exact SHA-256 + Perceptual pHash via Backend / Local Cache)
-    const backendCorrection = await checkCorrectionOnBackend(imageHash, imagePhash);
+    // LAYER 1: Check User-Learned Memory (Exact SHA-256 on raw file or canvas + strict pHash)
+    const backendCorrection = await checkCorrectionOnBackend(imageHash, imagePhash, rawFileHash);
     if (backendCorrection.matched && backendCorrection.record) {
       const rec = backendCorrection.record;
       const livePrice = await fetchLiveProductPrice(rec.corrected_normalized_name, marketLocation);
       const conf = backendCorrection.confidence || 0.99;
+      const scientific = resolveProduct(rec.corrected_normalized_name)?.scientificName || resolveCropAlias(rec.corrected_normalized_name)?.scientificName || '';
       return {
         identified: true,
         canonicalId: rec.corrected_normalized_name,
         name: rec.corrected_product,
-        scientificName: resolveCropAlias(rec.corrected_normalized_name)?.scientificName || '',
+        scientificName: scientific,
         category: rec.corrected_category,
         form: 'Fresh',
         confidence: conf,
@@ -323,7 +335,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
           {
             canonicalId: rec.corrected_normalized_name,
             name: rec.corrected_product,
-            scientificName: resolveCropAlias(rec.corrected_normalized_name)?.scientificName || '',
+            scientificName: scientific,
             category: rec.corrected_category,
             confidence: conf,
             matchedTrait: 'User-Verified Learned Identification'
@@ -337,6 +349,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
         uploadedPhotoPreviewUrl: uploadedPreviewUrl,
         imageSignature,
         imageHash,
+        rawFileHash,
         imagePhash,
         imageThumbnail: thumbnail,
         price: livePrice
@@ -352,6 +365,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
       body: JSON.stringify({
         imageBase64: processed.dataUrl,
         imageHash,
+        rawFileHash,
         imagePhash,
         mimeType: file.type || 'image/jpeg',
         fileName: file.name,
@@ -418,6 +432,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
           uploadedPhotoPreviewUrl: uploadedPreviewUrl,
           imageSignature,
           imageHash: r.imageHash || imageHash,
+          rawFileHash: rawFileHash || r.rawFileHash,
           imagePhash: r.imagePhash || imagePhash,
           imageThumbnail: thumbnail,
           price: livePrice
@@ -494,6 +509,7 @@ export async function identifyCropFromImage(file: File, marketLocation: string =
     uploadedPhotoPreviewUrl: uploadedPreviewUrl,
     imageSignature,
     imageHash,
+    rawFileHash,
     imagePhash,
     imageThumbnail: thumbnail,
     price: fallbackPrice

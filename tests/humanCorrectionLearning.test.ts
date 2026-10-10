@@ -149,8 +149,54 @@ assert(deleted === true, 'Correction deleted successfully');
 const afterDelete = findExactCorrection(sha_A);
 assert(afterDelete === null, 'Deleted correction is no longer matched in memory');
 
-// Cleanup butter test record
-deleteCorrection(butterRecord.id);
+// 7. STRICT SAME-IMAGE MEMORY SCOPE & RAW FILE HASH DETERMINISM
+console.log('\n7. Testing Strict Same-Image Memory Scope & Raw File Hash Determinism:');
+const mockRawFileSha = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const mockCanvasDataSha = '25f34e5b60fccad260593f12e143da2a1f927b89b9cd14908054eae8f823ea0c';
+const mockPhashStrict = 'a1b2c3d4e5f60718';
+
+// User corrects Pepper image
+const savedPepperCorr = saveCorrection({
+  image_hash: mockCanvasDataSha,
+  raw_file_hash: mockRawFileSha,
+  image_phash: mockPhashStrict,
+  original_ai_result: 'Green Cardamom (Choti Elaichi)',
+  corrected_product: 'Black Pepper (Kalimirch)',
+  corrected_normalized_name: 'black-pepper',
+  corrected_category: 'Spice',
+  notes: 'Spherical peppercorns corrected to Black Pepper'
+});
+
+// A. Exact raw file SHA-256 match
+const matchByRawSha = findExactCorrection(mockCanvasDataSha, mockRawFileSha);
+assert(matchByRawSha !== null, 'Exact raw file SHA-256 match found');
+assert(matchByRawSha?.corrected_product === 'Black Pepper (Kalimirch)', 'Returns user-corrected Black Pepper');
+
+// B. Exact match when passing only raw_file_hash as primary or alt
+const matchOnlyRaw = findExactCorrection('different_canvas_sha', mockRawFileSha);
+assert(matchOnlyRaw !== null, 'Matches even if canvas dataURL re-quantization shifted when raw file SHA matches');
+assert(matchOnlyRaw?.corrected_normalized_name === 'black-pepper', 'Corrected product normalized name is black-pepper');
+
+// C. Different image with different raw file and canvas SHA must NOT match
+const diffRawSha = '9999c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b78529999';
+const diffCanvasSha = '88884e5b60fccad260593f12e143da2a1f927b89b9cd14908054eae8f8238888';
+const diffMatch = findExactCorrection(diffCanvasSha, diffRawSha);
+assert(diffMatch === null, 'Completely different image never triggers exact match');
+
+// D. Strict perceptual pHash threshold (default 3 bits)
+// 1 bit flipped from mockPhashStrict (18 -> 19)
+const nearStrict2Bits = 'a1b2c3d4e5f6071a'; // 2 bits diff
+const strictMatchNear = findNearDuplicateCorrection(nearStrict2Bits); // default <= 3 bits
+assert(strictMatchNear !== null, 'Strict near-duplicate with 2 bits difference matches');
+assert(strictMatchNear?.record.corrected_product === 'Black Pepper (Kalimirch)', 'Strict near match returns Black Pepper');
+
+// 5 bits flipped from mockPhashStrict
+const nearFar5Bits = 'a1b2c3d4e5f6077f'; // > 3 bits diff
+const strictFarMatch = findNearDuplicateCorrection(nearFar5Bits); // default <= 3 bits
+assert(strictFarMatch === null, 'Different produce image (> 3 bits diff) does NOT falsely trigger learned memory');
+
+// Cleanup pepper test record
+deleteCorrection(savedPepperCorr.id);
 
 console.log('\n====================================================');
 console.log(`SUMMARY: ${passed} PASSED, ${failed} FAILED`);

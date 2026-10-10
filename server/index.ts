@@ -293,6 +293,8 @@ const SERVER_PRICE_BENCHMARKS: Record<string, {
   'turmeric': { name: 'Salem Cured Turmeric Finger', category: 'SPICES', modal: 165, min: 140, max: 195, unit: 'kg', source: 'Spices Board of India / Salem APMC', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'black-pepper': { name: 'Malabar Black Pepper (Kalimirch)', category: 'SPICES', modal: 1100, min: 950, max: 1250, unit: 'kg', source: 'Spices Board of India / Kochi Terminal Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'pepper': { name: 'Malabar Black Pepper (Kalimirch)', category: 'SPICES', modal: 1100, min: 950, max: 1250, unit: 'kg', source: 'Spices Board of India / Kochi Terminal Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
+  'white-pepper': { name: 'White Pepper (Safed Mirch / Decorticated)', category: 'SPICES', modal: 1350, min: 1150, max: 1550, unit: 'kg', source: 'Spices Board of India / Kochi Terminal Auction', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
+  'green-peppercorn': { name: 'Green Peppercorns (Kacha Menasu)', category: 'SPICES', modal: 850, min: 720, max: 980, unit: 'kg', source: 'Spices Board of India / Sakleshpur Yard', sourceUrl: 'https://indianspices.com', priceType: 'commodity' },
   'capsicum': { name: 'Capsicum / Bell Pepper (Shimla Mirch)', category: 'FRESH_PRODUCE', modal: 48, min: 38, max: 62, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'bell-pepper': { name: 'Capsicum / Bell Pepper (Shimla Mirch)', category: 'FRESH_PRODUCE', modal: 48, min: 38, max: 62, unit: 'kg', source: 'Agmarknet APMC Mandi', sourceUrl: 'https://agmarknet.gov.in', priceType: 'mandi' },
   'almond': { name: 'California / Mamra Almonds', category: 'DRY_FRUITS', modal: 820, min: 740, max: 920, unit: 'kg', source: 'Dry Fruits Wholesale Traders Association', sourceUrl: 'https://agmarknet.gov.in', priceType: 'wholesale' }
@@ -506,7 +508,7 @@ app.post('/api/ai/cloud-vision', async (req, res) => {
  * Multi-Model Vision Architecture: Google Cloud Vision API + Google Gemini 2.5 Flash + Real-Time Mandi / Finnworlds pricing.
  */
 app.post('/api/ai/identify-product', async (req, res) => {
-  const { imageBase64, mimeType = 'image/jpeg', fileName = '', market = 'Bengaluru' } = req.body;
+  const { imageBase64, mimeType = 'image/jpeg', fileName = '', market = 'Bengaluru', rawFileHash } = req.body;
   const now = new Date().toISOString();
 
   if (!imageBase64 && !fileName) {
@@ -525,8 +527,8 @@ app.post('/api/ai/identify-product', async (req, res) => {
   // ============================================================
   // STEP 1 & 2: Check AI Human-Correction Memory (Exact & Near-Duplicate)
   // ============================================================
-  if (calculatedSha) {
-    const correctionMatch = matchImageAgainstCorrections(calculatedSha, calculatedPhash);
+  if (calculatedSha || rawFileHash) {
+    const correctionMatch = matchImageAgainstCorrections(calculatedSha, calculatedPhash, rawFileHash);
     if (correctionMatch.matched && correctionMatch.record) {
       const rec = correctionMatch.record;
       const livePrice = computeLivePrice(rec.corrected_normalized_name, market);
@@ -618,6 +620,12 @@ Identify:
 Return the most visually supported product.
 If multiple products are visible, return all major products.
 Never invent visual evidence.
+
+BOTANICAL DISCRIMINATION RULES:
+- Piper nigrum (Pepper / Black Pepper / Green Pepper): Spherical peppercorns, clustered spikes, wrinkled dark or green berries. MUST return canonicalId: "pepper" (or "black-pepper"). NEVER classify spherical peppercorns as Cardamom!
+- Elettaria cardamomum (Cardamom): Elongated, ribbed, three-sided spindle-shaped green or straw-colored pods. Return canonicalId: "cardamom".
+- Capsicum annuum var. grossum (Bell Pepper / Capsicum): Large lobed hollow bell-shaped vegetable fruit. Return canonicalId: "capsicum".
+- Capsicum frutescens / annuum (Chilli Pepper): Slender pungent chili pods. Return canonicalId: "green-chilli" or "red-chilli".
 
 Return ONLY a strict JSON object with this exact structure:
 {
@@ -1151,6 +1159,23 @@ Return ONLY a strict JSON object with this exact structure:
       condition: 'Premium dried whole spice pods',
       qualityObservations: ['Moisture <10.5%', 'Volatile oil content >3.5% (v/w)', 'Spices Board AGEB Grade']
     };
+  } else if (cleanName.includes('pepper') || cleanName.includes('peppercorn') || cleanName.includes('kali mirch') || cleanName.includes('kalimirch') || cleanName.includes('gol marich')) {
+    identifiedCrop = {
+      canonicalId: 'pepper',
+      name: 'Black Pepper (Kali Mirch / King of Spices)',
+      scientificName: 'Piper nigrum',
+      category: 'Spices & Condiments',
+      form: 'Dried Whole Berries',
+      confidence: 0.97,
+      confidenceLabel: 'HIGH',
+      visualEvidence: [
+        'Spherical wrinkled black/dark-brown peppercorn drupe morphology',
+        'Distinctive Piper nigrum corrugation from enzymatic sun-drying',
+        'Pungent piperine aroma profile, free from elongated capsules or stalks'
+      ],
+      condition: 'Clean dried whole peppercorns',
+      qualityObservations: ['Moisture <11%', 'Piperine content >4.5%', 'Garbled Malabar Black Pepper Grade']
+    };
   }
 
   const livePrice = computeLivePrice(identifiedCrop.canonicalId, market);
@@ -1200,11 +1225,11 @@ Return ONLY a strict JSON object with this exact structure:
 // Check image hash / phash against learned correction memory
 app.post('/api/ai/corrections/check', (req, res) => {
   try {
-    const { imageHash, imagePhash } = req.body;
-    if (!imageHash && !imagePhash) {
-      return res.status(400).json({ success: false, error: 'imageHash or imagePhash required' });
+    const { imageHash, imagePhash, rawFileHash } = req.body;
+    if (!imageHash && !imagePhash && !rawFileHash) {
+      return res.status(400).json({ success: false, error: 'imageHash, imagePhash or rawFileHash required' });
     }
-    const match = matchImageAgainstCorrections(imageHash, imagePhash);
+    const match = matchImageAgainstCorrections(imageHash, imagePhash, rawFileHash);
     res.json({ success: true, match });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message || 'Failed to check correction memory' });
@@ -1216,6 +1241,7 @@ app.post('/api/ai/corrections', (req, res) => {
   try {
     const {
       image_hash,
+      raw_file_hash,
       image_phash,
       image_thumbnail,
       original_ai_result,
@@ -1228,8 +1254,9 @@ app.post('/api/ai/corrections', (req, res) => {
       notes
     } = req.body;
 
-    if (!image_hash || !corrected_product) {
-      return res.status(400).json({ success: false, error: 'image_hash and corrected_product are required' });
+    const effectiveHash = image_hash || raw_file_hash;
+    if (!effectiveHash || !corrected_product) {
+      return res.status(400).json({ success: false, error: 'image_hash or raw_file_hash and corrected_product are required' });
     }
 
     // Centralized normalization to prevent collisions (e.g. Butter vs Butter fruit)
@@ -1239,7 +1266,8 @@ app.post('/api/ai/corrections', (req, res) => {
     const resolvedCat = normMatch.matched ? (normMatch.product!.category.charAt(0).toUpperCase() + normMatch.product!.category.slice(1)) : (corrected_category || 'Commodity');
 
     const record = saveCorrection({
-      image_hash,
+      image_hash: effectiveHash,
+      raw_file_hash: raw_file_hash || effectiveHash,
       image_phash: image_phash || computeFallbackPhash(''),
       image_thumbnail,
       original_ai_result: original_ai_result || 'Unknown',
@@ -1358,9 +1386,11 @@ app.post('/api/vision/identify-food', async (req, res) => {
     ? req.body.imagePhash 
     : (cleanBase64 ? computeFallbackPhash(cleanBase64) : '');
 
+  const rawFileHash = req.body.rawFileHash;
+
   // Check Correction Memory
-  if (calculatedSha) {
-    const correctionMatch = matchImageAgainstCorrections(calculatedSha, calculatedPhash);
+  if (calculatedSha || rawFileHash) {
+    const correctionMatch = matchImageAgainstCorrections(calculatedSha, calculatedPhash, rawFileHash);
     if (correctionMatch.matched && correctionMatch.record) {
       const rec = correctionMatch.record;
       const conf = correctionMatch.confidence || 0.99;

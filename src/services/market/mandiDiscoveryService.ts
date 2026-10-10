@@ -26,9 +26,14 @@ export function discoverNearbyMandis(
   farmerLng: number,
   canonicalCropId: string,
   cropName: string,
-  preferredMaxRadiusKm: number = 250
+  preferredMaxRadiusKm: number = 250,
+  category?: string
 ): MandiDiscoveryResult {
-  const allMandiRecords = getMandiRecordsForCrop(canonicalCropId, cropName);
+  const cleanId = canonicalCropId.toLowerCase().trim();
+  const isSpice = (category?.toLowerCase().includes('spice')) ||
+    ['cardamom', 'black-pepper', 'pepper', 'white-pepper', 'green-peppercorn', 'clove', 'cinnamon', 'nutmeg', 'mace'].includes(cleanId);
+
+  const allMandiRecords = getMandiRecordsForCrop(canonicalCropId, cropName, category);
 
   // Compute road distance to every mandi
   const mandisWithDistance: DiscoveredMandi[] = allMandiRecords.map(mandi => {
@@ -50,7 +55,25 @@ export function discoverNearbyMandis(
   // Sort ascending by distance
   mandisWithDistance.sort((a, b) => a.distanceKm - b.distanceKm);
 
-  // Progressive radius filter
+  // For Spices: Route directly to dedicated Spices Board / Terminal auction hubs
+  if (isSpice) {
+    const matchedMandis = mandisWithDistance.slice(0, 6);
+    const closestDist = matchedMandis[0]?.distanceKm || 0;
+    
+    // Prominent official notice if local perishable APMCs lack direct trading volume
+    const expansionNote = closestDist > 75 
+      ? `No active APMC trading volume in local radius for ${cropName}. Displaying benchmark terminal auction markets.`
+      : `Trading via authorized Spices Board / Terminal auction center (${closestDist} km).`;
+
+    return {
+      mandis: matchedMandis,
+      activeRadiusKm: Math.max(preferredMaxRadiusKm, closestDist),
+      radiusExpansionNote: expansionNote,
+      totalFound: matchedMandis.length
+    };
+  }
+
+  // Progressive radius filter for general produce
   const tiers = [25, 50, 100, 200, preferredMaxRadiusKm, 2000];
   let activeRadius = 25;
   let matchedMandis: DiscoveredMandi[] = [];

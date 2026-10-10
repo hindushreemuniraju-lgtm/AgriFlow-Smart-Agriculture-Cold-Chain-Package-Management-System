@@ -11,6 +11,7 @@
 export interface AiCorrectionClientRecord {
   id: string;
   image_hash: string;
+  raw_file_hash?: string;
   image_phash: string;
   image_thumbnail?: string;
   original_ai_result: string;
@@ -37,6 +38,20 @@ export interface CheckCorrectionResponse {
 }
 
 const LOCAL_STORAGE_KEY = 'agriflow_ai_corrections_cache_v2';
+
+/**
+ * Compute SHA-256 directly from raw File or Blob buffer (100% deterministic, zero canvas drift)
+ */
+export async function computeFileBlobSha256(file: Blob | File): Promise<string> {
+  try {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return '';
+  }
+}
 
 /**
  * Compute SHA-256 of Data URL string
@@ -135,13 +150,14 @@ export function createThumbnailDataUrl(canvas: HTMLCanvasElement, maxDim: number
  */
 export async function checkCorrectionOnBackend(
   imageHash: string,
-  imagePhash?: string
+  imagePhash?: string,
+  rawFileHash?: string
 ): Promise<CheckCorrectionResponse> {
   try {
     const res = await fetch('/api/ai/corrections/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageHash, imagePhash })
+      body: JSON.stringify({ imageHash, imagePhash, rawFileHash })
     });
     if (res.ok) {
       const data = await res.json();
@@ -154,7 +170,7 @@ export async function checkCorrectionOnBackend(
   }
 
   // Fallback check in local storage cache
-  return checkCorrectionInLocalCache(imageHash, imagePhash);
+  return checkCorrectionInLocalCache(imageHash, imagePhash, rawFileHash);
 }
 
 /**
@@ -163,6 +179,7 @@ export async function checkCorrectionOnBackend(
 export async function saveUserCorrection(params: {
   imageHash: string;
   imagePhash: string;
+  rawFileHash?: string;
   imageThumbnail?: string;
   originalAiResult: string;
   correctedProduct: string;
@@ -174,6 +191,7 @@ export async function saveUserCorrection(params: {
 }): Promise<AiCorrectionClientRecord> {
   const payload = {
     image_hash: params.imageHash,
+    raw_file_hash: params.rawFileHash || params.imageHash,
     image_phash: params.imagePhash,
     image_thumbnail: params.imageThumbnail,
     original_ai_result: params.originalAiResult,
@@ -207,6 +225,7 @@ export async function saveUserCorrection(params: {
   const fallbackRecord: AiCorrectionClientRecord = {
     id: `corr_local_${Date.now()}`,
     image_hash: params.imageHash,
+    raw_file_hash: params.rawFileHash || params.imageHash,
     image_phash: params.imagePhash,
     image_thumbnail: params.imageThumbnail,
     original_ai_result: params.originalAiResult,
@@ -335,10 +354,20 @@ function deleteRecordFromLocalCache(id: string): void {
 
 function checkCorrectionInLocalCache(
   imageHash: string,
-  imagePhash?: string
+  imagePhash?: string,
+  rawFileHash?: string
 ): CheckCorrectionResponse {
   const records = getRecordsFromLocalCache();
-  const exact = records.find(r => r.image_hash === imageHash && r.verified !== 'disputed');
+  
+  // 1. Exact hash check (matches either rawFileHash or canvas imageHash)
+  const exact = records.find(r => 
+    (
+      (rawFileHash && (r.image_hash === rawFileHash || r.raw_file_hash === rawFileHash)) ||
+      (imageHash && (r.image_hash === imageHash || r.raw_file_hash === imageHash))
+    ) && 
+    r.verified !== 'disputed'
+  );
+
   if (exact) {
     return {
       matched: true,
@@ -349,17 +378,18 @@ function checkCorrectionInLocalCache(
     };
   }
 
+  // 2. Strict near-duplicate check (<= 3 bits) to avoid false overrides on unrelated images
   if (imagePhash && imagePhash.length >= 16) {
     for (const r of records) {
       if (r.verified === 'disputed' || !r.image_phash) continue;
       const dist = calculateClientHammingDistance(imagePhash, r.image_phash);
-      if (dist <= 6) {
+      if (dist <= 3) {
         return {
           matched: true,
           matchType: 'near_duplicate',
           record: r,
           hammingDistance: dist,
-          confidence: Math.max(0.92, +(1 - dist / 64).toFixed(3)),
+          confidence: Math.max(0.95, +(1 - dist / 64).toFixed(3)),
           explanation: `Recognized from verified similar visual example (Perceptual similarity: ${Math.round((1 - dist / 64) * 100)}%)`
         };
       }

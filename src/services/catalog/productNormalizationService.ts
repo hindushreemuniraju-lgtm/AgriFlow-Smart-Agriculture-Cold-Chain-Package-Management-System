@@ -967,6 +967,54 @@ export const CENTRAL_PRODUCT_CATALOG: ProductCatalogEntry[] = [
       'మిరియాలు', 'నల్ల మిరియాలు', 'miriyalu', 'nalla miriyalu',
       'மிளகு', 'கருப்பு மிளகு', 'milagu', 'karuppu milagu'
     ]
+  },
+  {
+    id: 'white-pepper',
+    canonicalName: 'white-pepper',
+    displayName: 'White Pepper (Safed Mirch)',
+    category: 'spice',
+    subcategory: 'decorticated peppercorn',
+    scientificName: 'Piper nigrum (Decorticated)',
+    icon: '⚪',
+    basePriceKg: 1350,
+    multilingual: {
+      en: 'White Pepper',
+      kn: 'ಬಿಳಿ ಮೆಣಸು',
+      hi: 'सफेद मिर्च',
+      te: 'తెల్ల మిరియాలు',
+      ta: 'வெள்ளை மிளகு'
+    },
+    aliases: [
+      'white pepper', 'white peppercorn', 'safed mirch', 'safed mirchi', 'white-pepper',
+      'ಬಿಳಿ ಮೆಣಸು', 'bili menasu', 'bili menasina kalu',
+      'सफेद मिर्च', 'दखनी मिर्च', 'safed mirch', 'dakhni mirch',
+      'తెల్ల మిరియాలు', 'thella miriyalu',
+      'வெள்ளை மிளகு', 'vellai milagu'
+    ]
+  },
+  {
+    id: 'green-peppercorn',
+    canonicalName: 'green-peppercorn',
+    displayName: 'Green Peppercorns (Kacha Menasu)',
+    category: 'spice',
+    subcategory: 'unripe preserved peppercorn',
+    scientificName: 'Piper nigrum (Unripe Berry)',
+    icon: '🟢',
+    basePriceKg: 850,
+    multilingual: {
+      en: 'Green Peppercorns',
+      kn: 'ಹಸಿ ಕಾಳುಮೆಣಸು',
+      hi: 'हरी काली मिर्च',
+      te: 'పచ్చి మిరియాలు',
+      ta: 'பச்சை மிளகு'
+    },
+    aliases: [
+      'green peppercorn', 'green peppercorns', 'green pepper spice', 'green-peppercorn', 'fresh green pepper',
+      'ಹಸಿ ಕಾಳುಮೆಣಸು', 'ಹಸಿ ಮೆಣಸು', 'hasi kalumenasu', 'kacha menasu',
+      'हरी काली मिर्च', 'कच्ची काली मिर्च', 'hari kali mirch', 'kacchi kali mirch',
+      'పచ్చి మిరియాలు', 'pachi miriyalu',
+      'பச்சை மிளகு', 'pachai milagu'
+    ]
   }
 ];
 
@@ -1069,6 +1117,22 @@ export function matchProduct(
     const cp = CENTRAL_PRODUCT_CATALOG.find(p => p.id === 'capsicum');
     if (cp) {
       return { matched: true, product: cp, matchType: 'EXACT_ALIAS', confidence: 0.99 };
+    }
+  }
+
+  // White Pepper (Decorticated Piper nigrum)
+  if (clean.includes('white pepper') || clean.includes('safed mirch') || clean.includes('safed mirchi') || clean.includes('bili menasu') || clean.includes('thella miriyalu') || clean.includes('vellai milagu')) {
+    const wp = CENTRAL_PRODUCT_CATALOG.find(p => p.id === 'white-pepper');
+    if (wp) {
+      return { matched: true, product: wp, matchType: 'EXACT_ALIAS', confidence: 0.99 };
+    }
+  }
+
+  // Green Peppercorns (Unripe preserved Piper nigrum)
+  if (clean.includes('green peppercorn') || clean.includes('green pepper spice') || clean.includes('kacha menasu') || clean.includes('hasi kalumenasu') || clean.includes('hari kali mirch') || clean.includes('pachi miriyalu')) {
+    const gp = CENTRAL_PRODUCT_CATALOG.find(p => p.id === 'green-peppercorn');
+    if (gp) {
+      return { matched: true, product: gp, matchType: 'EXACT_ALIAS', confidence: 0.99 };
     }
   }
 
@@ -1190,4 +1254,73 @@ function editDistance(s1: string, s2: string): number {
     if (i > 0) costs[s2.length] = lastValue;
   }
   return costs[s2.length];
+}
+
+export interface PepperCommodityOption {
+  id: string;
+  name: string;
+  scientificName: string;
+  category: string;
+  indicName: string;
+  approxRateKg: number;
+  icon: string;
+  description: string;
+}
+
+export const PEPPER_COMMODITY_OPTIONS: PepperCommodityOption[] = [
+  {
+    id: 'black-pepper',
+    name: 'Black Pepper (Kali Mirch)',
+    scientificName: 'Piper nigrum',
+    category: 'Spice',
+    indicName: 'काली मिर्च / ಕಾಳುಮೆಣಸು',
+    approxRateKg: 1100,
+    icon: '⚫',
+    description: 'Dried whole black peppercorns (King of Spices) with pungent piperine'
+  },
+  {
+    id: 'capsicum',
+    name: 'Bell Pepper / Capsicum (Shimla Mirch)',
+    scientificName: 'Capsicum annuum var. grossum',
+    category: 'Vegetable',
+    indicName: 'शिमला मिर्च / ದಪ್ಪ ಮೆಣಸಿನಕಾಯಿ',
+    approxRateKg: 48,
+    icon: '🫑',
+    description: 'Crisp, sweet, blocky bell pepper vegetable'
+  },
+  {
+    id: 'white-pepper',
+    name: 'White Pepper (Safed Mirch)',
+    scientificName: 'Piper nigrum (Decorticated)',
+    category: 'Spice',
+    indicName: 'सफेद मिर्च / ಬಿಳಿ ಮೆಣಸು',
+    approxRateKg: 1350,
+    icon: '⚪',
+    description: 'Fully ripened berry with outer pericarp removed'
+  },
+  {
+    id: 'green-peppercorn',
+    name: 'Green Peppercorns (Kacha Menasu)',
+    scientificName: 'Piper nigrum (Unripe)',
+    category: 'Spice',
+    indicName: 'कच्ची काली मिर्च / ಹಸಿ ಕಾಳುಮೆಣಸು',
+    approxRateKg: 850,
+    icon: '🟢',
+    description: 'Unripe green peppercorns preserved in brine or dehydrated'
+  },
+  {
+    id: 'green-chilli',
+    name: 'Chilli Pepper (Hari Mirch / Hot Chilli)',
+    scientificName: 'Capsicum annuum',
+    category: 'Vegetable',
+    indicName: 'हरी मिर्च / ಹಸಿ ಮೆಣಸಿನಕಾಯಿ',
+    approxRateKg: 78,
+    icon: '🌶️',
+    description: 'Hot pungent culinary chilli pepper'
+  }
+];
+
+export function isAmbiguousPepperQuery(input: string): boolean {
+  const clean = (input || '').toLowerCase().trim();
+  return clean === 'pepper' || clean === 'peppers' || clean === 'pepper query';
 }

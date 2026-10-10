@@ -384,6 +384,34 @@ export const PRODUCT_IMAGE_REGISTRY: Record<string, {
     iconPath: 'M12 5c-3 0-6 3-6 7 0 3 3 6 6 6s6-3 6-6c0-4-3-7-6-7z',
     alt: 'Malabar Black Pepper Corns'
   },
+  'black-pepper': {
+    emoji: '🫘',
+    gradient: ['#18181b', '#27272a'],
+    accentColor: '#71717a',
+    iconPath: 'M12 5c-3 0-6 3-6 7 0 3 3 6 6 6s6-3 6-6c0-4-3-7-6-7z',
+    alt: 'Malabar Black Peppercorns'
+  },
+  'pepper': {
+    emoji: '🫘',
+    gradient: ['#18181b', '#27272a'],
+    accentColor: '#71717a',
+    iconPath: 'M12 5c-3 0-6 3-6 7 0 3 3 6 6 6s6-3 6-6c0-4-3-7-6-7z',
+    alt: 'Malabar Black Peppercorns'
+  },
+  'white-pepper': {
+    emoji: '⚪',
+    gradient: ['#52525b', '#e4e4e7'],
+    accentColor: '#d4d4d8',
+    iconPath: 'M12 5c-3 0-6 3-6 7 0 3 3 6 6 6s6-3 6-6c0-4-3-7-6-7z',
+    alt: 'Decorticated White Peppercorns'
+  },
+  'green-peppercorn': {
+    emoji: '🟢',
+    gradient: ['#14532d', '#22c55e'],
+    accentColor: '#86efac',
+    iconPath: 'M12 5c-3 0-6 3-6 7 0 3 3 6 6 6s6-3 6-6c0-4-3-7-6-7z',
+    alt: 'Fresh Preserved Green Peppercorns'
+  },
   'cardamom': {
     emoji: '🌿',
     gradient: ['#14532d', '#16a34a'],

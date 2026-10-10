@@ -1005,8 +1005,28 @@ export const CANONICAL_CROP_ALIASES: CropAliasMapping[] = [
     scientificName: 'Piper nigrum',
     category: 'Spice',
     aliases: [
-      'black pepper', 'kali mirch', 'menasu', 'miriyalu', 'milagu', 'gol morich', 
-      'piper nigrum', 'malabar pepper', 'black peppercorn'
+      'black pepper', 'pepper', 'black-pepper', 'kali mirch', 'menasu', 'miriyalu', 'milagu', 'gol morich', 
+      'piper nigrum', 'malabar pepper', 'black peppercorn', 'kalimirch', 'kappu menasu'
+    ]
+  },
+  {
+    canonicalId: 'white-pepper',
+    name: 'White Pepper (Safed Mirch)',
+    scientificName: 'Piper nigrum (Decorticated)',
+    category: 'Spice',
+    aliases: [
+      'white pepper', 'safed mirch', 'safed mirchi', 'bili menasu', 'thellati miriyalu', 
+      'vellai milagu', 'piper nigrum album', 'white peppercorn', 'white-pepper'
+    ]
+  },
+  {
+    canonicalId: 'green-peppercorn',
+    name: 'Green Peppercorns (Kacha Menasu)',
+    scientificName: 'Piper nigrum (Unripe Berry)',
+    category: 'Spice',
+    aliases: [
+      'green peppercorn', 'green peppercorns', 'kacha menasu', 'hasiru menasu', 
+      'pachi miriyalu', 'pachai milagu', 'green pepper spice', 'green-peppercorn'
     ]
   },
   {

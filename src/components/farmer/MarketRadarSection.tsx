@@ -33,13 +33,14 @@ export const MarketRadarSection: React.FC<MarketRadarSectionProps> = ({
       location.longitude,
       product.id,
       product.name,
-      250
+      250,
+      product.category
     );
-  }, [location.latitude, location.longitude, product.id, product.name]);
+  }, [location.latitude, location.longitude, product.id, product.name, product.category]);
 
   // Compute deterministic net realization across all discovered mandis
   const realizations: MarketNetRealizationBreakdown[] = useMemo(() => {
-    const isPerishable = !['rice', 'wheat', 'maize', 'ragi', 'chickpea', 'almond', 'cashew', 'walnut', 'turmeric'].includes(product.id);
+    const isPerishable = !['rice', 'wheat', 'maize', 'ragi', 'chickpea', 'almond', 'cashew', 'walnut', 'turmeric', 'cardamom', 'black-pepper', 'pepper', 'white-pepper', 'green-peppercorn', 'clove'].includes(product.id.toLowerCase());
     return calculateMarketRealizations(
       discoveryResult.mandis,
       quantityKg,

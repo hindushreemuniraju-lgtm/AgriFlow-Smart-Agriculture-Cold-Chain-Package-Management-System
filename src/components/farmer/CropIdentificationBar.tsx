@@ -23,7 +23,7 @@ import { IdentificationResult } from '../../services/crop/cropIdentificationServ
 import { getEnrichedCropKnowledge, EnrichedProductIntelligence } from '../../services/crop/cropKnowledgeService';
 import { recordImageCorrection } from '../../services/crop/imageCorrectionMemoryService';
 import { saveUserCorrection } from '../../services/crop/aiCorrectionClientService';
-import { CENTRAL_PRODUCT_CATALOG } from '../../services/catalog/productNormalizationService';
+import { CENTRAL_PRODUCT_CATALOG, isAmbiguousPepperQuery, PEPPER_COMMODITY_OPTIONS } from '../../services/catalog/productNormalizationService';
 import { formatCurrency, formatNumber, formatTime } from '../../utils/formatters';
 import confetti from 'canvas-confetti';
 
@@ -44,6 +44,7 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
   const [manualSelectionOpen, setManualSelectionOpen] = useState<boolean>(false);
   const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState<boolean>(false);
   const [isCorrectionsHistoryOpen, setIsCorrectionsHistoryOpen] = useState<boolean>(false);
+  const [isPepperDisambiguationOpen, setIsPepperDisambiguationOpen] = useState<boolean>(false);
 
   // Human Correction Form States
   const [isCorrectingResult, setIsCorrectingResult] = useState<boolean>(false);
@@ -57,6 +58,10 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
 
   const handleSearch = async (searchTerm: string) => {
     if (!searchTerm.trim()) return;
+    if (isAmbiguousPepperQuery(searchTerm)) {
+      setIsPepperDisambiguationOpen(true);
+      return;
+    }
     setIsSearching(true);
     try {
       const res = await searchUniversalCrop(searchTerm);
@@ -87,6 +92,11 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
       setCorrectedCategory((res.product?.category as any) || 'Fruit');
       setCorrectedProductText('');
       setCorrectionNotes('');
+
+      // If matched from AI Learned Memory, immediately display the corrected product across the dashboard
+      if (res.identification.isLearnedCorrection) {
+        onSelectCrop(res.product);
+      }
     } catch (err: any) {
       console.error('[CropIdentificationBar] Image search failed:', err);
       const fallbackName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'Uploaded Produce';
@@ -162,6 +172,7 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
       
       await saveUserCorrection({
         imageHash: imageModalResult.result.imageHash || imageModalResult.result.imageSignature || `hash_${Date.now()}`,
+        rawFileHash: imageModalResult.result.rawFileHash,
         imagePhash: imageModalResult.result.imagePhash || '0'.repeat(16),
         imageThumbnail: imageModalResult.result.imageThumbnail || imageModalResult.result.uploadedPhotoPreviewUrl,
         originalAiResult: imageModalResult.result.name,
@@ -567,13 +578,20 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
 
                 {/* Learned Memory Banner */}
                 {imageModalResult.result.isLearnedCorrection && (
-                  <div className="p-3 rounded-2xl bg-cyan-950/40 border border-cyan-500/40 flex items-center gap-2.5 text-cyan-200 text-xs">
-                    <Brain className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <div>
-                      <span className="font-bold">Learned Memory Applied:</span>
-                      <span className="text-cyan-300/90 ml-1">
-                        {(imageModalResult.result.source || '').includes('Recognized') ? 'Recognized from verified similar visual example' : 'Learned from your previous correction'}
-                      </span>
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-teal-950/50 to-cyan-950/60 border-2 border-emerald-500/50 flex items-start gap-3 text-emerald-200 text-xs shadow-lg shadow-emerald-950/40">
+                    <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 shrink-0 mt-0.5">
+                      <Brain className="w-5 h-5 text-emerald-300" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-white text-sm">AI Learned Memory Match</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/40">
+                          Verified Correction
+                        </span>
+                      </div>
+                      <p className="text-emerald-300/90 leading-relaxed">
+                        AgriFlow recognized this image from your previous correction and is displaying <strong className="text-white underline decoration-emerald-400">{imageModalResult.result.name}</strong>. Real-time market rates and packaging guidelines have been updated automatically.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -793,6 +811,84 @@ export const CropIdentificationBar: React.FC<CropIdentificationBarProps> = ({
               </div>
             )}
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Pepper Disambiguation Modal */}
+      {isPepperDisambiguationOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-lg rounded-3xl bg-slate-900 border border-purple-500/40 p-6 shadow-2xl space-y-4 text-left max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setIsPepperDisambiguationOpen(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-purple-300 font-bold">
+                  Commodity Disambiguation
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold">
+                  Multiple Varieties Found
+                </span>
+              </div>
+              <h3 className="text-lg font-extrabold text-white">
+                Which pepper commodity are you looking for?
+              </h3>
+              <p className="text-xs text-slate-400">
+                "Pepper" can refer to spices (Black, White, Green peppercorns) or fresh vegetables (Bell Pepper / Capsicum, Chilli). Please select your exact commodity:
+              </p>
+            </div>
+
+            <div className="space-y-2.5 pt-2">
+              {PEPPER_COMMODITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    setIsPepperDisambiguationOpen(false);
+                    setQuery('');
+                    searchUniversalCrop(opt.id).then((res) => {
+                      onSelectCrop(res.product);
+                      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+                    });
+                  }}
+                  className="w-full p-3.5 rounded-2xl bg-slate-950/80 hover:bg-purple-950/40 border border-purple-500/20 hover:border-purple-400/60 flex items-center justify-between text-left transition-all cursor-pointer group shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl p-2 rounded-xl bg-slate-900 border border-slate-800 group-hover:scale-110 transition-transform">
+                      {opt.icon}
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">
+                          {opt.name}
+                        </h4>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                          {opt.category}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-purple-300/80 font-mono">
+                        {opt.scientificName} • {opt.indicName}
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        {opt.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-3">
+                    <span className="text-xs font-bold text-emerald-400 font-mono block">
+                      ~₹{opt.approxRateKg}/kg
+                    </span>
+                    <span className="text-[10px] text-slate-500">Benchmark</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>,
         document.body

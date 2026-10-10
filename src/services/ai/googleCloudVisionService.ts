@@ -56,17 +56,29 @@ export interface CloudVisionAnalysisResult {
 
 // Map Google Cloud Vision Labels & Web Entities to AgriFlow Canonical Products
 const VISION_LABEL_MAP: Record<string, string> = {
-  // Spices
+  // Spices — Pepper (Piper nigrum: spherical peppercorns, clustered spikes, wrinkled dark or green berries)
+  'pepper': 'pepper',
+  'black pepper': 'pepper',
+  'peppercorn': 'pepper',
+  'peppercorns': 'pepper',
+  'black peppercorn': 'pepper',
+  'green pepper': 'pepper',
+  'green peppercorn': 'pepper',
+  'white pepper': 'white-pepper',
+  'piper nigrum': 'pepper',
+  'piper': 'pepper',
+  'kali mirch': 'pepper',
+  'kalimirch': 'pepper',
+
+  // Spices — Cardamom (Elettaria cardamomum: elongated, ribbed, three-sided spindle pods)
   'cardamom': 'cardamom',
   'green cardamom': 'cardamom',
   'elettaria': 'cardamom',
   'elettaria cardamomum': 'cardamom',
   'true cardamom': 'cardamom',
   'black cardamom': 'cardamom',
-  'spice': 'cardamom',
-  'black pepper': 'black-pepper',
-  'peppercorn': 'black-pepper',
-  'piper nigrum': 'black-pepper',
+  'choti elaichi': 'cardamom',
+  'elaichi': 'cardamom',
   'turmeric': 'turmeric',
   'curcuma longa': 'turmeric',
   'ginger': 'ginger',
@@ -189,22 +201,63 @@ export function parseCloudVisionResponse(data: any): CloudVisionAnalysisResult {
   // Identify highest confidence crop match from vision features
   let bestMatch: { canonicalId: string; name: string; scientificName: string; category: string; confidence: number; matchedFeature: string } | undefined;
 
+  // BOTANICAL DISCRIMINATION LAYER:
+  // Distinctly separate Piper nigrum (Pepper: spherical peppercorns, clustered spikes, wrinkled dark or green berries)
+  // from Elettaria cardamomum (Cardamom: elongated, ribbed, three-sided spindle pods).
+  const allTextFeatures = [
+    ...labels.map(l => l.description.toLowerCase()),
+    ...localizedObjects.map(o => o.name.toLowerCase()),
+    ...webEntities.map(w => w.description.toLowerCase())
+  ].join(' ');
+
+  const hasPepperEvidence = allTextFeatures.includes('peppercorn') ||
+    allTextFeatures.includes('black pepper') ||
+    allTextFeatures.includes('piper nigrum') ||
+    allTextFeatures.includes('kali mirch') ||
+    allTextFeatures.includes('kalimirch') ||
+    allTextFeatures.includes('green pepper') ||
+    allTextFeatures.includes('white pepper') ||
+    (allTextFeatures.includes('pepper') && !allTextFeatures.includes('bell pepper') && !allTextFeatures.includes('capsicum') && !allTextFeatures.includes('chilli'));
+
+  const hasCardamomEvidence = allTextFeatures.includes('cardamom') ||
+    allTextFeatures.includes('elettaria') ||
+    allTextFeatures.includes('elaichi') ||
+    allTextFeatures.includes('choti elaichi');
+
+  // If spherical peppercorn / Piper nigrum features are detected, NEVER allow false Cardamom match
+  if (hasPepperEvidence && !hasCardamomEvidence) {
+    const resolvedPepper = resolveCropAlias('pepper') || resolveCropAlias('black-pepper');
+    if (resolvedPepper) {
+      bestMatch = {
+        canonicalId: 'pepper',
+        name: 'Pepper (Black Pepper / Kali Mirch)',
+        scientificName: 'Piper nigrum',
+        category: 'Spice',
+        confidence: 0.95,
+        matchedFeature: 'Botanical Morphological Discrimination: Piper nigrum (spherical peppercorns)'
+      };
+    }
+  }
+
   // 1. Check Localized Objects first (highest specificity)
-  for (const obj of localizedObjects) {
-    const key = obj.name.toLowerCase().trim();
-    if (VISION_LABEL_MAP[key]) {
-      const canonId = VISION_LABEL_MAP[key];
-      const resolved = resolveCropAlias(canonId);
-      if (resolved) {
-        bestMatch = {
-          canonicalId: resolved.canonicalId,
-          name: resolved.name,
-          scientificName: resolved.scientificName,
-          category: resolved.category,
-          confidence: Math.max(0.92, obj.score),
-          matchedFeature: `Object Localization: "${obj.name}" (${(obj.score * 100).toFixed(1)}%)`
-        };
-        break;
+  if (!bestMatch) {
+    for (const obj of localizedObjects) {
+      const key = obj.name.toLowerCase().trim();
+      if (VISION_LABEL_MAP[key]) {
+        const canonId = VISION_LABEL_MAP[key];
+        if (canonId === 'cardamom' && hasPepperEvidence) continue;
+        const resolved = resolveCropAlias(canonId);
+        if (resolved) {
+          bestMatch = {
+            canonicalId: resolved.canonicalId,
+            name: resolved.name,
+            scientificName: resolved.scientificName,
+            category: resolved.category,
+            confidence: Math.max(0.92, obj.score),
+            matchedFeature: `Object Localization: "${obj.name}" (${(obj.score * 100).toFixed(1)}%)`
+          };
+          break;
+        }
       }
     }
   }
@@ -215,6 +268,7 @@ export function parseCloudVisionResponse(data: any): CloudVisionAnalysisResult {
       const desc = (web.description || '').toLowerCase().trim();
       for (const [key, canonId] of Object.entries(VISION_LABEL_MAP)) {
         if (desc === key || desc.includes(key)) {
+          if (canonId === 'cardamom' && hasPepperEvidence) continue;
           const resolved = resolveCropAlias(canonId);
           if (resolved) {
             bestMatch = {
@@ -239,6 +293,7 @@ export function parseCloudVisionResponse(data: any): CloudVisionAnalysisResult {
       const desc = label.description.toLowerCase().trim();
       for (const [key, canonId] of Object.entries(VISION_LABEL_MAP)) {
         if (desc === key || desc.includes(key)) {
+          if (canonId === 'cardamom' && hasPepperEvidence) continue;
           const resolved = resolveCropAlias(canonId);
           if (resolved) {
             bestMatch = {
